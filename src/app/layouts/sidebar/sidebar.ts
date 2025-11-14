@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { SidebarStateService } from '../../shared/sidebar-state.service';
 
 interface MenuItem {
   icon: string;
@@ -27,9 +28,13 @@ export class Sidebar {
     { icon: 'settings', label: 'Configuración', route: '/settings' },
   ];
 
-  isCollapsed = false;
+  constructor(public sidebarState: SidebarStateService) {}
+
+  get isCollapsed(): boolean {
+    return this.sidebarState.isCollapsed;
+  }
 
   toggleSidebar() {
-    this.isCollapsed = !this.isCollapsed;
+    this.sidebarState.toggle();
   }
 }

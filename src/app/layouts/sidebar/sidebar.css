@@ -27,6 +27,11 @@
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
+.collapsed .sidebar-header {
+  flex-direction: column;
+  gap: 12px;
+}
+
 .logo {
   display: flex;
   align-items: center;
@@ -109,7 +114,6 @@
 .nav-item:hover {
   background: rgba(255, 255, 255, 0.1);
   color: white;
-  transform: translateX(4px);
 }
 
 .nav-item.active {

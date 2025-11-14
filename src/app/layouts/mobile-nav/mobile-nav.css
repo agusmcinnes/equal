@@ -1,3 +1,159 @@
+/* Drawer Overlay */
+.drawer-overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 72px; /* Deja espacio para la barra de navegación móvil */
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1999;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.drawer-overlay.open {
+  display: block;
+  opacity: 1;
+}
+
+/* Drawer */
+.drawer {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 280px;
+  background: white;
+  box-shadow: 4px 0 12px rgba(0, 0, 0, 0.15);
+  z-index: 2000;
+  transform: translateX(-100%);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.drawer.open {
+  transform: translateX(0);
+}
+
+.drawer-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 16px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.drawer-logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.drawer-logo-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  object-fit: contain;
+}
+
+.drawer-logo-text {
+  font-size: 24px;
+  font-weight: 700;
+  background: var(--gradient-primary);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.drawer-close-btn {
+  background: transparent;
+  border: none;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  cursor: pointer;
+  color: #6b7280;
+  transition: all 0.2s;
+}
+
+.drawer-close-btn:hover {
+  background: #f3f4f6;
+  color: var(--color-primary);
+}
+
+.drawer-nav {
+  flex: 1;
+  padding: 16px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.drawer-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 16px;
+  color: #374151;
+  text-decoration: none;
+  border-radius: 12px;
+  transition: all 0.2s;
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.drawer-nav-item:hover {
+  background: #f3f4f6;
+}
+
+.drawer-nav-item.active {
+  background: rgba(70, 51, 151, 0.1);
+  color: var(--color-primary);
+}
+
+.drawer-nav-item .material-icons {
+  font-size: 24px;
+  color: inherit;
+}
+
+.drawer-footer {
+  padding: 16px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.drawer-logout-btn {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+  padding: 14px 16px;
+  background: transparent;
+  border: none;
+  border-radius: 12px;
+  color: #ef4444;
+  font-size: 15px;
+  font-weight: 500;
+  font-family: 'Poppins', sans-serif;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.drawer-logout-btn:hover {
+  background: rgba(239, 68, 68, 0.1);
+}
+
+.drawer-logout-btn .material-icons {
+  font-size: 24px;
+}
+
+/* Bottom Navigation Bar */
 .mobile-nav {
   display: none;
   position: fixed;
@@ -25,6 +181,15 @@
   position: relative;
   flex: 1;
   min-width: 0;
+  background: transparent;
+  border: none;
+  font-family: 'Poppins', sans-serif;
+  cursor: pointer;
+}
+
+.menu-btn {
+  color: var(--color-primary);
+  font-weight: 600;
 }
 
 .nav-icon {
@@ -76,14 +241,9 @@
     justify-content: space-around;
     align-items: center;
   }
-}
 
-/* Animation for tap feedback */
-@keyframes tap {
-  0%, 100% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(0.95);
+  .drawer-overlay,
+  .drawer {
+    display: block;
   }
 }

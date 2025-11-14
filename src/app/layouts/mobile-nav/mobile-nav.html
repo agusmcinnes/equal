@@ -1,4 +1,49 @@
+<!-- Overlay -->
+<div
+  class="drawer-overlay"
+  [class.open]="isDrawerOpen"
+  (click)="closeDrawer()"
+></div>
+
+<!-- Drawer -->
+<aside class="drawer" [class.open]="isDrawerOpen">
+  <div class="drawer-header">
+    <div class="drawer-logo">
+      <img src="/images/equal-logo.png" alt="Equal Logo" class="drawer-logo-icon">
+      <span class="drawer-logo-text">EQUAL</span>
+    </div>
+    <button class="drawer-close-btn" (click)="closeDrawer()">
+      <span class="material-icons">close</span>
+    </button>
+  </div>
+
+  <nav class="drawer-nav">
+    <a
+      *ngFor="let item of allMenuItems"
+      [routerLink]="item.route"
+      routerLinkActive="active"
+      class="drawer-nav-item"
+      (click)="closeDrawer()"
+    >
+      <span class="material-icons">{{ item.icon }}</span>
+      <span>{{ item.label }}</span>
+    </a>
+  </nav>
+
+  <div class="drawer-footer">
+    <button class="drawer-logout-btn" (click)="closeDrawer()">
+      <span class="material-icons">logout</span>
+      <span>Cerrar sesión</span>
+    </button>
+  </div>
+</aside>
+
+<!-- Bottom Navigation Bar -->
 <nav class="mobile-nav">
+  <button class="nav-item menu-btn" (click)="toggleDrawer()">
+    <span class="material-icons nav-icon">menu</span>
+    <span class="nav-label">Menú</span>
+  </button>
   <a
     *ngFor="let item of navItems"
     [routerLink]="item.route"
