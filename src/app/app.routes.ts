@@ -2,6 +2,7 @@ import { Routes } from '@angular/router';
 import { Login } from './pages/login/login';
 import { Register } from './pages/register/register';
 import { Dashboard } from './pages/dashboard/dashboard';
+import { Transactions } from './pages/transactions/transactions';
 import { MainLayout } from './layouts/main-layout/main-layout';
 import { authGuard } from './guards/auth.guard';
 
@@ -34,7 +35,7 @@ export const routes: Routes = [
       // Placeholder routes para las demás secciones
       {
         path: 'transactions',
-        loadComponent: () => import('./pages/dashboard/dashboard').then(m => m.Dashboard)
+        component: Transactions
       },
       {
         path: 'categories',

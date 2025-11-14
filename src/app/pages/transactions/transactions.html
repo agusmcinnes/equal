@@ -1,0 +1,132 @@
+<div class="transactions-page">
+  <header class="toolbar">
+    <h2>Transacciones</h2>
+    <button (click)="showForm()">Nueva operación</button>
+  </header>
+
+  <section *ngIf="formVisible" class="tx-form">
+    <div class="modal-overlay">
+      <div class="modal-sheet">
+        <div class="tx-form-card">
+      <h3 class="form-title">{{ editing ? 'Editar operación' : 'Registrar operación' }}</h3>
+
+      <form (ngSubmit)="save()" class="login-form">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="date">Fecha</label>
+            <input type="datetime-local" id="date" [(ngModel)]="model.date" name="date" required />
+          </div>
+
+          <div class="form-group">
+            <label for="currency">Moneda</label>
+            <select id="currency" [(ngModel)]="model.currency" name="currency">
+              <option value="ARS">ARS (Peso)</option>
+              <option value="USD">USD (Dólar)</option>
+              <option value="EUR">EUR (Euro)</option>
+              <option value="CRYPTO">CRYPTO (Cripto)</option>
+            </select>
+            <div class="field-error" *ngIf="fieldErrors['currency']">{{ fieldErrors['currency'] }}</div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="description">Descripción</label>
+          <input type="text" id="description" [(ngModel)]="model.description" name="description" placeholder="Ej: Compra supermercado" />
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="category">Categoría</label>
+            <select id="category" [(ngModel)]="model.category_id" name="category">
+              <option [ngValue]="null">— Sin categoría —</option>
+              <option *ngFor="let c of categories" [value]="c.id">{{ c.name }}</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="amount">Monto</label>
+            <input type="number" id="amount" step="0.01" [(ngModel)]="model.amount" name="amount" required />
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Tipo</label>
+            <div class="radio-row">
+              <label class="radio">
+                <input type="radio" name="type" [(ngModel)]="model.type" value="income" />
+                Ingreso
+              </label>
+              <label class="radio">
+                <input type="radio" name="type" [(ngModel)]="model.type" value="expense" />
+                Gasto
+              </label>
+            </div>
+            <div class="field-error" *ngIf="fieldErrors['type']">{{ fieldErrors['type'] }}</div>
+          </div>
+
+          <div class="form-group">
+            <label>&nbsp;</label>
+            <div class="actions">
+              <button type="submit" class="submit-btn">{{ editing ? 'Actualizar' : 'Guardar' }}</button>
+              <button type="button" class="submit-btn" style="background:#fff;color:#333;border:1px solid #e5e7eb;" (click)="formVisible=false">Cancelar</button>
+            </div>
+          </div>
+        </div>
+        <div *ngIf="model.currency === 'CRYPTO'" class="form-row crypto-row">
+          <div class="form-group">
+            <label for="crypto_type">Seleccionar cripto</label>
+            <select id="crypto_type" [(ngModel)]="model.crypto_type" name="crypto_type">
+              <option value="BTC">BTC</option>
+              <option value="ETH">ETH</option>
+              <option value="USDC">USDC</option>
+            </select>
+            <div class="field-error" *ngIf="fieldErrors['crypto_type']">{{ fieldErrors['crypto_type'] }}</div>
+          </div>
+        </div>
+      </form>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="tx-list">
+    <div *ngIf="loading" class="loading">Cargando...</div>
+
+    <div *ngIf="!loading && transactions.length === 0" class="empty">
+      <span class="material-icons empty-illustration">inbox</span>
+      <p>No hay operaciones aún. Crea tu primera operación usando "Nueva operación".</p>
+    </div>
+
+    <div class="cards" *ngIf="!loading">
+      <article class="tx-card" *ngFor="let t of transactions" [attr.data-type]="t.type">
+        <div class="tx-left">
+          <div class="tx-date">{{ t.date | date:'shortDate' }}</div>
+          <div class="tx-time">{{ t.date | date:'shortTime' }}</div>
+        </div>
+
+        <div class="tx-main">
+          <div class="tx-header">
+            <div class="tx-icon" [style.background]="getCategoryColor(t.category_id)">
+              <span class="material-icons">{{ getCategoryIcon(t.category_id) }}</span>
+            </div>
+            <div class="tx-title">
+              <div class="desc">{{ t.description || getCategoryName(t.category_id) || 'Sin descripción' }}</div>
+              <div class="meta">{{ getCategoryName(t.category_id) }} • {{ t.wallet_id ? 'Cuenta' : '—' }}</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="tx-right">
+          <div class="amount" [class.income]="t.type === 'income'" [class.expense]="t.type === 'expense'">
+            {{ t.type === 'expense' ? '-' : '+' }}{{ t.amount | number:'1.2-2' }} <small>{{ t.currency }}</small>
+          </div>
+          <div class="actions">
+            <button class="icon-btn" title="Editar" (click)="showForm(t)"><span class="material-icons">edit</span></button>
+            <button class="icon-btn danger" title="Eliminar" (click)="remove(t.id)"><span class="material-icons">delete</span></button>
+          </div>
+        </div>
+      </article>
+    </div>
+  </section>
+</div>
