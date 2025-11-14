@@ -1,16 +1,87 @@
-# Equals
+# Equal - Gestor de Finanzas Personales
+
+**Equal** es una aplicación de gestión financiera personal desarrollada con Angular, diseñada para facilitar el control y seguimiento de las finanzas diarias.
+
+## Características
+
+- Gestión de ingresos y gastos
+- Categorización de transacciones
+- Programación de operaciones futuras
+- Registro de ahorros e inversiones
+- Establecimiento de objetivos financieros
+- Integración con Dólar API
+- Gráficos y visualizaciones financieras
+- Autenticación segura con Supabase
+- Diseño responsivo (Desktop y Mobile)
+
+## Tecnologías
+
+- **Frontend**: Angular 20.3.8
+- **Lenguaje**: TypeScript
+- **Backend/DB**: Supabase
+- **Autenticación**: Supabase Auth
+- **UI Components**: Angular Material
+- **Estilos**: CSS puro
+- **Fuente**: Poppins
+
+## Colores de Marca
+
+- Primary: `#463397`
+- Secondary: `#9850eb`
+- Accent: `#6d38c7`
+- Dark: `#2c116a`
+
+## Estructura del Proyecto
+
+```
+src/app/
+├── components/     # Componentes reutilizables
+├── core/          # Servicios core (Supabase config)
+├── guards/        # Guards de autenticación
+├── layouts/       # Layouts (Sidebar, Mobile Nav, Main Layout)
+├── models/        # Interfaces y tipos TypeScript
+├── pages/         # Páginas de la aplicación
+├── services/      # Servicios de negocio
+└── shared/        # Recursos compartidos
+```
 
 This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 20.3.8.
 
+## Configuración Inicial
+
+### 1. Instalar Dependencias
+
+```bash
+npm install
+```
+
+### 2. Configurar Supabase
+
+1. Crea un proyecto en [Supabase](https://supabase.com)
+2. Copia las credenciales de tu proyecto
+3. Actualiza el archivo `src/environments/environment.ts`:
+
+```typescript
+export const environment = {
+  production: false,
+  supabase: {
+    url: 'TU_SUPABASE_URL',
+    anonKey: 'TU_SUPABASE_ANON_KEY'
+  }
+};
+```
+
+4. Actualiza también `src/environments/environment.prod.ts` con las credenciales de producción
+
 ## Development server
 
-To start a local development server, run:
+Para iniciar el servidor de desarrollo, ejecuta:
 
 ```bash
 ng serve
 ```
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+Abre tu navegador en `http://localhost:4200/`. La aplicación se recargará automáticamente cuando modifiques los archivos fuente.
 
 ## Code scaffolding
 

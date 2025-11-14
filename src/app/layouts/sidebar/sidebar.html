@@ -1,0 +1,35 @@
+<aside class="sidebar" [class.collapsed]="isCollapsed">
+  <div class="sidebar-header">
+    <div class="logo">
+      <img src="/images/equal-logo.png" alt="Equal Logo" class="logo-icon">
+      <span class="logo-text" *ngIf="!isCollapsed">EQUAL</span>
+    </div>
+    <button class="toggle-btn" (click)="toggleSidebar()">
+      <span class="material-icons">{{ isCollapsed ? 'chevron_right' : 'chevron_left' }}</span>
+    </button>
+  </div>
+
+  <nav class="sidebar-nav">
+    <a
+      *ngFor="let item of menuItems"
+      [routerLink]="item.route"
+      routerLinkActive="active"
+      class="nav-item"
+      [title]="item.label"
+    >
+      <span class="material-icons nav-icon">{{ item.icon }}</span>
+      <span class="nav-label" *ngIf="!isCollapsed">{{ item.label }}</span>
+    </a>
+  </nav>
+
+  <div class="sidebar-footer">
+    <a routerLink="/profile" routerLinkActive="active" class="nav-item" title="Perfil">
+      <span class="material-icons nav-icon">account_circle</span>
+      <span class="nav-label" *ngIf="!isCollapsed">Perfil</span>
+    </a>
+    <button class="nav-item logout-btn" title="Cerrar sesión">
+      <span class="material-icons nav-icon">logout</span>
+      <span class="nav-label" *ngIf="!isCollapsed">Salir</span>
+    </button>
+  </div>
+</aside>
