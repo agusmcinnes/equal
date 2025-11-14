@@ -1,0 +1,80 @@
+<div class="dashboard-container">
+  <header class="dashboard-header">
+    <div>
+      <h1 class="page-title">Dashboard</h1>
+      <p class="page-subtitle">Bienvenido a Equal - Tu gestor financiero personal</p>
+    </div>
+  </header>
+
+  <div class="stats-grid">
+    <div
+      *ngFor="let stat of stats"
+      class="stat-card"
+      [attr.data-color]="stat.color"
+    >
+      <div class="stat-icon">
+        <span class="material-icons">{{ stat.icon }}</span>
+      </div>
+      <div class="stat-content">
+        <p class="stat-label">{{ stat.title }}</p>
+        <h3 class="stat-value">{{ stat.value }}</h3>
+      </div>
+    </div>
+  </div>
+
+  <div class="dashboard-grid">
+    <section class="card transactions-card">
+      <div class="card-header">
+        <h2 class="card-title">Transacciones Recientes</h2>
+        <button class="view-all-btn">Ver todas</button>
+      </div>
+      <div class="card-body">
+        <div class="empty-state" *ngIf="recentTransactions.length === 0">
+          <span class="material-icons">receipt_long</span>
+          <p>No hay transacciones aún</p>
+          <p class="empty-subtitle">Comienza registrando tus ingresos y gastos</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="card goals-card">
+      <div class="card-header">
+        <h2 class="card-title">Objetivos Financieros</h2>
+        <button class="view-all-btn">Ver todos</button>
+      </div>
+      <div class="card-body">
+        <div class="empty-state" *ngIf="goals.length === 0">
+          <span class="material-icons">flag</span>
+          <p>No hay objetivos definidos</p>
+          <p class="empty-subtitle">Establece metas para alcanzar tus sueños</p>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <section class="card quick-actions-card">
+    <div class="card-header">
+      <h2 class="card-title">Acciones Rápidas</h2>
+    </div>
+    <div class="card-body">
+      <div class="quick-actions">
+        <button class="action-btn">
+          <span class="material-icons">add</span>
+          <span>Nuevo Ingreso</span>
+        </button>
+        <button class="action-btn">
+          <span class="material-icons">remove</span>
+          <span>Nuevo Gasto</span>
+        </button>
+        <button class="action-btn">
+          <span class="material-icons">category</span>
+          <span>Categorías</span>
+        </button>
+        <button class="action-btn">
+          <span class="material-icons">flag</span>
+          <span>Nuevo Objetivo</span>
+        </button>
+      </div>
+    </div>
+  </section>
+</div>
