@@ -1,132 +1,315 @@
 <div class="transactions-page">
-  <header class="toolbar">
-    <h2>Transacciones</h2>
-    <button (click)="showForm()">Nueva operación</button>
-  </header>
+  <!-- Page Header -->
+  <div class="page-header">
+    <h1>Transacciones</h1>
+    <button class="btn-primary" (click)="showForm()">
+      <span class="material-icons">add</span>
+      Nueva transacción
+    </button>
+  </div>
 
-  <section *ngIf="formVisible" class="tx-form">
-    <div class="modal-overlay">
-      <div class="modal-sheet">
-        <div class="tx-form-card">
-      <h3 class="form-title">{{ editing ? 'Editar operación' : 'Registrar operación' }}</h3>
+  <!-- Statistics Section -->
+  <div class="statistics-section" *ngIf="!loading">
+    <div class="stats-grid">
+      <app-stat-card
+        title="Total Ingresos"
+        [value]="statistics?.total_income || 0"
+        icon="trending_up"
+        currency="ARS"
+        [loading]="statsLoading"
+      ></app-stat-card>
 
-      <form (ngSubmit)="save()" class="login-form">
+      <app-stat-card
+        title="Total Gastos"
+        [value]="statistics?.total_expenses || 0"
+        icon="trending_down"
+        currency="ARS"
+        [loading]="statsLoading"
+      ></app-stat-card>
+
+      <app-stat-card
+        title="Balance"
+        [value]="statistics?.net_balance || 0"
+        icon="account_balance_wallet"
+        currency="ARS"
+        [loading]="statsLoading"
+      ></app-stat-card>
+
+      <app-stat-card
+        title="Transacciones"
+        [value]="statistics?.transaction_count || 0"
+        icon="receipt_long"
+        [loading]="statsLoading"
+      ></app-stat-card>
+    </div>
+
+    <!-- Charts -->
+    <div class="charts-grid" *ngIf="!statsLoading && statistics && (incomeByCategoryData.length > 0 || expensesByCategoryData.length > 0)">
+      <div class="chart-card" *ngIf="incomeByCategoryData.length > 0">
+        <h3>Distribución de Ingresos por Categoría</h3>
+        <ngx-charts-pie-chart
+          [results]="incomeByCategoryData"
+          [scheme]="incomeCategoryColorScheme"
+          [view]="[600, 600]"
+          [labels]="true"
+          [doughnut]="true"
+          [legend]="false"
+        >
+        </ngx-charts-pie-chart>
+      </div>
+
+      <div class="chart-card" *ngIf="expensesByCategoryData.length > 0">
+        <h3>Distribución de Gastos por Categoría</h3>
+        <ngx-charts-pie-chart
+          [results]="expensesByCategoryData"
+          [scheme]="expenseCategoryColorScheme"
+          [view]="[600, 600]"
+          [labels]="true"
+          [doughnut]="true"
+          [legend]="false"
+        >
+        </ngx-charts-pie-chart>
+      </div>
+    </div>
+  </div>
+
+  <!-- Transactions List -->
+  <div class="transactions-section">
+    <div class="section-header">
+      <h2>Historial</h2>
+      <div class="sort-options">
+        <button
+          class="sort-btn"
+          [class.active]="sort.field === 'date'"
+          (click)="changeSort('date')"
+        >
+          Fecha
+          <span class="material-icons" *ngIf="sort.field === 'date'">
+            {{ sort.order === 'asc' ? 'arrow_upward' : 'arrow_downward' }}
+          </span>
+        </button>
+        <button
+          class="sort-btn"
+          [class.active]="sort.field === 'amount'"
+          (click)="changeSort('amount')"
+        >
+          Monto
+          <span class="material-icons" *ngIf="sort.field === 'amount'">
+            {{ sort.order === 'asc' ? 'arrow_upward' : 'arrow_downward' }}
+          </span>
+        </button>
+      </div>
+    </div>
+
+    <div *ngIf="loading" class="loading-state">
+      <div class="spinner"></div>
+      <p>Cargando transacciones...</p>
+    </div>
+
+    <app-empty-state
+      *ngIf="!loading && transactions.length === 0"
+      icon="receipt_long"
+      title="No hay transacciones"
+      description="Comienza a registrar tus ingresos y gastos para visualizar tus finanzas."
+      actionLabel="Crear transacción"
+      actionIcon="add"
+      (action)="showForm()"
+    ></app-empty-state>
+
+    <div *ngIf="!loading && transactions.length > 0" class="transactions-list">
+      <div *ngFor="let group of groupedTransactions" class="transaction-group">
+        <h3 class="group-label">{{ group.label }}</h3>
+
+        <div class="transaction-card" *ngFor="let tx of group.transactions">
+          <div class="tx-left" [class.income]="tx.type === 'income'" [class.expense]="tx.type === 'expense'">
+            <app-category-badge
+              [name]="tx.category_name || 'Sin categoría'"
+              [icon]="tx.category_icon || 'category'"
+              [color]="tx.category_color || '#6b7280'"
+              size="medium"
+            ></app-category-badge>
+          </div>
+
+          <div class="tx-center">
+            <div class="tx-description">
+              {{ tx.description || 'Sin descripción' }}
+            </div>
+            <div class="tx-metadata">
+              <span class="tx-date">
+                <span class="material-icons">schedule</span>
+                {{ tx.date | date: 'short' }}
+              </span>
+              <span class="tx-wallet" *ngIf="tx.wallet_name">
+                <span class="material-icons">account_balance_wallet</span>
+                {{ tx.wallet_name }}
+              </span>
+              <span class="tx-recurring" *ngIf="tx.is_recurring">
+                <span class="material-icons">event_repeat</span>
+                Recurrente
+              </span>
+            </div>
+          </div>
+
+          <div class="tx-right">
+            <div class="tx-amount" [class.income]="tx.type === 'income'" [class.expense]="tx.type === 'expense'">
+              {{ tx.type === 'income' ? '+' : '-' }}{{ formatCurrency(tx.amount, tx.currency) }}
+            </div>
+            <div class="tx-actions">
+              <button class="btn-icon" (click)="showForm(tx)" title="Editar">
+                <span class="material-icons">edit</span>
+              </button>
+              <button class="btn-icon btn-danger" (click)="remove(tx.id)" title="Eliminar">
+                <span class="material-icons">delete</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pagination -->
+    <div class="pagination" *ngIf="!loading && totalPages > 1">
+      <button
+        class="pagination-btn"
+        [disabled]="currentPage === 1"
+        (click)="changePage(currentPage - 1)"
+      >
+        <span class="material-icons">chevron_left</span>
+      </button>
+
+      <span class="pagination-info">
+        Página {{ currentPage }} de {{ totalPages }}
+      </span>
+
+      <button
+        class="pagination-btn"
+        [disabled]="currentPage === totalPages"
+        (click)="changePage(currentPage + 1)"
+      >
+        <span class="material-icons">chevron_right</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Transaction Form Modal -->
+  <div class="modal-overlay" *ngIf="formVisible" (click)="closeForm()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>{{ editing ? 'Editar' : 'Nueva' }} Transacción</h2>
+        <button class="btn-close" (click)="closeForm()">
+          <span class="material-icons">close</span>
+        </button>
+      </div>
+
+      <form class="transaction-form" (ngSubmit)="save()">
         <div class="form-row">
           <div class="form-group">
-            <label for="date">Fecha</label>
-            <input type="datetime-local" id="date" [(ngModel)]="model.date" name="date" required />
+            <label>Fecha y Hora *</label>
+            <input
+              type="datetime-local"
+              [(ngModel)]="model.date"
+              name="date"
+              required
+            />
+            <span class="error" *ngIf="fieldErrors['date']">{{ fieldErrors['date'] }}</span>
           </div>
 
           <div class="form-group">
-            <label for="currency">Moneda</label>
-            <select id="currency" [(ngModel)]="model.currency" name="currency">
-              <option value="ARS">ARS (Peso)</option>
-              <option value="USD">USD (Dólar)</option>
-              <option value="EUR">EUR (Euro)</option>
-              <option value="CRYPTO">CRYPTO (Cripto)</option>
-            </select>
-            <div class="field-error" *ngIf="fieldErrors['currency']">{{ fieldErrors['currency'] }}</div>
+            <label>Tipo *</label>
+            <div class="radio-group">
+              <label class="radio-button">
+                <input type="radio" [(ngModel)]="model.type" name="type" value="income" />
+                <span>Ingreso</span>
+              </label>
+              <label class="radio-button">
+                <input type="radio" [(ngModel)]="model.type" name="type" value="expense" />
+                <span>Gasto</span>
+              </label>
+            </div>
+            <span class="error" *ngIf="fieldErrors['type']">{{ fieldErrors['type'] }}</span>
           </div>
         </div>
 
         <div class="form-group">
-          <label for="description">Descripción</label>
-          <input type="text" id="description" [(ngModel)]="model.description" name="description" placeholder="Ej: Compra supermercado" />
+          <label>Descripción</label>
+          <input
+            type="text"
+            [(ngModel)]="model.description"
+            name="description"
+            placeholder="Ej: Compra en supermercado"
+          />
         </div>
 
         <div class="form-row">
           <div class="form-group">
-            <label for="category">Categoría</label>
-            <select id="category" [(ngModel)]="model.category_id" name="category">
-              <option [ngValue]="null">— Sin categoría —</option>
-              <option *ngFor="let c of categories" [value]="c.id">{{ c.name }}</option>
-            </select>
+            <label>Monto *</label>
+            <input
+              type="number"
+              [(ngModel)]="model.amount"
+              name="amount"
+              min="0"
+              step="0.01"
+              placeholder="0.00"
+              required
+            />
+            <span class="error" *ngIf="fieldErrors['amount']">{{ fieldErrors['amount'] }}</span>
           </div>
 
           <div class="form-group">
-            <label for="amount">Monto</label>
-            <input type="number" id="amount" step="0.01" [(ngModel)]="model.amount" name="amount" required />
+            <label>Moneda *</label>
+            <select [(ngModel)]="model.currency" name="currency" required>
+              <option value="ARS">Pesos (ARS)</option>
+              <option value="USD">Dólares (USD)</option>
+              <option value="EUR">Euros (EUR)</option>
+              <option value="CRYPTO">Criptomonedas</option>
+            </select>
+            <span class="error" *ngIf="fieldErrors['currency']">{{ fieldErrors['currency'] }}</span>
           </div>
+        </div>
+
+        <div class="form-group" *ngIf="model.currency === 'CRYPTO'">
+          <label>Tipo de Cripto *</label>
+          <select [(ngModel)]="model.crypto_type" name="crypto_type">
+            <option value="">Seleccionar...</option>
+            <option value="BTC">Bitcoin (BTC)</option>
+            <option value="ETH">Ethereum (ETH)</option>
+            <option value="USDC">USD Coin (USDC)</option>
+            <option value="USDT">Tether (USDT)</option>
+          </select>
+          <span class="error" *ngIf="fieldErrors['crypto_type']">{{ fieldErrors['crypto_type'] }}</span>
         </div>
 
         <div class="form-row">
           <div class="form-group">
-            <label>Tipo</label>
-            <div class="radio-row">
-              <label class="radio">
-                <input type="radio" name="type" [(ngModel)]="model.type" value="income" />
-                Ingreso
-              </label>
-              <label class="radio">
-                <input type="radio" name="type" [(ngModel)]="model.type" value="expense" />
-                Gasto
-              </label>
-            </div>
-            <div class="field-error" *ngIf="fieldErrors['type']">{{ fieldErrors['type'] }}</div>
+            <label>Categoría</label>
+            <select [(ngModel)]="model.category_id" name="category_id">
+              <option [ngValue]="null">Sin categoría</option>
+              <option *ngFor="let cat of categories" [ngValue]="cat.id">
+                {{ cat.name }}
+              </option>
+            </select>
           </div>
 
           <div class="form-group">
-            <label>&nbsp;</label>
-            <div class="actions">
-              <button type="submit" class="submit-btn">{{ editing ? 'Actualizar' : 'Guardar' }}</button>
-              <button type="button" class="submit-btn" style="background:#fff;color:#333;border:1px solid #e5e7eb;" (click)="formVisible=false">Cancelar</button>
-            </div>
+            <label>Billetera</label>
+            <select [(ngModel)]="model.wallet_id" name="wallet_id">
+              <option [ngValue]="null">Sin billetera</option>
+              <option *ngFor="let wallet of wallets" [ngValue]="wallet.id">
+                {{ wallet.name }} ({{ wallet.currency }})
+              </option>
+            </select>
           </div>
         </div>
-        <div *ngIf="model.currency === 'CRYPTO'" class="form-row crypto-row">
-          <div class="form-group">
-            <label for="crypto_type">Seleccionar cripto</label>
-            <select id="crypto_type" [(ngModel)]="model.crypto_type" name="crypto_type">
-              <option value="BTC">BTC</option>
-              <option value="ETH">ETH</option>
-              <option value="USDC">USDC</option>
-            </select>
-            <div class="field-error" *ngIf="fieldErrors['crypto_type']">{{ fieldErrors['crypto_type'] }}</div>
-          </div>
+
+        <div class="form-actions">
+          <button type="button" class="btn-secondary" (click)="closeForm()">
+            Cancelar
+          </button>
+          <button type="submit" class="btn-primary" [disabled]="loading">
+            {{ editing ? 'Actualizar' : 'Crear' }}
+          </button>
         </div>
       </form>
-        </div>
-      </div>
     </div>
-  </section>
-
-  <section class="tx-list">
-    <div *ngIf="loading" class="loading">Cargando...</div>
-
-    <div *ngIf="!loading && transactions.length === 0" class="empty">
-      <span class="material-icons empty-illustration">inbox</span>
-      <p>No hay operaciones aún. Crea tu primera operación usando "Nueva operación".</p>
-    </div>
-
-    <div class="cards" *ngIf="!loading">
-      <article class="tx-card" *ngFor="let t of transactions" [attr.data-type]="t.type">
-        <div class="tx-left">
-          <div class="tx-date">{{ t.date | date:'shortDate' }}</div>
-          <div class="tx-time">{{ t.date | date:'shortTime' }}</div>
-        </div>
-
-        <div class="tx-main">
-          <div class="tx-header">
-            <div class="tx-icon" [style.background]="getCategoryColor(t.category_id)">
-              <span class="material-icons">{{ getCategoryIcon(t.category_id) }}</span>
-            </div>
-            <div class="tx-title">
-              <div class="desc">{{ t.description || getCategoryName(t.category_id) || 'Sin descripción' }}</div>
-              <div class="meta">{{ getCategoryName(t.category_id) }} • {{ t.wallet_id ? 'Cuenta' : '—' }}</div>
-            </div>
-          </div>
-        </div>
-
-        <div class="tx-right">
-          <div class="amount" [class.income]="t.type === 'income'" [class.expense]="t.type === 'expense'">
-            {{ t.type === 'expense' ? '-' : '+' }}{{ t.amount | number:'1.2-2' }} <small>{{ t.currency }}</small>
-          </div>
-          <div class="actions">
-            <button class="icon-btn" title="Editar" (click)="showForm(t)"><span class="material-icons">edit</span></button>
-            <button class="icon-btn danger" title="Eliminar" (click)="remove(t.id)"><span class="material-icons">delete</span></button>
-          </div>
-        </div>
-      </article>
-    </div>
-  </section>
+  </div>
 </div>
