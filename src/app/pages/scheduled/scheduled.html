@@ -1,0 +1,127 @@
+<div class="scheduled-container">
+  <!-- Header -->
+  <div class="page-header">
+    <div class="header-content">
+      <div class="header-title">
+        <h1>Transacciones Programadas</h1>
+        <p>Gestiona tus ingresos y gastos fijos</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Success message -->
+  <div class="alert alert-success" *ngIf="successMessage">
+    <i class="material-icons">check_circle</i>
+    <span>{{ successMessage }}</span>
+  </div>
+
+  <!-- Error message -->
+  <div class="alert alert-error" *ngIf="errorMessage">
+    <i class="material-icons">error</i>
+    <span>{{ errorMessage }}</span>
+  </div>
+
+  <!-- Content -->
+  <div class="scheduled-content">
+    <!-- Income Section -->
+    <section class="transaction-section income-section">
+      <div class="section-header">
+        <div class="section-title">
+          <i class="material-icons">trending_up</i>
+          <span>Ingresos Fijos</span>
+          <span class="count-badge">{{ getActiveIncomeCount() }}</span>
+        </div>
+        <button class="btn-add" (click)="openCreateModal('income')" title="Agregar ingreso fijo">
+          <i class="material-icons">add</i>
+          <span>Nuevo Ingreso</span>
+        </button>
+      </div>
+
+      <div class="section-stats">
+        <div class="stat-item">
+          <span class="stat-label">Total programado:</span>
+          <span class="stat-value income">{{ getIncomeTotalMonthly() | number: '1.2-2' }} ARS</span>
+        </div>
+      </div>
+
+      <div class="transactions-grid">
+        <div *ngIf="incomeTransactions.length === 0" class="empty-state">
+          <i class="material-icons">trending_up</i>
+          <p>No hay ingresos programados</p>
+          <button class="btn-primary-sm" (click)="openCreateModal('income')">
+            <i class="material-icons">add</i>
+            Crear ingreso
+          </button>
+        </div>
+
+        <div *ngFor="let transaction of incomeTransactions" class="transaction-item">
+          <app-scheduled-card
+            [transaction]="transaction"
+            (edit)="openEditModal($event)"
+            (delete)="onDeleteTransaction($event)"
+            (toggle)="onToggleTransaction($event)"
+          />
+        </div>
+      </div>
+    </section>
+
+    <!-- Expense Section -->
+    <section class="transaction-section expense-section">
+      <div class="section-header">
+        <div class="section-title">
+          <i class="material-icons">trending_down</i>
+          <span>Gastos Fijos</span>
+          <span class="count-badge">{{ getActiveExpenseCount() }}</span>
+        </div>
+        <button class="btn-add" (click)="openCreateModal('expense')" title="Agregar gasto fijo">
+          <i class="material-icons">add</i>
+          <span>Nuevo Gasto</span>
+        </button>
+      </div>
+
+      <div class="section-stats">
+        <div class="stat-item">
+          <span class="stat-label">Total programado:</span>
+          <span class="stat-value expense">{{ getExpenseTotalMonthly() | number: '1.2-2' }} ARS</span>
+        </div>
+      </div>
+
+      <div class="transactions-grid">
+        <div *ngIf="expenseTransactions.length === 0" class="empty-state">
+          <i class="material-icons">trending_down</i>
+          <p>No hay gastos programados</p>
+          <button class="btn-primary-sm" (click)="openCreateModal('expense')">
+            <i class="material-icons">add</i>
+            Crear gasto
+          </button>
+        </div>
+
+        <div *ngFor="let transaction of expenseTransactions" class="transaction-item">
+          <app-scheduled-card
+            [transaction]="transaction"
+            (edit)="openEditModal($event)"
+            (delete)="onDeleteTransaction($event)"
+            (toggle)="onToggleTransaction($event)"
+          />
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- Modal for create/edit -->
+  <app-scheduled-modal
+    [isOpen]="isModalOpen"
+    [mode]="modalMode"
+    [transaction]="selectedTransaction"
+    [categories]="categories"
+    [wallets]="wallets"
+    [defaultType]="modalDefaultType"
+    (close)="closeModal()"
+    (save)="onSaveTransaction($event)"
+  />
+
+  <!-- Loading overlay -->
+  <div class="loading-overlay" *ngIf="isLoading">
+    <div class="spinner"></div>
+  </div>
+</div>

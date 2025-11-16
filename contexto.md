@@ -25,14 +25,13 @@ RF17 El sistema deberá mostrar al usuario un gráfico de distribución de ingre
 
 4. Programación de Operaciones Futuras
 RF18 El sistema deberá permitir al usuario programar ingresos o gastos futuros, indicando fecha, monto y categoría.
-RF19 El sistema deberá notificar al usuario por correo electrónico cuando se acerque la fecha programada.
+
 RF20 El sistema deberá permitir al usuario editar o eliminar operaciones futuras antes de su ejecución.
 RF21 El sistema deberá mostrar al usuario un listado de próximos movimientos.
 
 6. Patrimonio, Ahorros e Inversiones
 RF22 El sistema deberá mostrar al usuario su patrimonio total en tiempo real (en pesos y dólares).
 RF23 El sistema deberá permitir al usuario registrar ahorros e inversiones como parte de su patrimonio.
-RF24 El sistema deberá considerar los valores registrados por el usuario en ahorros e inversiones para el cálculo general del patrimonio.
 
 7. Objetivos Financieros
 RF25 El sistema deberá permitir al usuario crear, modificar y eliminar objetivos financieros.

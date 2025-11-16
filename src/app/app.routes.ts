@@ -3,6 +3,7 @@ import { Login } from './pages/login/login';
 import { Register } from './pages/register/register';
 import { Dashboard } from './pages/dashboard/dashboard';
 import { Transactions } from './pages/transactions/transactions';
+import { ScheduledComponent } from './pages/scheduled/scheduled';
 import { MainLayout } from './layouts/main-layout/main-layout';
 import { authGuard } from './guards/auth.guard';
 
@@ -38,12 +39,8 @@ export const routes: Routes = [
         component: Transactions
       },
       {
-        path: 'categories',
-        loadComponent: () => import('./pages/dashboard/dashboard').then(m => m.Dashboard)
-      },
-      {
         path: 'scheduled',
-        loadComponent: () => import('./pages/dashboard/dashboard').then(m => m.Dashboard)
+        component: ScheduledComponent
       },
       {
         path: 'savings',
