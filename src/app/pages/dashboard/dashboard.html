@@ -1,80 +1,214 @@
-<div class="dashboard-container">
-  <header class="dashboard-header">
-    <div>
-      <h1 class="page-title">Dashboard</h1>
-      <p class="page-subtitle">Bienvenido a Equal - Tu gestor financiero personal</p>
+<div class="dashboard-page">
+  <!-- Page Header -->
+  <div class="page-header">
+    <div class="header-content">
+      <h1>Dashboard</h1>
+      <p class="header-subtitle">Resumen de tu situación financiera</p>
     </div>
-  </header>
+    <button class="btn-primary" (click)="navigateToTransactions()">
+      <span class="material-icons">add</span>
+      Nueva transacción
+    </button>
+  </div>
 
-  <div class="stats-grid">
-    <div
-      *ngFor="let stat of stats"
-      class="stat-card"
-      [attr.data-color]="stat.color"
-    >
-      <div class="stat-icon">
-        <span class="material-icons">{{ stat.icon }}</span>
+  <!-- Loading State -->
+  <div *ngIf="loading" class="loading-state">
+    <div class="spinner"></div>
+    <p>Cargando datos...</p>
+  </div>
+
+  <!-- Main Content -->
+  <div *ngIf="!loading" class="dashboard-content">
+    <!-- Summary Cards -->
+    <div class="summary-section">
+      <div class="stats-grid">
+        <app-stat-card
+          title="Balance Total"
+          [value]="totalWalletBalance"
+          icon="account_balance_wallet"
+          currency="ARS"
+          [loading]="statsLoading"
+        ></app-stat-card>
+
+        <app-stat-card
+          title="Total Ingresos"
+          [value]="statistics?.total_income || 0"
+          icon="trending_up"
+          currency="ARS"
+          [loading]="statsLoading"
+        ></app-stat-card>
+
+        <app-stat-card
+          title="Total Gastos"
+          [value]="statistics?.total_expenses || 0"
+          icon="trending_down"
+          currency="ARS"
+          [loading]="statsLoading"
+        ></app-stat-card>
+
+        <app-stat-card
+          title="Transacciones"
+          [value]="statistics?.transaction_count || 0"
+          icon="receipt_long"
+          [loading]="statsLoading"
+        ></app-stat-card>
       </div>
-      <div class="stat-content">
-        <p class="stat-label">{{ stat.title }}</p>
-        <h3 class="stat-value">{{ stat.value }}</h3>
+    </div>
+
+    <!-- Charts Section -->
+    <div class="charts-section" *ngIf="!statsLoading && topExpensesChartData.length > 0">
+      <!-- Top Expenses Chart -->
+      <div class="chart-card">
+        <div class="chart-header">
+          <h3>Top 5 Gastos por Categoría</h3>
+          <span class="chart-info">Distribución actual</span>
+        </div>
+        <div class="chart-container-pie">
+          <ngx-charts-pie-chart
+            [results]="topExpensesChartData"
+            [scheme]="expenseCategoryColorScheme"
+            [view]="[500, 400]"
+            [labels]="true"
+            [legend]="false"
+            [doughnut]="false"
+          >
+          </ngx-charts-pie-chart>
+        </div>
+      </div>
+    </div>
+
+    <!-- Empty State for Charts -->
+    <div *ngIf="!statsLoading && topExpensesChartData.length === 0" class="empty-charts-section">
+      <div class="empty-charts">
+        <app-empty-state
+          title="Sin transacciones registradas"
+          subtitle="Comienza a registrar transacciones para ver análisis y tendencias de tu dinero"
+          icon="trending_up"
+        ></app-empty-state>
+        <div class="empty-actions">
+          <button class="empty-btn" (click)="navigateToTransactions()">
+            <span class="material-icons">add</span>
+            Crear primera transacción
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recent Transactions & Quick Actions -->
+    <div class="bottom-section">
+      <!-- Recent Transactions & Quick Actions Row -->
+      <div class="transactions-actions-row">
+        <!-- Recent Transactions -->
+        <div class="recent-transactions-card">
+          <div class="card-header">
+            <h3>Transacciones Recientes</h3>
+            <button class="btn-link" (click)="navigateToTransactions()">
+              Ver todas
+              <span class="material-icons">arrow_forward</span>
+            </button>
+          </div>
+
+          <div *ngIf="recentTransactions.length > 0; else noRecentTx" class="transactions-list">
+            <div
+              *ngFor="let tx of recentTransactions"
+              class="transaction-item"
+              [class.income]="tx.type === 'income'"
+              [class.expense]="tx.type === 'expense'"
+            >
+              <div class="tx-left">
+                <div class="tx-category" *ngIf="tx.category_icon">
+                  <app-category-badge
+                    [name]="tx.category_name || 'Sin categoría'"
+                    [color]="tx.category_color || '#9CA3AF'"
+                    [icon]="tx.category_icon"
+                    [size]="'small'"
+                  ></app-category-badge>
+                </div>
+                <div class="tx-info">
+                  <p class="tx-description">{{ tx.description || tx.category_name || 'Sin categoría' }}</p>
+                  <p class="tx-date">{{ formatDate(tx.date) }}</p>
+                </div>
+              </div>
+
+              <div class="tx-right">
+                <p class="tx-amount" [class.positive]="tx.type === 'income'">
+                  {{ tx.type === 'income' ? '+' : '-' }}${{ tx.amount | number: '1.2-2' }}
+                </p>
+                <p class="tx-wallet">{{ tx.wallet_name || 'Sin billetera' }}</p>
+              </div>
+            </div>
+          </div>
+
+          <ng-template #noRecentTx>
+            <app-empty-state
+              title="Sin transacciones recientes"
+              subtitle="Crea tu primera transacción para ver el historial aquí"
+              icon="receipt_long"
+            ></app-empty-state>
+          </ng-template>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="quick-actions-card">
+          <h3>Acciones Rápidas</h3>
+          <div class="actions-grid">
+            <button class="action-btn" (click)="navigateToTransactions()">
+              <span class="material-icons">add_circle</span>
+              <span>Nueva Transacción</span>
+            </button>
+            <button class="action-btn" (click)="navigateToTransactions()">
+              <span class="material-icons">swap_horiz</span>
+              <span>Transacciones</span>
+            </button>
+            <button class="action-btn" (click)="navigateTo('categories')">
+              <span class="material-icons">category</span>
+              <span>Categorías</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Top Expenses List (Horizontal, Full Width) -->
+      <div class="top-expenses-card horizontal" *ngIf="topExpenses.length > 0">
+        <h3>Gastos por Categoría</h3>
+        <div class="expenses-list horizontal">
+          <div *ngFor="let expense of topExpenses" class="expense-item horizontal">
+            <div class="expense-category">
+              <span class="category-icon material-icons" [style.color]="expense.color">
+                {{ expense.icon }}
+              </span>
+              <p class="expense-name">{{ expense.name }}</p>
+            </div>
+            <div class="expense-details">
+              <p class="expense-amount">${{ expense.amount | number: '1.2-2' }}</p>
+              <div class="progress-bar">
+                <div class="progress-fill" [style.width.%]="expense.percentage"></div>
+              </div>
+              <p class="expense-percentage">{{ expense.percentage | number: '1.0-0' }}%</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Wallet Summary -->
+      <div class="wallet-summary-card" *ngIf="wallets.length > 0">
+        <h3>Tus Billeteras</h3>
+        <div class="wallets-list">
+          <div *ngFor="let wallet of wallets" class="wallet-item">
+            <div class="wallet-icon">
+              <span class="material-icons">account_balance_wallet</span>
+            </div>
+            <div class="wallet-info">
+              <p class="wallet-name">{{ wallet.name }}</p>
+              <p class="wallet-provider">{{ wallet.provider }}</p>
+            </div>
+            <div class="wallet-balance">
+              <p class="balance-amount">${{ wallet.balance | number: '1.2-2' }}</p>
+              <p class="balance-currency">{{ wallet.currency }}</p>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
-
-  <div class="dashboard-grid">
-    <section class="card transactions-card">
-      <div class="card-header">
-        <h2 class="card-title">Transacciones Recientes</h2>
-        <button class="view-all-btn">Ver todas</button>
-      </div>
-      <div class="card-body">
-        <div class="empty-state" *ngIf="recentTransactions.length === 0">
-          <span class="material-icons">receipt_long</span>
-          <p>No hay transacciones aún</p>
-          <p class="empty-subtitle">Comienza registrando tus ingresos y gastos</p>
-        </div>
-      </div>
-    </section>
-
-    <section class="card goals-card">
-      <div class="card-header">
-        <h2 class="card-title">Objetivos Financieros</h2>
-        <button class="view-all-btn">Ver todos</button>
-      </div>
-      <div class="card-body">
-        <div class="empty-state" *ngIf="goals.length === 0">
-          <span class="material-icons">flag</span>
-          <p>No hay objetivos definidos</p>
-          <p class="empty-subtitle">Establece metas para alcanzar tus sueños</p>
-        </div>
-      </div>
-    </section>
-  </div>
-
-  <section class="card quick-actions-card">
-    <div class="card-header">
-      <h2 class="card-title">Acciones Rápidas</h2>
-    </div>
-    <div class="card-body">
-      <div class="quick-actions">
-        <button class="action-btn">
-          <span class="material-icons">add</span>
-          <span>Nuevo Ingreso</span>
-        </button>
-        <button class="action-btn">
-          <span class="material-icons">remove</span>
-          <span>Nuevo Gasto</span>
-        </button>
-        <button class="action-btn">
-          <span class="material-icons">category</span>
-          <span>Categorías</span>
-        </button>
-        <button class="action-btn">
-          <span class="material-icons">flag</span>
-          <span>Nuevo Objetivo</span>
-        </button>
-      </div>
-    </div>
-  </section>
 </div>
