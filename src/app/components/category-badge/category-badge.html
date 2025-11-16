@@ -1,0 +1,24 @@
+<div class="category-badge" [class.clickable]="clickable" (click)="onClick($event)">
+  <div
+    class="category-icon"
+    [style.background-color]="color + '20'"
+    [style.width]="badgeSize"
+    [style.height]="badgeSize"
+  >
+    <span
+      class="material-icons"
+      [style.color]="color"
+      [style.font-size.px]="iconSize"
+    >
+      {{ icon }}
+    </span>
+  </div>
+
+  <span
+    *ngIf="showLabel"
+    class="category-name"
+    [style.font-size]="textSize"
+  >
+    {{ name }}
+  </span>
+</div>

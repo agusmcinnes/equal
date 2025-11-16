@@ -1,0 +1,23 @@
+<div class="stat-card" [class.loading]="loading">
+  <div class="stat-icon" [class.gradient-bg]="iconColor === 'gradient'">
+    <span class="material-icons">{{ icon }}</span>
+  </div>
+
+  <div class="stat-content">
+    <div class="stat-title">{{ title }}</div>
+
+    <div class="stat-value" *ngIf="!loading">
+      {{ formattedValue }}
+    </div>
+
+    <div class="stat-skeleton" *ngIf="loading">
+      <div class="skeleton-line"></div>
+    </div>
+
+    <div class="stat-trend" *ngIf="trend !== undefined && !loading" [class.trend-up]="trendDirection === 'up'" [class.trend-down]="trendDirection === 'down'">
+      <span class="material-icons trend-icon">{{ trendIcon }}</span>
+      <span class="trend-value">{{ Math.abs(trend) }}%</span>
+      <span class="trend-label">vs. mes anterior</span>
+    </div>
+  </div>
+</div>

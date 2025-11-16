@@ -1,0 +1,55 @@
+<div class="date-range-picker">
+  <button class="date-picker-trigger" (click)="togglePicker()" type="button">
+    <span class="material-icons">date_range</span>
+    <span class="trigger-label">{{ displayLabel }}</span>
+    <span class="material-icons">{{ isOpen ? 'expand_less' : 'expand_more' }}</span>
+  </button>
+
+  <div class="picker-dropdown" *ngIf="isOpen">
+    <div class="dropdown-overlay" (click)="closePicker()"></div>
+
+    <div class="dropdown-content">
+      <div class="preset-buttons">
+        <button
+          *ngFor="let preset of presets"
+          class="preset-button"
+          [class.active]="selectedPreset === preset.value"
+          (click)="selectPreset(preset.value)"
+          type="button"
+        >
+          <span class="material-icons">{{ preset.icon }}</span>
+          <span>{{ preset.label }}</span>
+        </button>
+      </div>
+
+      <div class="custom-inputs" *ngIf="selectedPreset === 'custom'">
+        <div class="input-group">
+          <label>Desde</label>
+          <input
+            type="date"
+            [(ngModel)]="customFrom"
+            [max]="customTo || undefined"
+          />
+        </div>
+
+        <div class="input-group">
+          <label>Hasta</label>
+          <input
+            type="date"
+            [(ngModel)]="customTo"
+            [min]="customFrom || undefined"
+          />
+        </div>
+
+        <button
+          class="apply-button"
+          (click)="applyCustomRange()"
+          [disabled]="!customFrom || !customTo"
+          type="button"
+        >
+          Aplicar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
