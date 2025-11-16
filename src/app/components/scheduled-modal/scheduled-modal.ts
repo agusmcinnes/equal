@@ -1,6 +1,6 @@
 import { Component, Input, Output, EventEmitter, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
 import { ScheduledTransaction, ScheduledTransactionWithDetails, FREQUENCY_OPTIONS } from '../../models/scheduled-transaction.model';
 import { Category } from '../../models/category.model';
 import { Wallet } from '../../models/wallet.model';
@@ -57,12 +57,31 @@ export class ScheduledModalComponent implements OnInit, OnDestroy {
       type: [this.defaultType, Validators.required],
       amount: ['', [Validators.required, Validators.min(0.01)]],
       currency: ['ARS', Validators.required],
-      category_id: [''],
+      category_id: ['', Validators.required],
       wallet_id: [''],
       start_date: ['', Validators.required],
       end_date: [''],
       frequency: ['monthly', Validators.required]
-    });
+    }, { validators: this.endDateAfterStartDate });
+  }
+
+  // Custom validator: end_date must be after start_date
+  private endDateAfterStartDate(control: AbstractControl): ValidationErrors | null {
+    const startDate = control.get('start_date')?.value;
+    const endDate = control.get('end_date')?.value;
+
+    if (!startDate || !endDate) {
+      return null; // No validation if either is empty (end_date is optional)
+    }
+
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+
+    if (end <= start) {
+      return { endDateBeforeStart: true };
+    }
+
+    return null;
   }
 
   private populateForm(transaction: ScheduledTransactionWithDetails): void {
@@ -129,6 +148,9 @@ export class ScheduledModalComponent implements OnInit, OnDestroy {
     if (this.form.dirty && !confirm('¿Descartar cambios?')) {
       return;
     }
+    this.isLoading = false;
+    this.errorMessage = '';
+    this.form.reset();
     this.close.emit();
   }
 
@@ -138,6 +160,10 @@ export class ScheduledModalComponent implements OnInit, OnDestroy {
 
   getFilteredCategories(): Category[] {
     return this.categories.filter(c => c.type === this.form.get('type')?.value);
+  }
+
+  hasWalletsForCurrency(): boolean {
+    return this.getFilteredWallets().length > 0;
   }
 
   get titleText(): string {

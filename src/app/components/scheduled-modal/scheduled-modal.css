@@ -132,7 +132,7 @@
 .form-control {
   padding: 12px;
   border: 1px solid #d1d5db;
-  border-radius: 8px;
+  border-radius: 12px;
   font-size: 14px;
   font-family: 'Poppins', sans-serif;
   transition: all 0.2s ease;
@@ -140,8 +140,8 @@
 
   &:focus {
     outline: none;
-    border-color: #6366f1;
-    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(70, 51, 151, 0.1);
   }
 
   &:disabled {
@@ -167,6 +167,15 @@
   font-size: 12px;
   color: #6b7280;
   font-weight: 400;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+
+  .material-icons {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+  }
 }
 
 .form-row {
@@ -265,12 +274,12 @@
 
   &.btn-primary {
     flex: 1;
-    background: #6366f1;
+    background: var(--gradient-primary);
     color: white;
 
     &:hover:not(:disabled) {
-      background: #4f46e5;
-      box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+      background: var(--color-dark);
+      box-shadow: var(--shadow-lg);
     }
   }
 }
