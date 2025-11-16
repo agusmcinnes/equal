@@ -44,6 +44,7 @@ export class Transactions implements OnInit, OnDestroy {
   // Data
   transactions: TransactionWithDetails[] = [];
   allTransactions: TransactionWithDetails[] = [];
+  groupedTransactions: GroupedTransactions[] = [];
   categories: Category[] = [];
   wallets: Wallet[] = [];
 
@@ -149,6 +150,7 @@ export class Transactions implements OnInit, OnDestroy {
     const start = (this.currentPage - 1) * this.pageSize;
     const end = start + this.pageSize;
     this.transactions = this.allTransactions.slice(start, end);
+    this.updateGroupedTransactions();
   }
 
   changePage(page: number): void {
@@ -167,7 +169,7 @@ export class Transactions implements OnInit, OnDestroy {
     this.loadData();
   }
 
-  get groupedTransactions(): GroupedTransactions[] {
+  private updateGroupedTransactions(): void {
     const groups = new Map<string, TransactionWithDetails[]>();
 
     this.transactions.forEach(tx => {
@@ -178,7 +180,7 @@ export class Transactions implements OnInit, OnDestroy {
       groups.get(label)!.push(tx);
     });
 
-    return Array.from(groups.entries()).map(([label, transactions]) => ({
+    this.groupedTransactions = Array.from(groups.entries()).map(([label, transactions]) => ({
       label,
       transactions
     }));
