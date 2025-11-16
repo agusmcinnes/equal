@@ -1,0 +1,166 @@
+<div class="modal-overlay" *ngIf="isOpen" (click)="onClose()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <!-- Header -->
+    <div class="modal-header">
+      <h2 class="modal-title">{{ titleText }}</h2>
+      <button class="close-btn" type="button" (click)="onClose()" title="Cerrar">
+        <i class="material-icons">close</i>
+      </button>
+    </div>
+
+    <!-- Body -->
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" class="modal-body">
+      <!-- Error message -->
+      <div class="error-message" *ngIf="errorMessage">
+        <i class="material-icons">error</i>
+        <span>{{ errorMessage }}</span>
+      </div>
+
+      <!-- Description -->
+      <div class="form-group">
+        <label for="description">Descripción *</label>
+        <input
+          id="description"
+          type="text"
+          formControlName="description"
+          placeholder="Ej: Pago de renta"
+          class="form-control"
+        />
+        <span class="error-text" *ngIf="form.get('description')?.hasError('required') && form.get('description')?.touched">
+          La descripción es requerida
+        </span>
+        <span class="error-text" *ngIf="form.get('description')?.hasError('minlength') && form.get('description')?.touched">
+          Mínimo 3 caracteres
+        </span>
+      </div>
+
+      <!-- Type selector -->
+      <div class="form-row">
+        <div class="form-group">
+          <label for="type">Tipo *</label>
+          <select id="type" formControlName="type" class="form-control">
+            <option value="income">Ingreso</option>
+            <option value="expense">Gasto</option>
+          </select>
+        </div>
+
+        <!-- Amount -->
+        <div class="form-group">
+          <label for="amount">Monto *</label>
+          <input
+            id="amount"
+            type="number"
+            formControlName="amount"
+            placeholder="0.00"
+            step="0.01"
+            min="0"
+            class="form-control"
+          />
+          <span class="error-text" *ngIf="form.get('amount')?.hasError('required') && form.get('amount')?.touched">
+            El monto es requerido
+          </span>
+        </div>
+      </div>
+
+      <!-- Currency -->
+      <div class="form-group">
+        <label for="currency">Moneda *</label>
+        <select id="currency" formControlName="currency" class="form-control">
+          <option value="ARS">ARS (Pesos)</option>
+          <option value="USD">USD (Dólares)</option>
+          <option value="EUR">EUR (Euros)</option>
+          <option value="CRYPTO">CRYPTO (Criptomonedas)</option>
+        </select>
+      </div>
+
+      <!-- Category -->
+      <div class="form-group">
+        <label for="category_id">Categoría</label>
+        <select id="category_id" formControlName="category_id" class="form-control">
+          <option [value]="null">Sin categoría</option>
+          <option *ngFor="let cat of getFilteredCategories()" [value]="cat.id">
+            <span class="category-option">
+              <i class="material-icons">{{ cat.icon }}</i>
+              {{ cat.name }}
+            </span>
+          </option>
+        </select>
+      </div>
+
+      <!-- Wallet -->
+      <div class="form-group">
+        <label for="wallet_id">Billetera</label>
+        <select id="wallet_id" formControlName="wallet_id" class="form-control">
+          <option [value]="null">Sin billetera</option>
+          <option *ngFor="let wallet of getFilteredWallets()" [value]="wallet.id">
+            {{ wallet.name }} ({{ wallet.provider }})
+          </option>
+        </select>
+      </div>
+
+      <!-- Schedule section -->
+      <div class="form-section-title">
+        <i class="material-icons">schedule</i>
+        <span>Programación</span>
+      </div>
+
+      <!-- Frequency -->
+      <div class="form-group">
+        <label for="frequency">Frecuencia *</label>
+        <select id="frequency" formControlName="frequency" class="form-control">
+          <option *ngFor="let freq of frequencyOptions" [value]="freq.value">
+            {{ freq.label }}
+          </option>
+        </select>
+      </div>
+
+      <!-- Start date -->
+      <div class="form-group">
+        <label for="start_date">Fecha de inicio *</label>
+        <input
+          id="start_date"
+          type="datetime-local"
+          formControlName="start_date"
+          class="form-control"
+        />
+        <span class="error-text" *ngIf="form.get('start_date')?.hasError('required') && form.get('start_date')?.touched">
+          La fecha de inicio es requerida
+        </span>
+      </div>
+
+      <!-- End date (optional) -->
+      <div class="form-group">
+        <label for="end_date">Fecha de finalización (opcional)</label>
+        <input
+          id="end_date"
+          type="datetime-local"
+          formControlName="end_date"
+          class="form-control"
+        />
+        <span class="help-text">Deja en blanco si no tiene fecha de finalización</span>
+      </div>
+
+      <!-- Info box -->
+      <div class="info-box">
+        <i class="material-icons">info</i>
+        <span>Esta transacción se ejecutará automáticamente en la fecha especificada según su frecuencia</span>
+      </div>
+    </form>
+
+    <!-- Footer -->
+    <div class="modal-footer">
+      <button type="button" class="btn btn-cancel" (click)="onClose()">
+        <span>Cancelar</span>
+      </button>
+      <button 
+        type="submit" 
+        class="btn btn-primary"
+        [disabled]="!isFormValid || isLoading"
+        (click)="onSubmit()"
+      >
+        <i class="material-icons" *ngIf="isLoading">hourglass_empty</i>
+        <span>{{ submitButtonText }}</span>
+      </button>
+    </div>
+  </div>
+</div>

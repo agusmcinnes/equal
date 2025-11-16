@@ -584,7 +584,44 @@ Las migraciones están numeradas secuencialmente y deben ejecutarse en orden.
 
 ---
 
-## Diagrama de Dependencias
+### 006_create_scheduled_transactions.sql
+
+**Descripción:** Crea tabla para transacciones programadas (gastos/ingresos fijos) con ejecución automática.
+
+**Objetos creados:**
+- Tabla: `scheduled_transactions`
+- Función: `calculate_next_execution_date()`
+- Función: `validate_scheduled_wallet_currency()`
+- Trigger: `trigger_validate_scheduled_wallet_currency`
+- Trigger: `trg_scheduled_transactions_updated_at`
+- 6 índices especializados
+- 3 vistas analíticas
+- 4 RLS policies
+
+**Campos principales:**
+- Planificación: start_date, end_date, frequency, next_execution_date, last_execution_date
+- Estado: is_active (para pausar sin eliminar)
+- Transacción: description, type, amount, currency, category_id, wallet_id
+- Seguimiento: created_at, updated_at
+
+**Vistas creadas:**
+1. `scheduled_transactions_with_details` - Con datos de categoría y billetera
+2. `pending_scheduled_transactions` - Transacciones listas para ejecutar hoy
+3. `active_scheduled_by_type` - Agrupación por tipo para análisis
+
+**Frecuencias soportadas:**
+- daily, weekly, bi-weekly, monthly, quarterly, bi-annual, yearly
+
+**Dependencias:** Requiere 001, 002 (para validaciones de categoría y wallet)
+
+**Beneficio:** Permite automatizar transacciones recurrentes que se reflejan en historial
+
+**Tamaño:** ~435 líneas
+**Estado:** ✅ Ejecutado
+
+---
+
+## Diagrama de Dependencias (Actualizado)
 
 ```
 ┌─────────────────────────────────────────────────┐
@@ -604,20 +641,35 @@ Las migraciones están numeradas secuencialmente y deben ejecutarse en orden.
 │ _defaults.sql       │  │ _transaction │  │ _wallets     │
 │ • crypto_type col   │  │ _indexes.sql │  │ _constraints │
 │ • default_categories│  │ • 8 indexes  │  │ • constraints│
-└──────────┬──────────┘  └──────┬───────┘  └──────────────┘
-           │                    │
-           └────────┬───────────┘
+└──────────┬──────────┘  └──────┬───────┘  └──────┬───────┘
+           │                    │                  │
+           └────────┬───────────┴──────────────────┘
                     │
                     ▼
          ┌─────────────────────┐
          │ 004_create          │
          │ _statistics_views   │
          │ • 6 analytical views│
-         └─────────────────────┘
+         └──────────┬──────────┘
+                    │
+                    ▼
+         ┌─────────────────────────────────┐
+         │ 007_create_scheduled_            │
+         │ transactions.sql                 │
+         │ • scheduled_transactions table   │
+         │ • 3 analytical views             │
+         │ • 6 indexes                      │
+         │ • 4 RLS policies                 │
+         └─────────────────────────────────┘
 ```
 
 **Orden de ejecución recomendado:**
 1. `001` (base obligatoria)
+2. `002` (extensión de features)
+3. `003` (performance - opcional pero recomendado)
+4. `004` (analytics - opcional)
+5. `005` (seguridad - opcional pero recomendado en producción)
+6. `007` (transacciones programadas - opcional pero recomendado para automatización)
 2. `002` (extensión de features)
 3. `003` (performance - opcional pero recomendado)
 4. `004` (analytics - opcional)

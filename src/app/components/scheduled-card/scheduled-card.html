@@ -1,0 +1,85 @@
+<div class="scheduled-card" [class.inactive]="!transaction.is_active" [class.expired]="isExpired()">
+  <!-- Header: Category color strip -->
+  <div 
+    class="card-header" 
+    [style.background-color]="transaction.category_color || '#6366f1'"
+  >
+    <div class="header-content">
+      <div class="category-info">
+        <span class="category-icon">
+          <i class="material-icons">{{ transaction.category_icon || 'attach_money' }}</i>
+        </span>
+        <div class="category-text">
+          <h3 class="category-name">{{ transaction.category_name || 'Sin categoría' }}</h3>
+          <p class="transaction-description">{{ transaction.description }}</p>
+        </div>
+      </div>
+      <div class="status-badge" [class.active]="transaction.is_active" [class.inactive]="!transaction.is_active">
+        {{ transaction.is_active ? 'Activo' : 'Inactivo' }}
+      </div>
+    </div>
+  </div>
+
+  <!-- Body: Transaction details -->
+  <div class="card-body">
+    <!-- Amount and type -->
+    <div class="amount-section">
+      <div class="amount" [class.income]="transaction.type === 'income'" [class.expense]="transaction.type === 'expense'">
+        <span class="type-icon">
+          <i class="material-icons">{{ transaction.type === 'income' ? 'trending_up' : 'trending_down' }}</i>
+        </span>
+        <div class="amount-details">
+          <span class="amount-value">{{ transaction.amount | number: '1.2-2' }} {{ transaction.currency }}</span>
+          <span class="amount-type">{{ transaction.type === 'income' ? 'Ingreso' : 'Gasto' }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Schedule info -->
+    <div class="schedule-info">
+      <div class="info-row">
+        <span class="info-label">Frecuencia:</span>
+        <span class="info-value">{{ getFrequencyLabel() }}</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Próxima ejecución:</span>
+        <span class="info-value">{{ formatDate(transaction.next_execution_date) }}</span>
+      </div>
+      <div class="info-row" *ngIf="transaction.wallet_name">
+        <span class="info-label">Billetera:</span>
+        <span class="info-value">{{ transaction.wallet_name }}</span>
+      </div>
+      <div class="info-row" *ngIf="transaction.end_date">
+        <span class="info-label">Finaliza:</span>
+        <span class="info-value">{{ formatDate(transaction.end_date) }}</span>
+      </div>
+    </div>
+
+    <!-- Days until execution -->
+    <div class="days-until" *ngIf="daysUntilExecution() >= 0">
+      <span class="days-count">{{ daysUntilExecution() }} día(s)</span>
+    </div>
+
+    <!-- Status message -->
+    <div class="status-message" *ngIf="isExpired()">
+      <i class="material-icons">warning</i>
+      Esta transacción ha vencido
+    </div>
+  </div>
+
+  <!-- Footer: Actions -->
+  <div class="card-footer">
+    <button class="btn btn-toggle" [title]="transaction.is_active ? 'Desactivar' : 'Activar'" (click)="onToggle()">
+      <i class="material-icons">{{ transaction.is_active ? 'pause' : 'play_arrow' }}</i>
+      <span>{{ transaction.is_active ? 'Pausar' : 'Reanudar' }}</span>
+    </button>
+    <button class="btn btn-edit" title="Editar" (click)="onEdit()">
+      <i class="material-icons">edit</i>
+      <span>Editar</span>
+    </button>
+    <button class="btn btn-delete" title="Eliminar" (click)="onDelete()">
+      <i class="material-icons">delete</i>
+      <span>Eliminar</span>
+    </button>
+  </div>
+</div>
