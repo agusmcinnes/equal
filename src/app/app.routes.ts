@@ -48,14 +48,6 @@ export const routes: Routes = [
         component: ScheduledComponent
       },
       {
-        path: 'savings',
-        loadComponent: () => import('./pages/dashboard/dashboard').then(m => m.Dashboard)
-      },
-      {
-        path: 'investments',
-        loadComponent: () => import('./pages/dashboard/dashboard').then(m => m.Dashboard)
-      },
-      {
         path: 'goals',
         loadComponent: () => import('./pages/dashboard/dashboard').then(m => m.Dashboard)
       },

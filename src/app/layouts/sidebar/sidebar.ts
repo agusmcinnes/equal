@@ -21,8 +21,6 @@ export class Sidebar {
     { icon: 'account_balance_wallet', label: 'Transacciones', route: '/transactions' },
     { icon: 'category', label: 'Categorías', route: '/categories' },
     { icon: 'schedule', label: 'Operaciones Futuras', route: '/scheduled' },
-    { icon: 'savings', label: 'Ahorros', route: '/savings' },
-    { icon: 'trending_up', label: 'Inversiones', route: '/investments' },
     { icon: 'flag', label: 'Objetivos', route: '/goals' },
     { icon: 'attach_money', label: 'Dólar', route: '/dollar' },
     { icon: 'settings', label: 'Configuración', route: '/settings' },
