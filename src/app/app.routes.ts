@@ -4,6 +4,7 @@ import { Register } from './pages/register/register';
 import { Dashboard } from './pages/dashboard/dashboard';
 import { Transactions } from './pages/transactions/transactions';
 import { Categories } from './pages/categories/categories';
+import { Goals } from './pages/goals/goals';
 import { ScheduledComponent } from './pages/scheduled/scheduled';
 import { MainLayout } from './layouts/main-layout/main-layout';
 import { authGuard } from './guards/auth.guard';
@@ -49,7 +50,7 @@ export const routes: Routes = [
       },
       {
         path: 'goals',
-        loadComponent: () => import('./pages/dashboard/dashboard').then(m => m.Dashboard)
+        component: Goals
       },
       {
         path: 'dollar',
