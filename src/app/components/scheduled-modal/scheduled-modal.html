@@ -75,27 +75,31 @@
 
       <!-- Category -->
       <div class="form-group">
-        <label for="category_id">Categoría</label>
+        <label for="category_id">Categoría *</label>
         <select id="category_id" formControlName="category_id" class="form-control">
-          <option [value]="null">Sin categoría</option>
-          <option *ngFor="let cat of getFilteredCategories()" [value]="cat.id">
-            <span class="category-option">
-              <i class="material-icons">{{ cat.icon }}</i>
-              {{ cat.name }}
-            </span>
+          <option [ngValue]="null">Seleccionar categoría</option>
+          <option *ngFor="let cat of getFilteredCategories()" [ngValue]="cat.id">
+            {{ cat.icon }} {{ cat.name }}
           </option>
         </select>
+        <span class="error-text" *ngIf="form.get('category_id')?.hasError('required') && form.get('category_id')?.touched">
+          La categoría es requerida
+        </span>
       </div>
 
       <!-- Wallet -->
       <div class="form-group">
         <label for="wallet_id">Billetera</label>
-        <select id="wallet_id" formControlName="wallet_id" class="form-control">
-          <option [value]="null">Sin billetera</option>
-          <option *ngFor="let wallet of getFilteredWallets()" [value]="wallet.id">
+        <select id="wallet_id" formControlName="wallet_id" class="form-control" [disabled]="!hasWalletsForCurrency()">
+          <option [ngValue]="null">Sin billetera</option>
+          <option *ngFor="let wallet of getFilteredWallets()" [ngValue]="wallet.id">
             {{ wallet.name }} ({{ wallet.provider }})
           </option>
         </select>
+        <span class="help-text" *ngIf="!hasWalletsForCurrency()">
+          <i class="material-icons">info</i>
+          No hay billeteras disponibles para {{ form.get('currency')?.value }}. Puedes crear una desde la página de Billeteras.
+        </span>
       </div>
 
       <!-- Schedule section -->
@@ -137,7 +141,12 @@
           formControlName="end_date"
           class="form-control"
         />
-        <span class="help-text">Deja en blanco si no tiene fecha de finalización</span>
+        <span class="error-text" *ngIf="form.hasError('endDateBeforeStart') && form.get('end_date')?.touched">
+          La fecha de finalización debe ser posterior a la fecha de inicio
+        </span>
+        <span class="help-text" *ngIf="!form.hasError('endDateBeforeStart')">
+          Deja en blanco si no tiene fecha de finalización
+        </span>
       </div>
 
       <!-- Info box -->
