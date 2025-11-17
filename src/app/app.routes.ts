@@ -3,6 +3,9 @@ import { Login } from './pages/login/login';
 import { Register } from './pages/register/register';
 import { Dashboard } from './pages/dashboard/dashboard';
 import { Transactions } from './pages/transactions/transactions';
+import { Categories } from './pages/categories/categories';
+import { Goals } from './pages/goals/goals';
+import { Wallets } from './pages/wallets/wallets';
 import { ScheduledComponent } from './pages/scheduled/scheduled';
 import { MainLayout } from './layouts/main-layout/main-layout';
 import { authGuard } from './guards/auth.guard';
@@ -39,20 +42,20 @@ export const routes: Routes = [
         component: Transactions
       },
       {
+        path: 'categories',
+        component: Categories
+      },
+      {
         path: 'scheduled',
         component: ScheduledComponent
       },
       {
-        path: 'savings',
-        loadComponent: () => import('./pages/dashboard/dashboard').then(m => m.Dashboard)
-      },
-      {
-        path: 'investments',
-        loadComponent: () => import('./pages/dashboard/dashboard').then(m => m.Dashboard)
-      },
-      {
         path: 'goals',
-        loadComponent: () => import('./pages/dashboard/dashboard').then(m => m.Dashboard)
+        component: Goals
+      },
+      {
+        path: 'wallets',
+        component: Wallets
       },
       {
         path: 'dollar',

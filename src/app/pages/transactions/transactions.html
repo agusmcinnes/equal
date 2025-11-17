@@ -1,7 +1,19 @@
 <div class="transactions-page">
   <!-- Page Header -->
   <div class="page-header">
-    <h1>Transacciones</h1>
+    <div class="header-content">
+      <h1>Transacciones</h1>
+      <div class="currency-filter">
+        <label for="currencySelect">Moneda:</label>
+        <select id="currencySelect" [(ngModel)]="filterCurrency" (change)="changeCurrencyFilter(filterCurrency)" class="currency-select">
+          <option value="all">Todas las monedas</option>
+          <option value="ARS">ARS - Peso Argentino</option>
+          <option value="USD">USD - Dólar</option>
+          <option value="EUR">EUR - Euro</option>
+          <option value="CRYPTO">CRYPTO - Criptomonedas</option>
+        </select>
+      </div>
+    </div>
     <button class="btn-primary" (click)="showForm()">
       <span class="material-icons">add</span>
       Nueva transacción
@@ -15,7 +27,7 @@
         title="Total Ingresos"
         [value]="statistics?.total_income || 0"
         icon="trending_up"
-        currency="ARS"
+        [currency]="statistics?.currency || 'ARS'"
         [loading]="statsLoading"
       ></app-stat-card>
 
@@ -23,7 +35,7 @@
         title="Total Gastos"
         [value]="statistics?.total_expenses || 0"
         icon="trending_down"
-        currency="ARS"
+        [currency]="statistics?.currency || 'ARS'"
         [loading]="statsLoading"
       ></app-stat-card>
 
@@ -31,7 +43,7 @@
         title="Balance"
         [value]="statistics?.net_balance || 0"
         icon="account_balance_wallet"
-        currency="ARS"
+        [currency]="statistics?.currency || 'ARS'"
         [loading]="statsLoading"
       ></app-stat-card>
 

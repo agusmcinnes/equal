@@ -11,6 +11,7 @@ import { Category } from '../../models/category.model';
 import { Wallet } from '../../models/wallet.model';
 import { ScheduledCardComponent } from '../../components/scheduled-card/scheduled-card';
 import { ScheduledModalComponent } from '../../components/scheduled-modal/scheduled-modal';
+import { EmptyStateComponent } from '../../components/empty-state/empty-state';
 
 @Component({
   selector: 'app-scheduled',
@@ -19,7 +20,8 @@ import { ScheduledModalComponent } from '../../components/scheduled-modal/schedu
     CommonModule,
     FormsModule,
     ScheduledCardComponent,
-    ScheduledModalComponent
+    ScheduledModalComponent,
+    EmptyStateComponent
   ],
   templateUrl: './scheduled.html',
   styleUrl: './scheduled.css'

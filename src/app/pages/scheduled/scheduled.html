@@ -31,7 +31,7 @@
           <span>Ingresos Fijos</span>
           <span class="count-badge">{{ getActiveIncomeCount() }}</span>
         </div>
-        <button class="btn-add" (click)="openCreateModal('income')" title="Agregar ingreso fijo">
+        <button class="btn-primary" (click)="openCreateModal('income')" title="Agregar ingreso fijo">
           <i class="material-icons">add</i>
           <span>Nuevo Ingreso</span>
         </button>
@@ -45,13 +45,15 @@
       </div>
 
       <div class="transactions-grid">
-        <div *ngIf="incomeTransactions.length === 0" class="empty-state">
-          <i class="material-icons">trending_up</i>
-          <p>No hay ingresos programados</p>
-          <button class="btn-primary-sm" (click)="openCreateModal('income')">
-            <i class="material-icons">add</i>
-            Crear ingreso
-          </button>
+        <div *ngIf="incomeTransactions.length === 0" style="grid-column: 1 / -1;">
+          <app-empty-state
+            icon="trending_up"
+            title="No hay ingresos programados"
+            description="Crea tu primer ingreso fijo para automatizar tus entradas recurrentes"
+            actionLabel="Crear ingreso"
+            actionIcon="add"
+            (action)="openCreateModal('income')"
+          ></app-empty-state>
         </div>
 
         <div *ngFor="let transaction of incomeTransactions" class="transaction-item">
@@ -73,7 +75,7 @@
           <span>Gastos Fijos</span>
           <span class="count-badge">{{ getActiveExpenseCount() }}</span>
         </div>
-        <button class="btn-add" (click)="openCreateModal('expense')" title="Agregar gasto fijo">
+        <button class="btn-primary" (click)="openCreateModal('expense')" title="Agregar gasto fijo">
           <i class="material-icons">add</i>
           <span>Nuevo Gasto</span>
         </button>
@@ -87,13 +89,15 @@
       </div>
 
       <div class="transactions-grid">
-        <div *ngIf="expenseTransactions.length === 0" class="empty-state">
-          <i class="material-icons">trending_down</i>
-          <p>No hay gastos programados</p>
-          <button class="btn-primary-sm" (click)="openCreateModal('expense')">
-            <i class="material-icons">add</i>
-            Crear gasto
-          </button>
+        <div *ngIf="expenseTransactions.length === 0" style="grid-column: 1 / -1;">
+          <app-empty-state
+            icon="trending_down"
+            title="No hay gastos programados"
+            description="Crea tu primer gasto fijo para automatizar tus salidas recurrentes"
+            actionLabel="Crear gasto"
+            actionIcon="add"
+            (action)="openCreateModal('expense')"
+          ></app-empty-state>
         </div>
 
         <div *ngFor="let transaction of expenseTransactions" class="transaction-item">
@@ -120,8 +124,9 @@
     (save)="onSaveTransaction($event)"
   />
 
-  <!-- Loading overlay -->
-  <div class="loading-overlay" *ngIf="isLoading">
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="loading-state">
     <div class="spinner"></div>
+    <p>Cargando transacciones programadas...</p>
   </div>
 </div>

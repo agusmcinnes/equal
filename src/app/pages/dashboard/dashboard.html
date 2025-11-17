@@ -2,8 +2,20 @@
   <!-- Page Header -->
   <div class="page-header">
     <div class="header-content">
-      <h1>Dashboard</h1>
-      <p class="header-subtitle">Resumen de tu situación financiera</p>
+      <div class="header-text">
+        <h1>Dashboard</h1>
+        <p class="header-subtitle">Resumen de tu situación financiera</p>
+      </div>
+      <div class="currency-filter">
+        <label for="currencySelect">Moneda:</label>
+        <select id="currencySelect" [(ngModel)]="filterCurrency" (change)="changeCurrencyFilter(filterCurrency)" class="currency-select">
+          <option value="all">Todas las monedas</option>
+          <option value="ARS">ARS - Peso Argentino</option>
+          <option value="USD">USD - Dólar</option>
+          <option value="EUR">EUR - Euro</option>
+          <option value="CRYPTO">CRYPTO - Criptomonedas</option>
+        </select>
+      </div>
     </div>
     <button class="btn-primary" (click)="navigateToTransactions()">
       <span class="material-icons">add</span>
@@ -21,12 +33,13 @@
   <div *ngIf="!loading" class="dashboard-content">
     <!-- Summary Cards -->
     <div class="summary-section">
-      <div class="stats-grid">
+      <!-- Single Currency View -->
+      <div *ngIf="filterCurrency !== 'all'" class="stats-grid">
         <app-stat-card
           title="Balance Total"
           [value]="totalWalletBalance"
           icon="account_balance_wallet"
-          currency="ARS"
+          [currency]="statistics?.currency || 'ARS'"
           [loading]="statsLoading"
         ></app-stat-card>
 
@@ -34,7 +47,7 @@
           title="Total Ingresos"
           [value]="statistics?.total_income || 0"
           icon="trending_up"
-          currency="ARS"
+          [currency]="statistics?.currency || 'ARS'"
           [loading]="statsLoading"
         ></app-stat-card>
 
@@ -42,7 +55,7 @@
           title="Total Gastos"
           [value]="statistics?.total_expenses || 0"
           icon="trending_down"
-          currency="ARS"
+          [currency]="statistics?.currency || 'ARS'"
           [loading]="statsLoading"
         ></app-stat-card>
 
@@ -52,6 +65,65 @@
           icon="receipt_long"
           [loading]="statsLoading"
         ></app-stat-card>
+      </div>
+
+      <!-- Multi-Currency View -->
+      <div *ngIf="filterCurrency === 'all'" class="multi-currency-stats">
+        <div class="multi-stat-card">
+          <div class="stat-header">
+            <span class="material-icons">trending_up</span>
+            <h3>Total Ingresos</h3>
+          </div>
+          <div class="stat-breakdown">
+            <div *ngFor="let curr of getCurrencyKeys()" class="stat-row">
+              <span class="currency-label">{{ curr }}</span>
+              <span class="currency-value">{{ formatCurrency(multiCurrencyStats[curr].income, curr) }}</span>
+            </div>
+            <div *ngIf="getCurrencyKeys().length === 0" class="stat-empty">Sin ingresos</div>
+          </div>
+        </div>
+
+        <div class="multi-stat-card">
+          <div class="stat-header">
+            <span class="material-icons">trending_down</span>
+            <h3>Total Gastos</h3>
+          </div>
+          <div class="stat-breakdown">
+            <div *ngFor="let curr of getCurrencyKeys()" class="stat-row">
+              <span class="currency-label">{{ curr }}</span>
+              <span class="currency-value">{{ formatCurrency(multiCurrencyStats[curr].expenses, curr) }}</span>
+            </div>
+            <div *ngIf="getCurrencyKeys().length === 0" class="stat-empty">Sin gastos</div>
+          </div>
+        </div>
+
+        <div class="multi-stat-card">
+          <div class="stat-header">
+            <span class="material-icons">account_balance_wallet</span>
+            <h3>Balance</h3>
+          </div>
+          <div class="stat-breakdown">
+            <div *ngFor="let curr of getCurrencyKeys()" class="stat-row">
+              <span class="currency-label">{{ curr }}</span>
+              <span class="currency-value" [class.positive]="multiCurrencyStats[curr].balance >= 0" [class.negative]="multiCurrencyStats[curr].balance < 0">
+                {{ formatCurrency(multiCurrencyStats[curr].balance, curr) }}
+              </span>
+            </div>
+            <div *ngIf="getCurrencyKeys().length === 0" class="stat-empty">Sin datos</div>
+          </div>
+        </div>
+
+        <div class="multi-stat-card">
+          <div class="stat-header">
+            <span class="material-icons">receipt_long</span>
+            <h3>Transacciones</h3>
+          </div>
+          <div class="stat-breakdown">
+            <div class="stat-row single">
+              <span class="currency-value large">{{ statistics?.transaction_count || 0 }}</span>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
 

@@ -13,6 +13,14 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 32px;
+  gap: 20px;
+}
+
+.page-header .header-content {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  flex: 1;
 }
 
 .page-header h1 {
@@ -20,6 +28,43 @@
   font-weight: 700;
   color: var(--color-dark);
   margin: 0;
+}
+
+.currency-filter {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.currency-filter label {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-dark);
+  white-space: nowrap;
+}
+
+.currency-select {
+  padding: 10px 16px;
+  border: 2px solid #e5e7eb;
+  border-radius: 12px;
+  font-size: 14px;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 500;
+  color: var(--color-dark);
+  background: white;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 200px;
+}
+
+.currency-select:hover {
+  border-color: var(--color-primary);
+}
+
+.currency-select:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(70, 51, 151, 0.1);
 }
 
 /* ===== STATISTICS SECTION ===== */
@@ -745,8 +790,23 @@
     gap: 16px;
   }
 
+  .page-header .header-content {
+    flex-direction: column;
+    align-items: flex-start;
+    width: 100%;
+  }
+
   .page-header h1 {
     font-size: 24px;
+  }
+
+  .currency-filter {
+    width: 100%;
+  }
+
+  .currency-select {
+    flex: 1;
+    min-width: auto;
   }
 
   .stats-grid {

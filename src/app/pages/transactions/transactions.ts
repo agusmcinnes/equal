@@ -66,6 +66,7 @@ export class Transactions implements OnInit, OnDestroy {
   statsLoading = false;
   formVisible = false;
   editing: Transaction | null = null;
+  filterCurrency: 'all' | 'ARS' | 'USD' | 'EUR' | 'CRYPTO' = 'all';
 
   // Form model
   model: Transaction = this.getEmptyModel();
@@ -165,6 +166,12 @@ export class Transactions implements OnInit, OnDestroy {
     } else {
       this.sort = { field, order: 'desc' };
     }
+    this.currentPage = 1;
+    this.loadData();
+  }
+
+  changeCurrencyFilter(currency: 'all' | 'ARS' | 'USD' | 'EUR' | 'CRYPTO'): void {
+    this.filterCurrency = currency;
     this.currentPage = 1;
     this.loadData();
   }
@@ -338,10 +345,10 @@ export class Transactions implements OnInit, OnDestroy {
       } as TransactionWithDetails;
     });
 
-    // Apply automatic filtering: Last 30 days and ARS only
+    // Apply automatic filtering: Last 30 days and selected currency
     mapped = mapped.filter(tx => {
-      // Always filter to ARS currency
-      if (tx.currency !== 'ARS') return false;
+      // Filter by currency (if not 'all')
+      if (this.filterCurrency !== 'all' && tx.currency !== this.filterCurrency) return false;
 
       // Filter by last 30 days
       const txDate = new Date(tx.date);
@@ -384,7 +391,7 @@ export class Transactions implements OnInit, OnDestroy {
   }
 
   private calculateStatistics(): void {
-    // All transactions are already filtered to ARS in last 30 days
+    // All transactions are already filtered to selected currency in last 30 days
     const filtered = this.allTransactions;
 
     const income = filtered.filter(t => t.type === 'income');
@@ -400,7 +407,7 @@ export class Transactions implements OnInit, OnDestroy {
       transaction_count: filtered.length,
       income_count: income.length,
       expense_count: expenses.length,
-      currency: 'ARS'
+      currency: this.filterCurrency === 'all' ? 'ARS' : this.filterCurrency
     };
 
     // Create simple Income vs Expenses pie chart data

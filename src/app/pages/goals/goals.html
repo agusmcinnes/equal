@@ -1,0 +1,518 @@
+<div class="goals-page">
+  <!-- Page Header -->
+  <div class="page-header">
+    <div class="header-content">
+      <h1>Objetivos Financieros</h1>
+      <p class="header-subtitle">Crea y monitorea tus objetivos de ahorro</p>
+    </div>
+    <button class="btn-primary" (click)="showGoalForm()" *ngIf="!formVisible && !selectedGoal">
+      <span class="material-icons">add</span>
+      Nuevo objetivo
+    </button>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading && goals.length === 0" class="loading-state">
+    <div class="spinner"></div>
+    <p>Cargando objetivos...</p>
+  </div>
+
+  <!-- Main Content -->
+  <div *ngIf="!loading || goals.length > 0" class="goals-content">
+    <!-- Goal Form -->
+    <div *ngIf="formVisible" class="form-card">
+      <div class="form-header">
+        <h2>{{ editing ? 'Editar Objetivo' : 'Nuevo Objetivo' }}</h2>
+        <button class="btn-close" (click)="closeGoalForm()">
+          <span class="material-icons">close</span>
+        </button>
+      </div>
+
+      <form (ngSubmit)="saveGoal()" class="goal-form">
+        <!-- Name Field -->
+        <div class="form-group">
+          <label for="name">Nombre del Objetivo *</label>
+          <input
+            id="name"
+            type="text"
+            [(ngModel)]="model.name"
+            name="name"
+            placeholder="Ej: Viaje a Europa, Auto nuevo"
+            class="form-input"
+            [class.error]="fieldErrors['name']"
+          />
+          <span class="error-message" *ngIf="fieldErrors['name']">
+            {{ fieldErrors['name'] }}
+          </span>
+        </div>
+
+        <!-- Description Field -->
+        <div class="form-group">
+          <label for="description">Descripción (opcional)</label>
+          <textarea
+            id="description"
+            [(ngModel)]="model.description"
+            name="description"
+            placeholder="Agrega detalles sobre tu objetivo..."
+            class="form-textarea"
+            rows="3"
+          ></textarea>
+        </div>
+
+        <!-- Target Amount Field -->
+        <div class="form-group">
+          <label for="target_amount">Monto Meta *</label>
+          <input
+            id="target_amount"
+            type="number"
+            [(ngModel)]="model.target_amount"
+            name="target_amount"
+            placeholder="Ej: 100000"
+            class="form-input"
+            [class.error]="fieldErrors['target_amount']"
+            min="0"
+            step="1000"
+          />
+          <span class="error-message" *ngIf="fieldErrors['target_amount']">
+            {{ fieldErrors['target_amount'] }}
+          </span>
+        </div>
+
+        <!-- Currency Field -->
+        <div class="form-group">
+          <label for="currency">Moneda *</label>
+          <select
+            id="currency"
+            [(ngModel)]="model.currency"
+            name="currency"
+            class="form-select"
+            [class.error]="fieldErrors['currency']"
+          >
+            <option value="ARS">ARS - Peso Argentino</option>
+            <option value="USD">USD - Dólar Estadounidense</option>
+            <option value="EUR">EUR - Euro</option>
+            <option value="CRYPTO">CRYPTO - Criptomonedas</option>
+          </select>
+          <span class="error-message" *ngIf="fieldErrors['currency']">
+            {{ fieldErrors['currency'] }}
+          </span>
+        </div>
+
+        <!-- Category Field -->
+        <div class="form-group">
+          <label for="category">Categoría</label>
+          <select
+            id="category"
+            [(ngModel)]="model.category"
+            name="category"
+            class="form-select"
+          >
+            <option value="general">General</option>
+            <option value="viajes">Viajes</option>
+            <option value="vehiculo">Vehículo</option>
+            <option value="propiedad">Propiedad</option>
+            <option value="educacion">Educación</option>
+            <option value="salud">Salud</option>
+            <option value="negocio">Negocio</option>
+            <option value="otro">Otro</option>
+          </select>
+        </div>
+
+        <!-- Target Date Field -->
+        <div class="form-group">
+          <label for="target_date">Fecha Meta (opcional)</label>
+          <input
+            id="target_date"
+            type="date"
+            [(ngModel)]="model.target_date"
+            name="target_date"
+            class="form-input"
+          />
+        </div>
+
+        <!-- Color Field -->
+        <div class="form-group">
+          <label>Color *</label>
+          <div class="color-picker">
+            <button
+              *ngFor="let color of colorPalette"
+              type="button"
+              class="color-option"
+              [style.backgroundColor]="color"
+              [class.selected]="model.color === color"
+              (click)="model.color = color"
+              [title]="color"
+            ></button>
+          </div>
+        </div>
+
+        <!-- Icon Field -->
+        <div class="form-group">
+          <label>Icono *</label>
+          <div class="icon-picker">
+            <button
+              *ngFor="let opt of availableIcons"
+              type="button"
+              class="icon-option"
+              [class.selected]="model.icon === opt.icon"
+              (click)="model.icon = opt.icon"
+              [title]="opt.name"
+            >
+              <span class="material-icons" [style.color]="model.color">{{ opt.icon }}</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="form-actions">
+          <button type="submit" class="btn-primary" [disabled]="loading">
+            <span *ngIf="!loading">{{ editing ? 'Actualizar' : 'Crear' }}</span>
+            <span *ngIf="loading" class="spinner-small"></span>
+          </button>
+          <button type="button" class="btn-secondary" (click)="closeGoalForm()">
+            Cancelar
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Filter Tabs -->
+    <div *ngIf="!formVisible && !selectedGoal" class="filter-tabs">
+      <button
+        class="filter-tab"
+        [class.active]="filterType === 'all'"
+        (click)="filterType = 'all'"
+      >
+        Todos ({{ goals.length }})
+      </button>
+      <button
+        class="filter-tab"
+        [class.active]="filterType === 'active'"
+        (click)="filterType = 'active'"
+      >
+        En Progreso ({{ activeGoals.length }})
+      </button>
+      <button
+        class="filter-tab"
+        [class.active]="filterType === 'completed'"
+        (click)="filterType = 'completed'"
+      >
+        Completados ({{ completedGoals.length }})
+      </button>
+    </div>
+
+    <!-- Goals List -->
+    <div *ngIf="!formVisible && !selectedGoal && getFilteredGoals().length > 0" class="goals-grid">
+      <div *ngFor="let goal of getFilteredGoals()" class="goal-card" (click)="selectGoal(goal)">
+        <div class="card-header">
+          <div class="goal-icon" [style.backgroundColor]="goal.color + '20'">
+            <span class="material-icons" [style.color]="goal.color">{{ goal.icon }}</span>
+          </div>
+          <div class="goal-info">
+            <h3>{{ goal.name }}</h3>
+            <p class="goal-category" *ngIf="goal.category">{{ goal.category }}</p>
+          </div>
+          <div class="goal-status" *ngIf="goal.is_completed">
+            <span class="badge completed">
+              <span class="material-icons">check_circle</span>
+              Completado
+            </span>
+          </div>
+        </div>
+
+        <div class="card-body">
+          <div class="progress-section">
+            <div class="progress-header">
+              <span class="progress-label">Progreso</span>
+              <span class="progress-percentage">{{ calculateProgress(goal) | number: '1.0-0' }}%</span>
+            </div>
+            <div class="progress-bar">
+              <div class="progress-fill" [style.width.%]="calculateProgress(goal)"></div>
+            </div>
+            <div class="amount-info">
+              <span class="current-amount">{{ formatCurrency(goal.current_amount, goal.currency) }}</span>
+              <span class="separator">/</span>
+              <span class="target-amount">{{ formatCurrency(goal.target_amount, goal.currency) }}</span>
+            </div>
+          </div>
+
+          <div class="remaining-info" *ngIf="!goal.is_completed">
+            <div class="remaining-label">Falta ahorrar:</div>
+            <div class="remaining-amount">{{ formatCurrency(calculateRemaining(goal), goal.currency) }}</div>
+          </div>
+
+          <div class="target-date-info" *ngIf="goal.target_date && !goal.is_completed">
+            <span class="material-icons">calendar_today</span>
+            <span>{{ formatDate(goal.target_date) }}</span>
+          </div>
+
+          <div class="completed-info" *ngIf="goal.is_completed && goal.completed_at">
+            <span class="material-icons">check</span>
+            <span>Completado el {{ formatDate(goal.completed_at) }}</span>
+          </div>
+        </div>
+
+        <div class="card-actions">
+          <button class="btn-icon" (click)="showGoalForm(goal); $event.stopPropagation()" title="Editar">
+            <span class="material-icons">edit</span>
+          </button>
+          <button class="btn-icon delete" (click)="deleteConfirmId = goal.id || null; $event.stopPropagation()" title="Eliminar">
+            <span class="material-icons">delete</span>
+          </button>
+        </div>
+
+        <!-- Delete Confirmation -->
+        <div *ngIf="deleteConfirmId === goal.id" class="delete-confirmation" (click)="$event.stopPropagation()">
+          <p>¿Eliminar este objetivo?</p>
+          <div class="confirm-actions">
+            <button class="btn-danger" (click)="deleteGoal(goal.id!)">
+              <span class="material-icons">delete</span>
+              Eliminar
+            </button>
+            <button class="btn-secondary" (click)="deleteConfirmId = null">
+              Cancelar
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Goal Detail View -->
+    <div *ngIf="!formVisible && selectedGoal" class="goal-detail-card">
+      <div class="detail-header">
+        <button class="btn-back" (click)="deselectGoal()">
+          <span class="material-icons">arrow_back</span>
+        </button>
+        <div class="detail-title">
+          <h2>{{ selectedGoal.name }}</h2>
+          <span class="badge" [ngClass]="selectedGoal.is_completed ? 'completed' : 'active'">
+            {{ selectedGoal.is_completed ? 'Completado' : 'En Progreso' }}
+          </span>
+        </div>
+        <div class="detail-actions">
+          <button class="btn-icon" (click)="showGoalForm(selectedGoal)" title="Editar">
+            <span class="material-icons">edit</span>
+          </button>
+          <button class="btn-icon delete" (click)="deleteGoal(selectedGoal.id!)" title="Eliminar">
+            <span class="material-icons">delete</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Goal Progress -->
+      <div class="progress-section">
+        <div class="progress-header">
+          <span class="progress-label">Progreso General</span>
+          <span class="progress-percentage">{{ calculateProgress(selectedGoal) | number: '1.0-0' }}%</span>
+        </div>
+        <div class="progress-bar large">
+          <div class="progress-fill" [style.width.%]="calculateProgress(selectedGoal)"></div>
+        </div>
+        <div class="amount-info large">
+          <div class="amount-box">
+            <span class="amount-label">Acumulado</span>
+            <span class="amount-value">{{ formatCurrency(selectedGoal.current_amount, selectedGoal.currency) }}</span>
+          </div>
+          <div class="amount-box">
+            <span class="amount-label">Meta</span>
+            <span class="amount-value">{{ formatCurrency(selectedGoal.target_amount, selectedGoal.currency) }}</span>
+          </div>
+          <div class="amount-box" *ngIf="!selectedGoal.is_completed">
+            <span class="amount-label">Falta</span>
+            <span class="amount-value remaining">{{ formatCurrency(calculateRemaining(selectedGoal), selectedGoal.currency) }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Goal Description -->
+      <div *ngIf="selectedGoal.description" class="detail-section">
+        <h4>Descripción</h4>
+        <p>{{ selectedGoal.description }}</p>
+      </div>
+
+      <!-- Goal Info -->
+      <div class="detail-section">
+        <div class="info-grid">
+          <div class="info-item">
+            <span class="info-label">Categoría</span>
+            <span class="info-value">{{ selectedGoal.category }}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Moneda</span>
+            <span class="info-value">{{ selectedGoal.currency || 'ARS' }}</span>
+          </div>
+          <div class="info-item" *ngIf="selectedGoal.target_date">
+            <span class="info-label">Fecha Meta</span>
+            <span class="info-value">{{ formatDate(selectedGoal.target_date) }}</span>
+          </div>
+          <div class="info-item" *ngIf="selectedGoal.created_at">
+            <span class="info-label">Creado</span>
+            <span class="info-value">{{ formatDate(selectedGoal.created_at) }}</span>
+          </div>
+          <div class="info-item" *ngIf="selectedGoal.is_completed && selectedGoal.completed_at">
+            <span class="info-label">Completado</span>
+            <span class="info-value">{{ formatDate(selectedGoal.completed_at) }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Add Movement Form -->
+      <div class="movement-form-section" *ngIf="!selectedGoal.is_completed">
+        <h4>Agregar Movimiento</h4>
+
+        <div *ngIf="movementFormVisible" class="movement-form">
+          <div class="form-row">
+            <div class="form-group">
+              <label>Tipo *</label>
+              <div class="type-selector">
+                <button
+                  type="button"
+                  class="type-btn"
+                  [class.active]="movementModel.type === 'deposit'"
+                  (click)="movementModel.type = 'deposit'"
+                >
+                  <span class="material-icons">add_circle</span>
+                  Depositar
+                </button>
+                <button
+                  type="button"
+                  class="type-btn"
+                  [class.active]="movementModel.type === 'withdrawal'"
+                  (click)="movementModel.type = 'withdrawal'"
+                >
+                  <span class="material-icons">remove_circle</span>
+                  Retirar
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="wallet">Billetera (opcional)</label>
+              <select
+                id="wallet"
+                [(ngModel)]="movementModel.wallet_id"
+                class="form-select"
+                [class.error]="movementErrors['wallet_id']"
+              >
+                <option value="">Sin billetera (opcional)</option>
+                <option *ngFor="let wallet of availableWallets" [value]="wallet.id">
+                  {{ wallet.name }} ({{ wallet.currency }})
+                </option>
+              </select>
+              <span class="error-message" *ngIf="movementErrors['wallet_id']">
+                {{ movementErrors['wallet_id'] }}
+              </span>
+            </div>
+
+            <div class="form-group">
+              <label for="amount">Monto *</label>
+              <input
+                id="amount"
+                type="number"
+                [(ngModel)]="movementModel.amount"
+                placeholder="0.00"
+                class="form-input"
+                [class.error]="movementErrors['amount']"
+                min="0"
+                step="100"
+              />
+              <span class="error-message" *ngIf="movementErrors['amount']">
+                {{ movementErrors['amount'] }}
+              </span>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="description">Descripción (opcional)</label>
+              <input
+                id="description"
+                type="text"
+                [(ngModel)]="movementModel.description"
+                placeholder="Ej: Bonus recibido"
+                class="form-input"
+              />
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button
+              type="button"
+              class="btn-primary"
+              (click)="saveMovement()"
+              [disabled]="loading"
+            >
+              <span *ngIf="!loading">Registrar Movimiento</span>
+              <span *ngIf="loading" class="spinner-small"></span>
+            </button>
+            <button type="button" class="btn-secondary" (click)="closeMovementForm()">
+              Cancelar
+            </button>
+          </div>
+        </div>
+
+        <button
+          *ngIf="!movementFormVisible"
+          type="button"
+          class="btn-secondary"
+          (click)="showMovementForm()"
+        >
+          <span class="material-icons">add</span>
+          Agregar Movimiento
+        </button>
+      </div>
+
+      <!-- Movements History -->
+      <div class="movements-section" *ngIf="selectedGoal.movements && selectedGoal.movements.length > 0">
+        <h4>Historial de Movimientos</h4>
+        <div class="movements-list">
+          <div *ngFor="let movement of selectedGoal.movements" class="movement-item" [class]="movement.type">
+            <div class="movement-header">
+              <div class="movement-info">
+                <span class="movement-type">
+                  <span class="material-icons">
+                    {{ movement.type === 'deposit' ? 'add_circle' : 'remove_circle' }}
+                  </span>
+                  {{ movement.type === 'deposit' ? 'Deposito' : 'Retiro' }}
+                </span>
+                <span class="movement-description" *ngIf="movement.description">{{ movement.description }}</span>
+              </div>
+              <span class="movement-amount" [class]="movement.type">
+                {{ movement.type === 'deposit' ? '+' : '-' }}{{ formatCurrency(movement.amount, selectedGoal.currency) }}
+              </span>
+            </div>
+            <div class="movement-date">
+              {{ formatDate(movement.created_at) }}
+              <button
+                class="btn-delete"
+                (click)="deleteMovementConfirmId = movement.id || null"
+                *ngIf="!deleteMovementConfirmId"
+              >
+                <span class="material-icons">close</span>
+              </button>
+              <div *ngIf="deleteMovementConfirmId === movement.id" class="delete-inline">
+                <button class="btn-confirm" (click)="deleteMovement(movement.id!)">Eliminar</button>
+                <button class="btn-cancel" (click)="deleteMovementConfirmId = null">Cancelar</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Empty State -->
+    <div *ngIf="!formVisible && !selectedGoal && getFilteredGoals().length === 0" class="empty-state-section">
+      <app-empty-state
+        title="Sin objetivos"
+        subtitle="Crea tu primer objetivo para comenzar a ahorrar con propósito"
+        icon="flag"
+      ></app-empty-state>
+      <button class="btn-primary" (click)="showGoalForm()">
+        <span class="material-icons">add</span>
+        Crear primer objetivo
+      </button>
+    </div>
+  </div>
+</div>
