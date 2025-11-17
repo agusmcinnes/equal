@@ -6,6 +6,8 @@ export interface Goal {
   target_amount: number;
   current_amount: number;
   category: string;
+  currency?: string; // 'ARS', 'USD', 'EUR', 'CRYPTO'
+  wallet_id?: string; // Optional wallet association
   icon?: string;
   color?: string;
   target_date?: string;
@@ -22,6 +24,8 @@ export interface GoalMovement {
   amount: number;
   type: 'deposit' | 'withdrawal';
   description?: string;
+  transaction_id?: string; // Linked transaction for balance tracking
+  wallet_id?: string; // Wallet used for this movement
   created_at?: string;
 }
 

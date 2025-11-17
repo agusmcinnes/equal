@@ -3,13 +3,17 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Subject } from 'rxjs';
 import { GoalsService } from '../../services/goals.service';
+import { WalletsService } from '../../services/wallets.service';
+import { CategoriesService } from '../../services/categories.service';
 import { Goal, GoalMovement, GoalWithMovements } from '../../models/goal.model';
+import { Wallet } from '../../models/wallet.model';
 import { EmptyStateComponent } from '../../components/empty-state/empty-state';
 
 interface GoalForm {
   name: string;
   description: string;
   target_amount: number;
+  currency: string;
   category: string;
   icon: string;
   color: string;
@@ -20,6 +24,7 @@ interface MovementForm {
   amount: number;
   description: string;
   type: 'deposit' | 'withdrawal';
+  wallet_id: string;
 }
 
 interface IconOption {
@@ -42,6 +47,9 @@ export class Goals implements OnInit, OnDestroy {
   activeGoals: Goal[] = [];
   completedGoals: Goal[] = [];
   selectedGoal: GoalWithMovements | null = null;
+  wallets: Wallet[] = [];
+  availableWallets: Wallet[] = [];
+  goalsCategory: any = null;
 
   // UI State
   loading = false;
@@ -64,7 +72,6 @@ export class Goals implements OnInit, OnDestroy {
     { icon: 'flight', name: 'Viajes' },
     { icon: 'directions_car', name: 'Coche/Vehículo' },
     { icon: 'home', name: 'Casa' },
-    { icon: 'shopping', name: 'Compra Mayor' },
     { icon: 'laptop', name: 'Tecnología' },
     { icon: 'school', name: 'Educación' },
     { icon: 'favorite', name: 'Salud' },
@@ -84,10 +91,48 @@ export class Goals implements OnInit, OnDestroy {
     '#6366f1', '#8b5cf6', '#d946ef', '#ec4899', '#f43f5e'
   ];
 
-  constructor(private goalsService: GoalsService) {}
+  constructor(
+    private goalsService: GoalsService,
+    private walletsService: WalletsService,
+    private categoriesService: CategoriesService
+  ) {}
 
-  ngOnInit(): void {
-    this.loadGoals();
+  async ngOnInit(): Promise<void> {
+    await this.loadInitialData();
+  }
+
+  async loadInitialData(): Promise<void> {
+    this.loadWallets(); // Observable - no blocking
+    await Promise.all([
+      this.loadGoals(),
+      this.loadGoalsCategory()
+    ]);
+  }
+
+  loadWallets(): void {
+    this.walletsService.list().subscribe({
+      next: (data) => {
+        this.wallets = data;
+      },
+      error: (error) => {
+        console.error('Error loading wallets:', error);
+      }
+    });
+  }
+
+  async loadGoalsCategory(): Promise<void> {
+    try {
+      const { data, error } = await this.categoriesService.getOrCreateGoalsCategory();
+      if (!error && data) {
+        this.goalsCategory = data;
+      }
+    } catch (error) {
+      console.error('Error loading goals category:', error);
+    }
+  }
+
+  filterWalletsByCurrency(currency: string): void {
+    this.availableWallets = this.wallets.filter(w => w.currency === currency);
   }
 
   ngOnDestroy(): void {
@@ -132,8 +177,10 @@ export class Goals implements OnInit, OnDestroy {
 
   async selectGoal(goal: Goal): Promise<void> {
     const { data, error } = await this.goalsService.getWithMovements(goal.id!);
-    if (!error) {
+    if (!error && data) {
       this.selectedGoal = data;
+      // Filter wallets by goal currency
+      this.filterWalletsByCurrency(data.currency || 'ARS');
     }
   }
 
@@ -150,6 +197,7 @@ export class Goals implements OnInit, OnDestroy {
         name: edit.name || '',
         description: edit.description || '',
         target_amount: edit.target_amount || 0,
+        currency: edit.currency || 'ARS',
         category: edit.category || 'general',
         icon: edit.icon || 'flag',
         color: edit.color || '#463397',
@@ -204,6 +252,7 @@ export class Goals implements OnInit, OnDestroy {
     if (!this.movementModel.amount || this.movementModel.amount <= 0) {
       this.movementErrors['amount'] = 'Ingrese un monto válido';
     }
+    // wallet_id is now optional
     return Object.keys(this.movementErrors).length === 0;
   }
 
@@ -217,6 +266,7 @@ export class Goals implements OnInit, OnDestroy {
         description: this.model.description,
         target_amount: this.model.target_amount,
         current_amount: this.editing?.current_amount || 0,
+        currency: this.model.currency || 'ARS',
         category: this.model.category,
         icon: this.model.icon,
         color: this.model.color,
@@ -254,39 +304,29 @@ export class Goals implements OnInit, OnDestroy {
 
     this.loading = true;
     try {
-      const movement: GoalMovement = {
-        goal_id: this.selectedGoal.id!,
-        amount: this.movementModel.amount,
-        type: this.movementModel.type,
-        description: this.movementModel.description
-      };
+      // wallet_id can be empty string, convert to null if empty
+      const walletId = this.movementModel.wallet_id || null;
 
-      const { error: movementError } = await this.goalsService.addMovement(movement);
-      if (movementError) {
-        console.error('Error adding movement:', movementError);
-        alert('Error al registrar el movimiento');
+      // ALWAYS create movement with transaction (with or without wallet)
+      // The transaction will appear in the transactions section
+      const { error } = await this.goalsService.createMovementWithTransaction(
+        this.selectedGoal.id!,
+        this.movementModel.amount,
+        this.movementModel.type,
+        walletId, // Can be null if no wallet selected
+        this.selectedGoal.currency || 'ARS',
+        this.goalsCategory?.id || null,
+        this.movementModel.description || undefined
+      );
+
+      if (error) {
+        console.error('Error creating movement with transaction:', error);
+        const errorMsg = (error as any)?.message || 'Error desconocido';
+        alert('Error al registrar el movimiento: ' + errorMsg);
         return;
       }
 
-      const newAmount =
-        this.movementModel.type === 'deposit'
-          ? this.selectedGoal.current_amount + this.movementModel.amount
-          : Math.max(this.selectedGoal.current_amount - this.movementModel.amount, 0);
-
-      const isCompleted = newAmount >= this.selectedGoal.target_amount;
-
-      const { error: updateError } = await this.goalsService.update(this.selectedGoal.id!, {
-        current_amount: newAmount,
-        is_completed: isCompleted,
-        completed_at: isCompleted ? new Date().toISOString() : undefined
-      });
-
-      if (updateError) {
-        console.error('Error updating goal amount:', updateError);
-        alert('Error al actualizar el monto del objetivo');
-        return;
-      }
-
+      // Note: The trigger will automatically update goal.current_amount
       this.closeMovementForm();
       await this.loadGoals();
       await this.selectGoal(this.selectedGoal);
@@ -325,30 +365,16 @@ export class Goals implements OnInit, OnDestroy {
 
     this.loading = true;
     try {
-      const movement = this.selectedGoal.movements?.find((m) => m.id === movementId);
-      if (!movement) return;
+      // Use the new method that deletes both movement and transaction
+      const { error } = await this.goalsService.deleteMovementWithTransaction(movementId);
 
-      const { error: deleteError } = await this.goalsService.deleteMovement(movementId);
-      if (deleteError) {
-        console.error('Error deleting movement:', deleteError);
+      if (error) {
+        console.error('Error deleting movement:', error);
         alert('Error al eliminar el movimiento');
         return;
       }
 
-      const newAmount =
-        movement.type === 'deposit'
-          ? this.selectedGoal.current_amount - movement.amount
-          : this.selectedGoal.current_amount + movement.amount;
-
-      const { error: updateError } = await this.goalsService.update(this.selectedGoal.id!, {
-        current_amount: Math.max(newAmount, 0)
-      });
-
-      if (updateError) {
-        console.error('Error updating goal amount:', updateError);
-        return;
-      }
-
+      // Note: The trigger will automatically update goal.current_amount
       this.deleteMovementConfirmId = null;
       await this.loadGoals();
       await this.selectGoal(this.selectedGoal);
@@ -379,11 +405,30 @@ export class Goals implements OnInit, OnDestroy {
     return date.toLocaleDateString('es-AR', options);
   }
 
+  formatCurrency(amount: number, currency?: string): string {
+    const curr = currency || 'ARS';
+    const formattedAmount = amount.toLocaleString('es-AR', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    });
+
+    const currencySymbols: { [key: string]: string } = {
+      'ARS': '$',
+      'USD': 'US$',
+      'EUR': '€',
+      'CRYPTO': '₿'
+    };
+
+    const symbol = currencySymbols[curr] || curr;
+    return `${symbol}${formattedAmount}`;
+  }
+
   private getEmptyGoalModel(): GoalForm {
     return {
       name: '',
       description: '',
       target_amount: 0,
+      currency: 'ARS',
       category: 'general',
       icon: 'flag',
       color: '#463397',
@@ -395,7 +440,8 @@ export class Goals implements OnInit, OnDestroy {
     return {
       amount: 0,
       description: '',
-      type: 'deposit'
+      type: 'deposit',
+      wallet_id: ''
     };
   }
 }

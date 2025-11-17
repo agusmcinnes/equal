@@ -19,6 +19,7 @@ export class Sidebar {
   menuItems: MenuItem[] = [
     { icon: 'dashboard', label: 'Dashboard', route: '/dashboard' },
     { icon: 'account_balance_wallet', label: 'Transacciones', route: '/transactions' },
+    { icon: 'wallet', label: 'Billeteras', route: '/wallets' },
     { icon: 'category', label: 'Categorías', route: '/categories' },
     { icon: 'schedule', label: 'Operaciones Futuras', route: '/scheduled' },
     { icon: 'flag', label: 'Objetivos', route: '/goals' },

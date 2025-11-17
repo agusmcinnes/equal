@@ -1,5 +1,6 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { RouterModule, Router } from '@angular/router';
 import { Subject, takeUntil, take } from 'rxjs';
 import { TransactionsService } from '../../services/transactions.service';
@@ -30,6 +31,7 @@ interface TopCategory {
   selector: 'app-dashboard',
   imports: [
     CommonModule,
+    FormsModule,
     RouterModule,
     StatCardComponent,
     CategoryBadgeComponent,
@@ -53,12 +55,16 @@ export class Dashboard implements OnInit, OnDestroy {
   topExpenses: TopCategory[] = [];
   totalWalletBalance = 0;
 
+  // Multi-currency stats (when filterCurrency === 'all')
+  multiCurrencyStats: { [key: string]: { income: number; expenses: number; balance: number } } = {};
+
   // Charts data
   topExpensesChartData: any[] = [];
 
   // UI State
   loading = false;
   statsLoading = false;
+  filterCurrency: 'all' | 'ARS' | 'USD' | 'EUR' | 'CRYPTO' = 'all';
 
     // Chart options
   colorScheme: any = {
@@ -158,14 +164,14 @@ export class Dashboard implements OnInit, OnDestroy {
       const thirtyDaysAgo = new Date(today);
       thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
-      // Filter for ARS currency and last 30 days (same logic as transactions page)
+      // Filter for selected currency and last 30 days
       this.allTransactions = data.filter((t: TransactionWithDetails) => {
-        // Always filter to ARS currency
-        if (t.currency !== 'ARS') return false;
-
         // Filter by last 30 days
         const txDate = new Date(t.date);
         if (txDate < thirtyDaysAgo || txDate > today) return false;
+
+        // Filter by currency (if not 'all')
+        if (this.filterCurrency !== 'all' && t.currency !== this.filterCurrency) return false;
 
         return true;
       });
@@ -184,23 +190,60 @@ export class Dashboard implements OnInit, OnDestroy {
   }
 
   calculateStatistics(): void {
-    if (this.allTransactions.length === 0) {
+    if (this.filterCurrency === 'all') {
+      // Calculate stats for each currency separately
+      this.multiCurrencyStats = {};
+      const currencies = ['ARS', 'USD', 'EUR', 'CRYPTO'];
+
+      currencies.forEach(curr => {
+        const txForCurrency = this.allTransactions.filter(t => t.currency === curr);
+        const income = txForCurrency.filter(t => t.type === 'income').reduce((sum, t) => sum + t.amount, 0);
+        const expenses = txForCurrency.filter(t => t.type === 'expense').reduce((sum, t) => sum + t.amount, 0);
+
+        if (income > 0 || expenses > 0) {
+          this.multiCurrencyStats[curr] = {
+            income: income,
+            expenses: expenses,
+            balance: income - expenses
+          };
+        }
+      });
+
+      // Set general statistics (for transaction count)
       this.statistics = {
         total_income: 0,
         total_expenses: 0,
         net_balance: 0,
-        transaction_count: 0,
-        income_count: 0,
-        expense_count: 0,
-        currency: 'ARS',
+        transaction_count: this.allTransactions.length,
+        income_count: this.allTransactions.filter(t => t.type === 'income').length,
+        expense_count: this.allTransactions.filter(t => t.type === 'expense').length,
+        currency: 'all',
         avg_income: 0,
         avg_expense: 0
       };
     } else {
-      this.statistics = this.statsService.calculateBasicStats(
-        this.allTransactions,
-        'ARS'
-      );
+      // Single currency statistics
+      this.multiCurrencyStats = {};
+      const currency = this.filterCurrency;
+
+      if (this.allTransactions.length === 0) {
+        this.statistics = {
+          total_income: 0,
+          total_expenses: 0,
+          net_balance: 0,
+          transaction_count: 0,
+          income_count: 0,
+          expense_count: 0,
+          currency: currency,
+          avg_income: 0,
+          avg_expense: 0
+        };
+      } else {
+        this.statistics = this.statsService.calculateBasicStats(
+          this.allTransactions,
+          currency
+        );
+      }
     }
   }
 
@@ -257,5 +300,21 @@ export class Dashboard implements OnInit, OnDestroy {
 
   navigateToTransactions(): void {
     this.router.navigate(['/transactions']);
+  }
+
+  changeCurrencyFilter(currency: 'all' | 'ARS' | 'USD' | 'EUR' | 'CRYPTO'): void {
+    this.filterCurrency = currency;
+    this.loadTransactions().then(() => {
+      this.calculateStatistics();
+      this.calculateTopExpenses();
+    });
+  }
+
+  formatCurrency(amount: number, currency: string): string {
+    return this.statsService.formatCurrency(amount, currency);
+  }
+
+  getCurrencyKeys(): string[] {
+    return Object.keys(this.multiCurrencyStats);
   }
 }

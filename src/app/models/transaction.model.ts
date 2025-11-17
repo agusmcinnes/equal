@@ -14,6 +14,7 @@ export interface Transaction {
   type: 'income' | 'expense';
   is_recurring?: boolean;
   recurring_id?: string | null;
+  goal_id?: string | null; // Link to goal if this transaction is from a goal movement
   created_at?: string;
   updated_at?: string;
 }

@@ -61,7 +61,7 @@
 
         <!-- Target Amount Field -->
         <div class="form-group">
-          <label for="target_amount">Monto Meta (ARS) *</label>
+          <label for="target_amount">Monto Meta *</label>
           <input
             id="target_amount"
             type="number"
@@ -75,6 +75,26 @@
           />
           <span class="error-message" *ngIf="fieldErrors['target_amount']">
             {{ fieldErrors['target_amount'] }}
+          </span>
+        </div>
+
+        <!-- Currency Field -->
+        <div class="form-group">
+          <label for="currency">Moneda *</label>
+          <select
+            id="currency"
+            [(ngModel)]="model.currency"
+            name="currency"
+            class="form-select"
+            [class.error]="fieldErrors['currency']"
+          >
+            <option value="ARS">ARS - Peso Argentino</option>
+            <option value="USD">USD - Dólar Estadounidense</option>
+            <option value="EUR">EUR - Euro</option>
+            <option value="CRYPTO">CRYPTO - Criptomonedas</option>
+          </select>
+          <span class="error-message" *ngIf="fieldErrors['currency']">
+            {{ fieldErrors['currency'] }}
           </span>
         </div>
 
@@ -210,15 +230,15 @@
               <div class="progress-fill" [style.width.%]="calculateProgress(goal)"></div>
             </div>
             <div class="amount-info">
-              <span class="current-amount">${{ goal.current_amount | number: '1.2-2' }}</span>
+              <span class="current-amount">{{ formatCurrency(goal.current_amount, goal.currency) }}</span>
               <span class="separator">/</span>
-              <span class="target-amount">${{ goal.target_amount | number: '1.2-2' }}</span>
+              <span class="target-amount">{{ formatCurrency(goal.target_amount, goal.currency) }}</span>
             </div>
           </div>
 
           <div class="remaining-info" *ngIf="!goal.is_completed">
             <div class="remaining-label">Falta ahorrar:</div>
-            <div class="remaining-amount">${{ calculateRemaining(goal) | number: '1.2-2' }}</div>
+            <div class="remaining-amount">{{ formatCurrency(calculateRemaining(goal), goal.currency) }}</div>
           </div>
 
           <div class="target-date-info" *ngIf="goal.target_date && !goal.is_completed">
@@ -291,15 +311,15 @@
         <div class="amount-info large">
           <div class="amount-box">
             <span class="amount-label">Acumulado</span>
-            <span class="amount-value">${{ selectedGoal.current_amount | number: '1.2-2' }}</span>
+            <span class="amount-value">{{ formatCurrency(selectedGoal.current_amount, selectedGoal.currency) }}</span>
           </div>
           <div class="amount-box">
             <span class="amount-label">Meta</span>
-            <span class="amount-value">${{ selectedGoal.target_amount | number: '1.2-2' }}</span>
+            <span class="amount-value">{{ formatCurrency(selectedGoal.target_amount, selectedGoal.currency) }}</span>
           </div>
           <div class="amount-box" *ngIf="!selectedGoal.is_completed">
             <span class="amount-label">Falta</span>
-            <span class="amount-value remaining">${{ calculateRemaining(selectedGoal) | number: '1.2-2' }}</span>
+            <span class="amount-value remaining">{{ formatCurrency(calculateRemaining(selectedGoal), selectedGoal.currency) }}</span>
           </div>
         </div>
       </div>
@@ -316,6 +336,10 @@
           <div class="info-item">
             <span class="info-label">Categoría</span>
             <span class="info-value">{{ selectedGoal.category }}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Moneda</span>
+            <span class="info-value">{{ selectedGoal.currency || 'ARS' }}</span>
           </div>
           <div class="info-item" *ngIf="selectedGoal.target_date">
             <span class="info-label">Fecha Meta</span>
@@ -365,6 +389,24 @@
 
           <div class="form-row">
             <div class="form-group">
+              <label for="wallet">Billetera (opcional)</label>
+              <select
+                id="wallet"
+                [(ngModel)]="movementModel.wallet_id"
+                class="form-select"
+                [class.error]="movementErrors['wallet_id']"
+              >
+                <option value="">Sin billetera (opcional)</option>
+                <option *ngFor="let wallet of availableWallets" [value]="wallet.id">
+                  {{ wallet.name }} ({{ wallet.currency }})
+                </option>
+              </select>
+              <span class="error-message" *ngIf="movementErrors['wallet_id']">
+                {{ movementErrors['wallet_id'] }}
+              </span>
+            </div>
+
+            <div class="form-group">
               <label for="amount">Monto *</label>
               <input
                 id="amount"
@@ -380,7 +422,9 @@
                 {{ movementErrors['amount'] }}
               </span>
             </div>
+          </div>
 
+          <div class="form-row">
             <div class="form-group">
               <label for="description">Descripción (opcional)</label>
               <input
@@ -436,7 +480,7 @@
                 <span class="movement-description" *ngIf="movement.description">{{ movement.description }}</span>
               </div>
               <span class="movement-amount" [class]="movement.type">
-                {{ movement.type === 'deposit' ? '+' : '-' }}${{ movement.amount | number: '1.2-2' }}
+                {{ movement.type === 'deposit' ? '+' : '-' }}{{ formatCurrency(movement.amount, selectedGoal.currency) }}
               </span>
             </div>
             <div class="movement-date">

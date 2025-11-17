@@ -1,0 +1,273 @@
+<div class="wallets-page">
+  <!-- Page Header -->
+  <div class="page-header">
+    <div class="header-content">
+      <h1>Billeteras</h1>
+      <p class="header-subtitle">Gestiona tus billeteras y monitorea tus balances</p>
+    </div>
+    <button class="btn-primary" (click)="showWalletForm()" *ngIf="!formVisible">
+      <span class="material-icons">add</span>
+      Nueva billetera
+    </button>
+  </div>
+
+  <!-- Summary Cards -->
+  <div class="summary-section" *ngIf="wallets.length > 0 && !formVisible">
+    <div class="summary-card" *ngFor="let curr of currencies">
+      <div class="summary-icon" [style.backgroundColor]="curr.color + '20'">
+        <span class="material-icons" [style.color]="curr.color">account_balance_wallet</span>
+      </div>
+      <div class="summary-content">
+        <div class="summary-label">{{ curr.name }}</div>
+        <div class="summary-value">{{ formatCurrency(getTotalBalance()[curr.code], curr.code) }}</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading && wallets.length === 0" class="loading-state">
+    <div class="spinner"></div>
+    <p>Cargando billeteras...</p>
+  </div>
+
+  <!-- Main Content -->
+  <div *ngIf="!loading || wallets.length > 0" class="wallets-content">
+    <!-- Wallet Form -->
+    <div *ngIf="formVisible" class="form-card">
+      <div class="form-header">
+        <h2>{{ editing ? 'Editar Billetera' : 'Nueva Billetera' }}</h2>
+        <button class="btn-close" (click)="closeWalletForm()">
+          <span class="material-icons">close</span>
+        </button>
+      </div>
+
+      <form (ngSubmit)="saveWallet()" class="wallet-form">
+        <!-- Name Field -->
+        <div class="form-group">
+          <label for="name">Nombre de la Billetera *</label>
+          <input
+            id="name"
+            type="text"
+            [(ngModel)]="model.name"
+            name="name"
+            placeholder="Ej: Mercado Pago, Efectivo"
+            class="form-input"
+            [class.error]="fieldErrors['name']"
+          />
+          <span class="error-message" *ngIf="fieldErrors['name']">
+            {{ fieldErrors['name'] }}
+          </span>
+        </div>
+
+        <!-- Provider Field -->
+        <div class="form-group">
+          <label for="provider">Proveedor *</label>
+          <select
+            id="provider"
+            [(ngModel)]="model.provider"
+            name="provider"
+            class="form-select"
+            [class.error]="fieldErrors['provider']"
+          >
+            <option *ngFor="let prov of availableProviders" [value]="prov.name">
+              {{ prov.name }}
+            </option>
+          </select>
+          <span class="error-message" *ngIf="fieldErrors['provider']">
+            {{ fieldErrors['provider'] }}
+          </span>
+        </div>
+
+        <!-- Currency Field -->
+        <div class="form-group">
+          <label for="currency">Moneda *</label>
+          <select
+            id="currency"
+            [(ngModel)]="model.currency"
+            name="currency"
+            class="form-select"
+            [class.error]="fieldErrors['currency']"
+            [disabled]="!!editing"
+          >
+            <option *ngFor="let curr of currencies" [value]="curr.code">
+              {{ curr.code }} - {{ curr.name }}
+            </option>
+          </select>
+          <span class="error-message" *ngIf="fieldErrors['currency']">
+            {{ fieldErrors['currency'] }}
+          </span>
+          <span class="info-message" *ngIf="editing">
+            La moneda no puede modificarse después de crear la billetera
+          </span>
+        </div>
+
+        <!-- Balance Field -->
+        <div class="form-group">
+          <label for="balance">Balance Inicial *</label>
+          <input
+            id="balance"
+            type="number"
+            [(ngModel)]="model.balance"
+            name="balance"
+            placeholder="0.00"
+            class="form-input"
+            [class.error]="fieldErrors['balance']"
+            [disabled]="!!editing"
+            step="0.01"
+          />
+          <span class="error-message" *ngIf="fieldErrors['balance']">
+            {{ fieldErrors['balance'] }}
+          </span>
+          <span class="info-message" *ngIf="editing">
+            El balance inicial no puede modificarse. El balance actual se calcula automáticamente.
+          </span>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="form-actions">
+          <button type="submit" class="btn-primary" [disabled]="loading">
+            <span *ngIf="!loading">{{ editing ? 'Actualizar' : 'Crear' }}</span>
+            <span *ngIf="loading" class="spinner-small"></span>
+          </button>
+          <button type="button" class="btn-secondary" (click)="closeWalletForm()">
+            Cancelar
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Filter Tabs -->
+    <div *ngIf="!formVisible && wallets.length > 0" class="filter-tabs">
+      <button
+        class="filter-tab"
+        [class.active]="filterCurrency === 'all'"
+        (click)="filterBy('all')"
+      >
+        Todas ({{ getWalletCountByCurrency('all') }})
+      </button>
+      <button
+        class="filter-tab"
+        [class.active]="filterCurrency === 'ARS'"
+        (click)="filterBy('ARS')"
+      >
+        ARS ({{ getWalletCountByCurrency('ARS') }})
+      </button>
+      <button
+        class="filter-tab"
+        [class.active]="filterCurrency === 'USD'"
+        (click)="filterBy('USD')"
+      >
+        USD ({{ getWalletCountByCurrency('USD') }})
+      </button>
+      <button
+        class="filter-tab"
+        [class.active]="filterCurrency === 'EUR'"
+        (click)="filterBy('EUR')"
+      >
+        EUR ({{ getWalletCountByCurrency('EUR') }})
+      </button>
+      <button
+        class="filter-tab"
+        [class.active]="filterCurrency === 'CRYPTO'"
+        (click)="filterBy('CRYPTO')"
+      >
+        CRYPTO ({{ getWalletCountByCurrency('CRYPTO') }})
+      </button>
+    </div>
+
+    <!-- Wallets Grid -->
+    <div *ngIf="!formVisible && filteredWallets.length > 0" class="wallets-grid">
+      <div *ngFor="let wallet of filteredWallets" class="wallet-card">
+        <div class="card-header">
+          <div class="wallet-icon" [style.backgroundColor]="getCurrencyInfo(wallet.currency!).color + '20'">
+            <span class="material-icons" [style.color]="getCurrencyInfo(wallet.currency!).color">
+              {{ getProviderIcon(wallet.provider || 'Otro') }}
+            </span>
+          </div>
+          <div class="wallet-info">
+            <h3>{{ wallet.name }}</h3>
+            <p class="wallet-provider">{{ wallet.provider }}</p>
+          </div>
+          <div class="wallet-currency">
+            <span class="currency-badge" [style.backgroundColor]="getCurrencyInfo(wallet.currency!).color">
+              {{ wallet.currency }}
+            </span>
+          </div>
+        </div>
+
+        <div class="card-body">
+          <!-- Balance Section -->
+          <div class="balance-section">
+            <div class="balance-item">
+              <span class="balance-label">Balance Actual</span>
+              <span class="balance-value current">
+                {{ formatCurrency(wallet.current_balance || 0, wallet.currency || 'ARS') }}
+              </span>
+            </div>
+            <div class="balance-item">
+              <span class="balance-label">Balance Inicial</span>
+              <span class="balance-value">
+                {{ formatCurrency(wallet.initial_balance || 0, wallet.currency || 'ARS') }}
+              </span>
+            </div>
+          </div>
+
+          <!-- Transaction Info -->
+          <div class="transaction-info" *ngIf="wallet.transaction_count && wallet.transaction_count > 0">
+            <span class="material-icons">receipt_long</span>
+            <span>{{ wallet.transaction_count }} transacción{{ wallet.transaction_count !== 1 ? 'es' : '' }}</span>
+          </div>
+        </div>
+
+        <div class="card-actions">
+          <button class="btn-icon" (click)="showWalletForm(wallet); $event.stopPropagation()" title="Editar">
+            <span class="material-icons">edit</span>
+            Editar
+          </button>
+          <button class="btn-icon delete" (click)="deleteConfirmId = wallet.id || null; $event.stopPropagation()" title="Eliminar">
+            <span class="material-icons">delete</span>
+            Eliminar
+          </button>
+        </div>
+
+        <!-- Delete Confirmation -->
+        <div *ngIf="deleteConfirmId === wallet.id" class="delete-confirmation" (click)="$event.stopPropagation()">
+          <p>¿Eliminar esta billetera?</p>
+          <div class="confirm-actions">
+            <button class="btn-danger" (click)="deleteWallet(wallet.id!)">
+              <span class="material-icons">delete</span>
+              Eliminar
+            </button>
+            <button class="btn-secondary" (click)="deleteConfirmId = null">
+              Cancelar
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Empty State -->
+    <div *ngIf="!formVisible && filteredWallets.length === 0 && wallets.length > 0" class="empty-state-section">
+      <app-empty-state
+        title="Sin billeteras en este filtro"
+        subtitle="No hay billeteras con la moneda seleccionada"
+        icon="account_balance_wallet"
+      ></app-empty-state>
+      <button class="btn-secondary" (click)="filterBy('all')">
+        Ver todas las billeteras
+      </button>
+    </div>
+
+    <div *ngIf="!formVisible && wallets.length === 0" class="empty-state-section">
+      <app-empty-state
+        title="Sin billeteras"
+        subtitle="Crea tu primera billetera para comenzar a gestionar tus finanzas"
+        icon="account_balance_wallet"
+      ></app-empty-state>
+      <button class="btn-primary" (click)="showWalletForm()">
+        <span class="material-icons">add</span>
+        Crear primera billetera
+      </button>
+    </div>
+  </div>
+</div>
