@@ -18,11 +18,32 @@ export class CategoriesService {
     return { data, error };
   }
 
+  async listByType(type: 'income' | 'expense') {
+    const user_id = this.userId();
+    if (!user_id) return { data: [], error: 'not_authenticated' };
+    const { data, error } = await this.supabase.from('categories').select('*').eq('user_id', user_id).eq('type', type).order('name');
+    return { data, error };
+  }
+
   async create(cat: Category) {
     const user_id = this.userId();
     if (!user_id) return { data: null, error: 'not_authenticated' };
     cat.user_id = user_id;
     const { data, error } = await this.supabase.from('categories').insert([cat]);
+    return { data, error };
+  }
+
+  async update(id: string, cat: Partial<Category>) {
+    const user_id = this.userId();
+    if (!user_id) return { data: null, error: 'not_authenticated' };
+    const { data, error } = await this.supabase.from('categories').update(cat).eq('id', id).eq('user_id', user_id);
+    return { data, error };
+  }
+
+  async delete(id: string) {
+    const user_id = this.userId();
+    if (!user_id) return { data: null, error: 'not_authenticated' };
+    const { data, error } = await this.supabase.from('categories').delete().eq('id', id).eq('user_id', user_id);
     return { data, error };
   }
 

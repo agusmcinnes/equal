@@ -1,0 +1,219 @@
+<div class="categories-page">
+  <!-- Page Header -->
+  <div class="page-header">
+    <div class="header-content">
+      <h1>Categorías</h1>
+      <p class="header-subtitle">Gestiona tus categorías de ingresos y gastos</p>
+    </div>
+    <button class="btn-primary" (click)="showForm()" *ngIf="!formVisible">
+      <span class="material-icons">add</span>
+      Nueva categoría
+    </button>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading && categories.length === 0" class="loading-state">
+    <div class="spinner"></div>
+    <p>Cargando categorías...</p>
+  </div>
+
+  <!-- Main Content -->
+  <div *ngIf="!loading || categories.length > 0" class="categories-content">
+    <!-- Form Section -->
+    <div *ngIf="formVisible" class="form-card">
+      <div class="form-header">
+        <h2>{{ editing ? 'Editar Categoría' : 'Nueva Categoría' }}</h2>
+        <button class="btn-close" (click)="closeForm()">
+          <span class="material-icons">close</span>
+        </button>
+      </div>
+
+      <form (ngSubmit)="save()" class="category-form">
+        <!-- Name Field -->
+        <div class="form-group">
+          <label for="name">Nombre *</label>
+          <input
+            id="name"
+            type="text"
+            [(ngModel)]="model.name"
+            name="name"
+            placeholder="Ej: Alimentos, Transporte"
+            class="form-input"
+            [class.error]="fieldErrors['name']"
+          />
+          <span class="error-message" *ngIf="fieldErrors['name']">
+            {{ fieldErrors['name'] }}
+          </span>
+        </div>
+
+        <!-- Type Field -->
+        <div class="form-group">
+          <label for="type">Tipo *</label>
+          <select
+            id="type"
+            [(ngModel)]="model.type"
+            name="type"
+            class="form-select"
+            [class.error]="fieldErrors['type']"
+          >
+            <option value="expense">Gasto</option>
+            <option value="income">Ingreso</option>
+          </select>
+          <span class="error-message" *ngIf="fieldErrors['type']">
+            {{ fieldErrors['type'] }}
+          </span>
+        </div>
+
+        <!-- Color Field -->
+        <div class="form-group">
+          <label>Color *</label>
+          <div class="color-picker">
+            <button
+              *ngFor="let color of colorPalette"
+              type="button"
+              class="color-option"
+              [style.backgroundColor]="color"
+              [class.selected]="model.color === color"
+              (click)="model.color = color"
+              [title]="color"
+            ></button>
+          </div>
+          <input
+            type="text"
+            [(ngModel)]="model.color"
+            name="color"
+            placeholder="#463397"
+            class="form-input color-input"
+            [class.error]="fieldErrors['color']"
+          />
+          <span class="error-message" *ngIf="fieldErrors['color']">
+            {{ fieldErrors['color'] }}
+          </span>
+        </div>
+
+        <!-- Icon Field -->
+        <div class="form-group">
+          <label>Icono *</label>
+          <div class="icon-picker">
+            <button
+              *ngFor="let opt of availableIcons"
+              type="button"
+              class="icon-option"
+              [class.selected]="model.icon === opt.icon"
+              (click)="model.icon = opt.icon"
+              [title]="opt.name"
+            >
+              <span class="material-icons" [style.color]="model.color">{{ opt.icon }}</span>
+            </button>
+          </div>
+          <span class="error-message" *ngIf="fieldErrors['icon']">
+            {{ fieldErrors['icon'] }}
+          </span>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="form-actions">
+          <button type="submit" class="btn-primary" [disabled]="loading">
+            <span *ngIf="!loading">{{ editing ? 'Actualizar' : 'Crear' }}</span>
+            <span *ngIf="loading" class="spinner-small"></span>
+          </button>
+          <button type="button" class="btn-secondary" (click)="closeForm()">
+            Cancelar
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Filters & Search -->
+    <div *ngIf="!formVisible" class="filters-section">
+      <div class="search-box">
+        <span class="material-icons">search</span>
+        <input
+          type="text"
+          [(ngModel)]="searchQuery"
+          placeholder="Buscar categorías..."
+          class="search-input"
+        />
+      </div>
+
+      <div class="filter-tabs">
+        <button
+          class="filter-tab"
+          [class.active]="filterType === 'all'"
+          (click)="filterType = 'all'"
+        >
+          Todas ({{ categories.length }})
+        </button>
+        <button
+          class="filter-tab"
+          [class.active]="filterType === 'income'"
+          (click)="filterType = 'income'"
+        >
+          Ingresos ({{ incomeCategories.length }})
+        </button>
+        <button
+          class="filter-tab"
+          [class.active]="filterType === 'expense'"
+          (click)="filterType = 'expense'"
+        >
+          Gastos ({{ expenseCategories.length }})
+        </button>
+      </div>
+    </div>
+
+    <!-- Categories List -->
+    <div *ngIf="!formVisible && getFilteredCategories().length > 0" class="categories-grid">
+      <div *ngFor="let category of getFilteredCategories()" class="category-card">
+        <div class="card-header">
+          <div class="category-icon" [style.backgroundColor]="category.color + '20'">
+            <span class="material-icons" [style.color]="category.color">
+              {{ category.icon }}
+            </span>
+          </div>
+          <div class="category-info">
+            <h3>{{ category.name }}</h3>
+            <span class="type-badge" [class]="category.type">
+              <span class="material-icons">{{ getTypeIcon(category.type) }}</span>
+              {{ getTypeLabel(category.type) }}
+            </span>
+          </div>
+          <div class="card-actions">
+            <button class="btn-icon" (click)="showForm(category)" title="Editar">
+              <span class="material-icons">edit</span>
+            </button>
+            <button class="btn-icon delete" (click)="deleteConfirmId = category.id || null" title="Eliminar">
+              <span class="material-icons">delete</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Delete Confirmation -->
+        <div *ngIf="deleteConfirmId === category.id" class="delete-confirmation">
+          <p>¿Eliminar esta categoría?</p>
+          <div class="confirm-actions">
+            <button class="btn-danger" (click)="delete(category.id!)">
+              <span class="material-icons">delete</span>
+              Eliminar
+            </button>
+            <button class="btn-secondary" (click)="cancelDelete()">
+              Cancelar
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Empty State -->
+    <div *ngIf="!formVisible && getFilteredCategories().length === 0" class="empty-state-section">
+      <app-empty-state
+        title="Sin categorías"
+        subtitle="Crea tu primera categoría para comenzar a organizar tus transacciones"
+        icon="category"
+      ></app-empty-state>
+      <button class="btn-primary" (click)="showForm()">
+        <span class="material-icons">add</span>
+        Crear primera categoría
+      </button>
+    </div>
+  </div>
+</div>
