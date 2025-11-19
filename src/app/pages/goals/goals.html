@@ -121,13 +121,12 @@
         <!-- Target Date Field -->
         <div class="form-group">
           <label for="target_date">Fecha Meta (opcional)</label>
-          <input
-            id="target_date"
-            type="date"
-            [(ngModel)]="model.target_date"
-            name="target_date"
-            class="form-input"
-          />
+          <app-datetime-picker
+            [value]="model.target_date"
+            (valueChange)="model.target_date = $event"
+            placeholder="Seleccionar fecha"
+            [showTime]="false"
+          ></app-datetime-picker>
         </div>
 
         <!-- Color Field -->
@@ -253,6 +252,9 @@
         </div>
 
         <div class="card-actions">
+          <button class="btn-icon primary" (click)="selectGoal(goal); $event.stopPropagation()" title="Ver Detalle">
+            <span class="material-icons">visibility</span>
+          </button>
           <button class="btn-icon" (click)="showGoalForm(goal); $event.stopPropagation()" title="Editar">
             <span class="material-icons">edit</span>
           </button>

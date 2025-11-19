@@ -3,53 +3,68 @@
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  background: linear-gradient(135deg, var(--color-accent) 0%, var(--color-primary) 100%);
   padding: 20px;
+  position: relative;
+  background: url('/images/fondo-login.jpg') no-repeat center center;
+  background-size: cover;
+}
+
+.register-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 0;
 }
 
 .register-card {
-  background: white;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   border-radius: 24px;
-  padding: 48px;
+  padding: 32px 40px;
   width: 100%;
-  max-width: 440px;
-  box-shadow: var(--shadow-xl);
+  max-width: 520px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.3);
   animation: slideUp 0.4s ease-out;
+  position: relative;
+  z-index: 1;
 }
 
 .logo-section {
   text-align: center;
-  margin-bottom: 40px;
+  margin-bottom: 24px;
 }
 
 .logo-icon {
-  width: 100px;
-  height: 100px;
-  border-radius: 20px;
-  margin-bottom: 16px;
+  width: 80px;
+  height: 80px;
+  border-radius: 16px;
+  margin-bottom: 12px;
   object-fit: contain;
 }
 
 .logo-title {
-  font-size: 36px;
+  font-size: 28px;
   font-weight: 700;
-  background: var(--gradient-primary);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: white;
   margin: 0 0 8px 0;
 }
 
 .subtitle {
-  color: var(--text-secondary);
-  font-size: 14px;
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 13px;
   margin: 0;
 }
 
 .register-form {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 14px;
 }
 
 .form-group {
@@ -61,7 +76,7 @@
 .form-group label {
   font-size: 14px;
   font-weight: 500;
-  color: #374151;
+  color: white;
 }
 
 .form-group input {
@@ -154,13 +169,13 @@
 
 .login-link {
   text-align: center;
-  color: var(--text-secondary);
+  color: rgba(255, 255, 255, 0.8);
   font-size: 14px;
   margin: 0;
 }
 
 .login-link a {
-  color: var(--color-primary);
+  color: white;
   text-decoration: none;
   font-weight: 600;
   transition: color 0.2s;
@@ -168,6 +183,15 @@
 
 .login-link a:hover {
   color: var(--color-secondary);
+}
+
+.divider {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.divider::before,
+.divider::after {
+  border-bottom-color: rgba(255, 255, 255, 0.3);
 }
 
 @keyframes slideUp {
@@ -183,6 +207,6 @@
 
 @media (max-width: 480px) {
   .register-card {
-    padding: 32px 24px;
+    padding: 24px 20px;
   }
 }

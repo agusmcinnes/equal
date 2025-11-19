@@ -1,7 +1,7 @@
 .main-layout {
   display: flex;
   min-height: 100vh;
-  background: #f5f5f7;
+  background: transparent;
 }
 
 .content {
@@ -10,10 +10,14 @@
   margin-left: 300px;
   min-height: 100vh;
   transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow-x: hidden;
+  max-width: calc(100vw - 300px);
+  box-sizing: border-box;
 }
 
 .content.sidebar-collapsed {
   margin-left: 120px;
+  max-width: calc(100vw - 120px);
 }
 
 /* Mobile styles */

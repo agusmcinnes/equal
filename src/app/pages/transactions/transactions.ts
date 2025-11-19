@@ -18,6 +18,8 @@ import { Wallet } from '../../models/wallet.model';
 import { StatCardComponent } from '../../components/stat-card/stat-card';
 import { CategoryBadgeComponent } from '../../components/category-badge/category-badge';
 import { EmptyStateComponent } from '../../components/empty-state/empty-state';
+import { DatetimePickerComponent } from '../../components/datetime-picker/datetime-picker';
+import { CustomSelectComponent, SelectOption } from '../../components/custom-select/custom-select';
 import { NgxChartsModule, LegendPosition } from '@swimlane/ngx-charts';
 
 interface GroupedTransactions {
@@ -33,6 +35,8 @@ interface GroupedTransactions {
     StatCardComponent,
     CategoryBadgeComponent,
     EmptyStateComponent,
+    DatetimePickerComponent,
+    CustomSelectComponent,
     NgxChartsModule
   ],
   templateUrl: './transactions.html',
@@ -44,6 +48,7 @@ export class Transactions implements OnInit, OnDestroy {
   // Data
   transactions: TransactionWithDetails[] = [];
   allTransactions: TransactionWithDetails[] = [];
+  rawTransactions: TransactionWithDetails[] = []; // Unfiltered data from DB
   groupedTransactions: GroupedTransactions[] = [];
   categories: Category[] = [];
   wallets: Wallet[] = [];
@@ -67,6 +72,41 @@ export class Transactions implements OnInit, OnDestroy {
   formVisible = false;
   editing: Transaction | null = null;
   filterCurrency: 'all' | 'ARS' | 'USD' | 'EUR' | 'CRYPTO' = 'all';
+  filterType: 'all' | 'income' | 'expense' = 'all';
+
+  // Select options
+  typeOptions: SelectOption[] = [
+    { value: 'all', label: 'Todos', icon: 'list' },
+    { value: 'income', label: 'Ingresos', icon: 'trending_up' },
+    { value: 'expense', label: 'Gastos', icon: 'trending_down' }
+  ];
+
+  currencyOptions: SelectOption[] = [
+    { value: 'all', label: 'Todas', icon: 'currency_exchange' },
+    { value: 'ARS', label: 'ARS', icon: 'attach_money' },
+    { value: 'USD', label: 'USD', icon: 'attach_money' },
+    { value: 'EUR', label: 'EUR', icon: 'euro' },
+    { value: 'CRYPTO', label: 'CRYPTO', icon: 'currency_bitcoin' }
+  ];
+
+  transactionTypeOptions: SelectOption[] = [
+    { value: 'income', label: 'Ingreso', icon: 'trending_up' },
+    { value: 'expense', label: 'Gasto', icon: 'trending_down' }
+  ];
+
+  formCurrencyOptions: SelectOption[] = [
+    { value: 'ARS', label: 'Pesos (ARS)', icon: 'attach_money' },
+    { value: 'USD', label: 'Dólares (USD)', icon: 'attach_money' },
+    { value: 'EUR', label: 'Euros (EUR)', icon: 'euro' },
+    { value: 'CRYPTO', label: 'Criptomonedas', icon: 'currency_bitcoin' }
+  ];
+
+  cryptoTypeOptions: SelectOption[] = [
+    { value: 'BTC', label: 'Bitcoin (BTC)', icon: 'currency_bitcoin' },
+    { value: 'ETH', label: 'Ethereum (ETH)', icon: 'currency_bitcoin' },
+    { value: 'USDC', label: 'USD Coin (USDC)', icon: 'currency_bitcoin' },
+    { value: 'USDT', label: 'Tether (USDT)', icon: 'currency_bitcoin' }
+  ];
 
   // Form model
   model: Transaction = this.getEmptyModel();
@@ -167,13 +207,64 @@ export class Transactions implements OnInit, OnDestroy {
       this.sort = { field, order: 'desc' };
     }
     this.currentPage = 1;
-    this.loadData();
+    this.applyFilters();
   }
 
   changeCurrencyFilter(currency: 'all' | 'ARS' | 'USD' | 'EUR' | 'CRYPTO'): void {
     this.filterCurrency = currency;
     this.currentPage = 1;
-    this.loadData();
+    this.applyFilters();
+  }
+
+  changeTypeFilter(type: 'all' | 'income' | 'expense'): void {
+    this.filterType = type;
+    this.currentPage = 1;
+    this.applyFilters();
+  }
+
+  private applyFilters(): void {
+    const today = new Date();
+    const thirtyDaysAgo = new Date(today);
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+    // Filter from cached raw data
+    let filtered = this.rawTransactions.filter(tx => {
+      // Filter by currency
+      if (this.filterCurrency !== 'all' && tx.currency !== this.filterCurrency) return false;
+      // Filter by type
+      if (this.filterType !== 'all' && tx.type !== this.filterType) return false;
+      // Filter by last 30 days
+      const txDate = new Date(tx.date);
+      if (txDate < thirtyDaysAgo || txDate > today) return false;
+      return true;
+    });
+
+    // Apply sorting
+    filtered.sort((a, b) => {
+      let comparison = 0;
+      switch (this.sort.field) {
+        case 'date':
+          comparison = new Date(a.date).getTime() - new Date(b.date).getTime();
+          break;
+        case 'amount':
+          comparison = a.amount - b.amount;
+          break;
+        case 'description':
+          comparison = (a.description || '').localeCompare(b.description || '');
+          break;
+        case 'category':
+          comparison = (a.category_name || '').localeCompare(b.category_name || '');
+          break;
+        case 'wallet':
+          comparison = (a.wallet_name || '').localeCompare(b.wallet_name || '');
+          break;
+      }
+      return this.sort.order === 'asc' ? comparison : -comparison;
+    });
+
+    this.allTransactions = filtered;
+    this.updatePagination();
+    this.calculateStatistics();
   }
 
   private updateGroupedTransactions(): void {
@@ -321,16 +412,37 @@ export class Transactions implements OnInit, OnDestroy {
     return Math;
   }
 
+  get categoryOptions(): SelectOption[] {
+    const options: SelectOption[] = [
+      { value: null, label: 'Sin categoría', icon: 'category' }
+    ];
+    return options.concat(
+      this.categories.map(cat => ({
+        value: cat.id,
+        label: cat.name,
+        icon: cat.icon || 'category'
+      }))
+    );
+  }
+
+  get walletOptions(): SelectOption[] {
+    const options: SelectOption[] = [
+      { value: null, label: 'Sin billetera', icon: 'account_balance_wallet' }
+    ];
+    return options.concat(
+      this.wallets.map(w => ({
+        value: w.id,
+        label: `${w.name} (${w.currency})`,
+        icon: 'account_balance_wallet'
+      }))
+    );
+  }
+
   private async loadTransactionsLegacy(): Promise<void> {
     const { data } = await this.txService.list();
 
-    // Calculate date range for last 30 days
-    const today = new Date();
-    const thirtyDaysAgo = new Date(today);
-    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-
-    // Map to TransactionWithDetails manually
-    let mapped = (data || []).map(tx => {
+    // Map to TransactionWithDetails and cache as raw data
+    this.rawTransactions = (data || []).map(tx => {
       const category = this.categories.find(c => c.id === tx.category_id);
       const wallet = this.wallets.find(w => w.id === tx.wallet_id);
 
@@ -345,49 +457,10 @@ export class Transactions implements OnInit, OnDestroy {
       } as TransactionWithDetails;
     });
 
-    // Apply automatic filtering: Last 30 days and selected currency
-    mapped = mapped.filter(tx => {
-      // Filter by currency (if not 'all')
-      if (this.filterCurrency !== 'all' && tx.currency !== this.filterCurrency) return false;
-
-      // Filter by last 30 days
-      const txDate = new Date(tx.date);
-      if (txDate < thirtyDaysAgo || txDate > today) return false;
-
-      return true;
-    });
-
-    // Apply sorting
-    mapped.sort((a, b) => {
-      let comparison = 0;
-
-      switch (this.sort.field) {
-        case 'date':
-          comparison = new Date(a.date).getTime() - new Date(b.date).getTime();
-          break;
-        case 'amount':
-          comparison = a.amount - b.amount;
-          break;
-        case 'description':
-          comparison = (a.description || '').localeCompare(b.description || '');
-          break;
-        case 'category':
-          comparison = (a.category_name || '').localeCompare(b.category_name || '');
-          break;
-        case 'wallet':
-          comparison = (a.wallet_name || '').localeCompare(b.wallet_name || '');
-          break;
-      }
-
-      return this.sort.order === 'asc' ? comparison : -comparison;
-    });
-
-    this.allTransactions = mapped;
-    this.updatePagination();
     this.loading = false;
 
-    // Calculate statistics manually
-    this.calculateStatistics();
+    // Apply filters from cached data
+    this.applyFilters();
   }
 
   private calculateStatistics(): void {

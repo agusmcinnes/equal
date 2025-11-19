@@ -76,6 +76,6 @@ export const routes: Routes = [
   // Wildcard route
   {
     path: '**',
-    redirectTo: 'login'
+    redirectTo: 'dashboard'
   }
 ];

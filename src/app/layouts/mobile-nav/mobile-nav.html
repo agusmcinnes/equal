@@ -10,7 +10,7 @@
   <div class="drawer-header">
     <div class="drawer-logo">
       <img src="/images/equal-logo.png" alt="Equal Logo" class="drawer-logo-icon">
-      <span class="drawer-logo-text">EQUAL</span>
+      <span class="drawer-logo-text">EQUALS</span>
     </div>
     <button class="drawer-close-btn" (click)="closeDrawer()">
       <span class="material-icons">close</span>
@@ -31,10 +31,19 @@
   </nav>
 
   <div class="drawer-footer">
-    <button class="drawer-logout-btn" (click)="logout()">
-      <span class="material-icons">logout</span>
-      <span>Cerrar sesión</span>
-    </button>
+    <div class="logout-container">
+      <button class="drawer-logout-btn" (click)="toggleLogoutConfirm()">
+        <span class="material-icons">logout</span>
+        <span>Cerrar sesión</span>
+      </button>
+      <div class="logout-confirm-tooltip" *ngIf="showLogoutConfirm">
+        <p>¿Cerrar sesión?</p>
+        <div class="logout-confirm-actions">
+          <button class="btn-confirm" (click)="confirmLogout()">Sí</button>
+          <button class="btn-cancel" (click)="cancelLogout()">No</button>
+        </div>
+      </div>
+    </div>
   </div>
 </aside>
 

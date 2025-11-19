@@ -1,7 +1,6 @@
 .dollar-page {
   padding: 24px;
   min-height: 100vh;
-  background: var(--bg-primary);
   color: var(--text-primary);
   font-family: 'Poppins', sans-serif;
 }

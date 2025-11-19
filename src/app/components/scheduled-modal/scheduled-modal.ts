@@ -5,13 +5,14 @@ import { ScheduledTransaction, ScheduledTransactionWithDetails, FREQUENCY_OPTION
 import { Category } from '../../models/category.model';
 import { Wallet } from '../../models/wallet.model';
 import { ScheduledTransactionsService } from '../../services/scheduled-transactions.service';
+import { DatetimePickerComponent } from '../datetime-picker/datetime-picker';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
 @Component({
   selector: 'app-scheduled-modal',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, DatetimePickerComponent],
   templateUrl: './scheduled-modal.html',
   styleUrl: './scheduled-modal.css'
 })
@@ -106,6 +107,24 @@ export class ScheduledModalComponent implements OnInit, OnDestroy {
   private formatDateForSubmission(dateString: string): string {
     const date = new Date(dateString);
     return date.toISOString();
+  }
+
+  onStartDateChange(value: string): void {
+    this.form.patchValue({ start_date: value });
+    this.form.get('start_date')?.markAsTouched();
+  }
+
+  onEndDateChange(value: string): void {
+    this.form.patchValue({ end_date: value });
+    this.form.get('end_date')?.markAsTouched();
+  }
+
+  get startDateValue(): string {
+    return this.form.get('start_date')?.value || '';
+  }
+
+  get endDateValue(): string {
+    return this.form.get('end_date')?.value || '';
   }
 
   onSubmit(): void {

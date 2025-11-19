@@ -1,6 +1,7 @@
 import { Component, Input, Output, EventEmitter, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { DatetimePickerComponent } from '../datetime-picker/datetime-picker';
 
 export interface DateRange {
   from: string; // ISO date
@@ -15,7 +16,7 @@ export type DateRangePreset = 'today' | 'yesterday' | 'thisWeek' | 'lastWeek' | 
   templateUrl: './date-range-picker.html',
   styleUrls: ['./date-range-picker.css'],
   standalone: true,
-  imports: [CommonModule, FormsModule]
+  imports: [CommonModule, FormsModule, DatetimePickerComponent]
 })
 export class DateRangePickerComponent implements OnInit {
   @Input() from: string | undefined = '';
