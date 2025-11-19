@@ -30,23 +30,34 @@
   margin: 0;
 }
 
-.currency-filter {
+.filters-row {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 16px;
 }
 
-.currency-filter label {
+.filters-row .filter-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-direction: row;
+}
+
+.filters-row .filter-group label {
   font-size: 14px;
   font-weight: 500;
   color: var(--color-dark);
   white-space: nowrap;
 }
 
-.currency-select {
-  padding: 10px 16px;
+.filters-row .filter-group app-custom-select {
+  min-width: 140px;
+}
+
+.filter-select {
+  padding: 8px 12px;
   border: 2px solid var(--border);
-  border-radius: 12px;
+  border-radius: 10px;
   font-size: 14px;
   font-family: 'Poppins', sans-serif;
   font-weight: 500;
@@ -54,14 +65,13 @@
   background: white;
   cursor: pointer;
   transition: all 0.2s ease;
-  min-width: 200px;
 }
 
-.currency-select:hover {
+.filter-select:hover {
   border-color: var(--color-primary);
 }
 
-.currency-select:focus {
+.filter-select:focus {
   outline: none;
   border-color: var(--color-primary);
   box-shadow: 0 0 0 3px rgba(70, 51, 151, 0.1);
@@ -804,11 +814,17 @@
     font-size: 24px;
   }
 
-  .currency-filter {
+  .filters-row {
     width: 100%;
+    flex-wrap: wrap;
   }
 
-  .currency-select {
+  .filters-row .filter-group {
+    flex: 1;
+    min-width: 120px;
+  }
+
+  .filter-select {
     flex: 1;
     min-width: auto;
   }

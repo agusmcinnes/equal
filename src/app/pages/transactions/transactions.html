@@ -3,15 +3,25 @@
   <div class="page-header">
     <div class="header-content">
       <h1>Transacciones</h1>
-      <div class="currency-filter">
-        <label for="currencySelect">Moneda:</label>
-        <select id="currencySelect" [(ngModel)]="filterCurrency" (change)="changeCurrencyFilter(filterCurrency)" class="currency-select">
-          <option value="all">Todas las monedas</option>
-          <option value="ARS">ARS - Peso Argentino</option>
-          <option value="USD">USD - Dólar</option>
-          <option value="EUR">EUR - Euro</option>
-          <option value="CRYPTO">CRYPTO - Criptomonedas</option>
-        </select>
+      <div class="filters-row">
+        <div class="filter-group">
+          <label>Tipo:</label>
+          <app-custom-select
+            [options]="typeOptions"
+            [(ngModel)]="filterType"
+            (selectionChange)="changeTypeFilter($event)"
+            placeholder="Tipo"
+          ></app-custom-select>
+        </div>
+        <div class="filter-group">
+          <label>Moneda:</label>
+          <app-custom-select
+            [options]="currencyOptions"
+            [(ngModel)]="filterCurrency"
+            (selectionChange)="changeCurrencyFilter($event)"
+            placeholder="Moneda"
+          ></app-custom-select>
+        </div>
       </div>
     </div>
     <button class="btn-primary" (click)="showForm()">
@@ -229,16 +239,11 @@
 
           <div class="form-group">
             <label>Tipo *</label>
-            <div class="radio-group">
-              <label class="radio-button">
-                <input type="radio" [(ngModel)]="model.type" name="type" value="income" />
-                <span>Ingreso</span>
-              </label>
-              <label class="radio-button">
-                <input type="radio" [(ngModel)]="model.type" name="type" value="expense" />
-                <span>Gasto</span>
-              </label>
-            </div>
+            <app-custom-select
+              [options]="transactionTypeOptions"
+              [(ngModel)]="model.type"
+              placeholder="Seleccionar tipo"
+            ></app-custom-select>
             <span class="error" *ngIf="fieldErrors['type']">{{ fieldErrors['type'] }}</span>
           </div>
         </div>
@@ -270,47 +275,42 @@
 
           <div class="form-group">
             <label>Moneda *</label>
-            <select [(ngModel)]="model.currency" name="currency" required>
-              <option value="ARS">Pesos (ARS)</option>
-              <option value="USD">Dólares (USD)</option>
-              <option value="EUR">Euros (EUR)</option>
-              <option value="CRYPTO">Criptomonedas</option>
-            </select>
+            <app-custom-select
+              [options]="formCurrencyOptions"
+              [(ngModel)]="model.currency"
+              placeholder="Seleccionar moneda"
+            ></app-custom-select>
             <span class="error" *ngIf="fieldErrors['currency']">{{ fieldErrors['currency'] }}</span>
           </div>
         </div>
 
         <div class="form-group" *ngIf="model.currency === 'CRYPTO'">
           <label>Tipo de Cripto *</label>
-          <select [(ngModel)]="model.crypto_type" name="crypto_type">
-            <option value="">Seleccionar...</option>
-            <option value="BTC">Bitcoin (BTC)</option>
-            <option value="ETH">Ethereum (ETH)</option>
-            <option value="USDC">USD Coin (USDC)</option>
-            <option value="USDT">Tether (USDT)</option>
-          </select>
+          <app-custom-select
+            [options]="cryptoTypeOptions"
+            [(ngModel)]="model.crypto_type"
+            placeholder="Seleccionar cripto"
+          ></app-custom-select>
           <span class="error" *ngIf="fieldErrors['crypto_type']">{{ fieldErrors['crypto_type'] }}</span>
         </div>
 
         <div class="form-row">
           <div class="form-group">
             <label>Categoría</label>
-            <select [(ngModel)]="model.category_id" name="category_id">
-              <option [ngValue]="null">Sin categoría</option>
-              <option *ngFor="let cat of categories" [ngValue]="cat.id">
-                {{ cat.name }}
-              </option>
-            </select>
+            <app-custom-select
+              [options]="categoryOptions"
+              [(ngModel)]="model.category_id"
+              placeholder="Sin categoría"
+            ></app-custom-select>
           </div>
 
           <div class="form-group">
             <label>Billetera</label>
-            <select [(ngModel)]="model.wallet_id" name="wallet_id">
-              <option [ngValue]="null">Sin billetera</option>
-              <option *ngFor="let wallet of wallets" [ngValue]="wallet.id">
-                {{ wallet.name }} ({{ wallet.currency }})
-              </option>
-            </select>
+            <app-custom-select
+              [options]="walletOptions"
+              [(ngModel)]="model.wallet_id"
+              placeholder="Sin billetera"
+            ></app-custom-select>
           </div>
         </div>
 
