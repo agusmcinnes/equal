@@ -79,7 +79,7 @@
         <select id="category_id" formControlName="category_id" class="form-control">
           <option [ngValue]="null">Seleccionar categoría</option>
           <option *ngFor="let cat of getFilteredCategories()" [ngValue]="cat.id">
-            {{ cat.icon }} {{ cat.name }}
+            {{ cat.name }}
           </option>
         </select>
         <span class="error-text" *ngIf="form.get('category_id')?.hasError('required') && form.get('category_id')?.touched">
@@ -121,12 +121,13 @@
       <!-- Start date -->
       <div class="form-group">
         <label for="start_date">Fecha de inicio *</label>
-        <input
-          id="start_date"
-          type="datetime-local"
-          formControlName="start_date"
-          class="form-control"
-        />
+        <app-datetime-picker
+          [value]="startDateValue"
+          (valueChange)="onStartDateChange($event)"
+          placeholder="Seleccionar fecha y hora"
+          [showTime]="true"
+          [required]="true"
+        ></app-datetime-picker>
         <span class="error-text" *ngIf="form.get('start_date')?.hasError('required') && form.get('start_date')?.touched">
           La fecha de inicio es requerida
         </span>
@@ -135,12 +136,12 @@
       <!-- End date (optional) -->
       <div class="form-group">
         <label for="end_date">Fecha de finalización (opcional)</label>
-        <input
-          id="end_date"
-          type="datetime-local"
-          formControlName="end_date"
-          class="form-control"
-        />
+        <app-datetime-picker
+          [value]="endDateValue"
+          (valueChange)="onEndDateChange($event)"
+          placeholder="Seleccionar fecha y hora"
+          [showTime]="true"
+        ></app-datetime-picker>
         <span class="error-text" *ngIf="form.hasError('endDateBeforeStart') && form.get('end_date')?.touched">
           La fecha de finalización debe ser posterior a la fecha de inicio
         </span>

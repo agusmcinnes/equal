@@ -25,20 +25,22 @@
       <div class="custom-inputs" *ngIf="selectedPreset === 'custom'">
         <div class="input-group">
           <label>Desde</label>
-          <input
-            type="date"
-            [(ngModel)]="customFrom"
-            [max]="customTo || undefined"
-          />
+          <app-datetime-picker
+            [value]="customFrom"
+            (valueChange)="customFrom = $event"
+            placeholder="Fecha inicio"
+            [showTime]="false"
+          ></app-datetime-picker>
         </div>
 
         <div class="input-group">
           <label>Hasta</label>
-          <input
-            type="date"
-            [(ngModel)]="customTo"
-            [min]="customFrom || undefined"
-          />
+          <app-datetime-picker
+            [value]="customTo"
+            (valueChange)="customTo = $event"
+            placeholder="Fecha fin"
+            [showTime]="false"
+          ></app-datetime-picker>
         </div>
 
         <button

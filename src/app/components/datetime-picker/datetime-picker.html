@@ -1,0 +1,96 @@
+<div class="datetime-picker-container">
+  <!-- Input display -->
+  <div class="picker-input" (click)="togglePicker()" [class.disabled]="disabled">
+    <span class="material-icons input-icon">calendar_today</span>
+    <input
+      type="text"
+      [value]="displayValue"
+      [placeholder]="placeholder"
+      readonly
+      [disabled]="disabled"
+    />
+    <span class="material-icons dropdown-icon">{{ isOpen ? 'expand_less' : 'expand_more' }}</span>
+  </div>
+
+  <!-- Dropdown picker -->
+  <div class="picker-overlay" *ngIf="isOpen" (click)="closePicker()"></div>
+  <div class="picker-dropdown" *ngIf="isOpen" [class.with-time]="showTime">
+    <div class="picker-content">
+      <!-- Calendar section -->
+      <div class="calendar-section">
+        <!-- Calendar header -->
+        <div class="calendar-header">
+          <button type="button" class="nav-btn" (click)="prevMonth()">
+            <span class="material-icons">chevron_left</span>
+          </button>
+          <span class="month-year">{{ months[currentMonth.getMonth()] }} {{ currentMonth.getFullYear() }}</span>
+          <button type="button" class="nav-btn" (click)="nextMonth()">
+            <span class="material-icons">chevron_right</span>
+          </button>
+        </div>
+
+        <!-- Week days -->
+        <div class="weekdays">
+          <span *ngFor="let day of weekDays" class="weekday">{{ day }}</span>
+        </div>
+
+        <!-- Calendar days -->
+        <div class="calendar-days">
+          <button
+            type="button"
+            *ngFor="let day of days"
+            class="day-btn"
+            [class.empty]="day === null"
+            [class.selected]="isSelected(day)"
+            [class.today]="isToday(day)"
+            (click)="selectDay(day)"
+            [disabled]="day === null"
+          >
+            {{ day }}
+          </button>
+        </div>
+      </div>
+
+      <!-- Time selector -->
+      <div class="time-selector" *ngIf="showTime">
+        <div class="time-label">Hora</div>
+        <div class="time-controls">
+          <div class="time-unit">
+            <button type="button" class="time-btn" (click)="incrementHour()">
+              <span class="material-icons">keyboard_arrow_up</span>
+            </button>
+            <span class="time-value">{{ formatHour(selectedHour) }}</span>
+            <button type="button" class="time-btn" (click)="decrementHour()">
+              <span class="material-icons">keyboard_arrow_down</span>
+            </button>
+          </div>
+          <span class="time-separator">:</span>
+          <div class="time-unit">
+            <button type="button" class="time-btn" (click)="incrementMinute()">
+              <span class="material-icons">keyboard_arrow_up</span>
+            </button>
+            <span class="time-value">{{ formatMinute(selectedMinute) }}</span>
+            <button type="button" class="time-btn" (click)="decrementMinute()">
+              <span class="material-icons">keyboard_arrow_down</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="picker-actions">
+      <button type="button" class="btn-clear" (click)="clearSelection()">
+        Limpiar
+      </button>
+      <button
+        type="button"
+        class="btn-confirm"
+        (click)="confirmSelection()"
+        [disabled]="!selectedDate"
+      >
+        Confirmar
+      </button>
+    </div>
+  </div>
+</div>

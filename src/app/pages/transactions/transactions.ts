@@ -18,6 +18,7 @@ import { Wallet } from '../../models/wallet.model';
 import { StatCardComponent } from '../../components/stat-card/stat-card';
 import { CategoryBadgeComponent } from '../../components/category-badge/category-badge';
 import { EmptyStateComponent } from '../../components/empty-state/empty-state';
+import { DatetimePickerComponent } from '../../components/datetime-picker/datetime-picker';
 import { NgxChartsModule, LegendPosition } from '@swimlane/ngx-charts';
 
 interface GroupedTransactions {
@@ -33,6 +34,7 @@ interface GroupedTransactions {
     StatCardComponent,
     CategoryBadgeComponent,
     EmptyStateComponent,
+    DatetimePickerComponent,
     NgxChartsModule
   ],
   templateUrl: './transactions.html',

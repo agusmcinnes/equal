@@ -8,6 +8,7 @@ import { CategoriesService } from '../../services/categories.service';
 import { Goal, GoalMovement, GoalWithMovements } from '../../models/goal.model';
 import { Wallet } from '../../models/wallet.model';
 import { EmptyStateComponent } from '../../components/empty-state/empty-state';
+import { DatetimePickerComponent } from '../../components/datetime-picker/datetime-picker';
 
 interface GoalForm {
   name: string;
@@ -35,7 +36,7 @@ interface IconOption {
 @Component({
   selector: 'app-goals',
   standalone: true,
-  imports: [CommonModule, FormsModule, EmptyStateComponent],
+  imports: [CommonModule, FormsModule, EmptyStateComponent, DatetimePickerComponent],
   templateUrl: './goals.html',
   styleUrl: './goals.css'
 })

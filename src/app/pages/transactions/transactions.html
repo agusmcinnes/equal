@@ -217,12 +217,13 @@
         <div class="form-row">
           <div class="form-group">
             <label>Fecha y Hora *</label>
-            <input
-              type="datetime-local"
-              [(ngModel)]="model.date"
-              name="date"
-              required
-            />
+            <app-datetime-picker
+              [value]="model.date"
+              (valueChange)="model.date = $event"
+              placeholder="Seleccionar fecha y hora"
+              [showTime]="true"
+              [required]="true"
+            ></app-datetime-picker>
             <span class="error" *ngIf="fieldErrors['date']">{{ fieldErrors['date'] }}</span>
           </div>
 
