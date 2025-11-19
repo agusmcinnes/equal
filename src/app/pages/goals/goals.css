@@ -5,7 +5,6 @@
   margin: 0 auto;
   min-height: 100vh;
   font-family: 'Poppins', sans-serif;
-  background: linear-gradient(135deg, #f5f7fa 0%, #f9fafb 100%);
 }
 
 /* Ensure Poppins is applied to all text elements */
@@ -687,6 +686,16 @@
 .btn-icon.delete:hover {
   background: #fee2e2;
   color: #dc2626;
+}
+
+.btn-icon.primary {
+  background: rgba(70, 51, 151, 0.1);
+  color: #463397;
+}
+
+.btn-icon.primary:hover {
+  background: rgba(70, 51, 151, 0.2);
+  color: #463397;
 }
 
 .btn-icon .material-icons {

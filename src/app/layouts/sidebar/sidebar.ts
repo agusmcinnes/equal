@@ -28,6 +28,8 @@ export class Sidebar {
     { icon: 'settings', label: 'Configuración', route: '/settings' },
   ];
 
+  showLogoutConfirm = false;
+
   constructor(
     public sidebarState: SidebarStateService,
     private authService: AuthService
@@ -41,7 +43,16 @@ export class Sidebar {
     this.sidebarState.toggle();
   }
 
-  logout() {
+  toggleLogoutConfirm() {
+    this.showLogoutConfirm = !this.showLogoutConfirm;
+  }
+
+  confirmLogout() {
+    this.showLogoutConfirm = false;
     this.authService.signOut();
+  }
+
+  cancelLogout() {
+    this.showLogoutConfirm = false;
   }
 }

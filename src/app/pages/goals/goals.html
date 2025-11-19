@@ -253,6 +253,9 @@
         </div>
 
         <div class="card-actions">
+          <button class="btn-icon primary" (click)="selectGoal(goal); $event.stopPropagation()" title="Ver Detalle">
+            <span class="material-icons">visibility</span>
+          </button>
           <button class="btn-icon" (click)="showGoalForm(goal); $event.stopPropagation()" title="Editar">
             <span class="material-icons">edit</span>
           </button>

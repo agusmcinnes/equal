@@ -27,9 +27,18 @@
       <span class="material-icons nav-icon">account_circle</span>
       <span class="nav-label" *ngIf="!isCollapsed">Perfil</span>
     </a>
-    <button class="nav-item logout-btn" (click)="logout()" title="Cerrar sesión">
-      <span class="material-icons nav-icon">logout</span>
-      <span class="nav-label" *ngIf="!isCollapsed">Salir</span>
-    </button>
+    <div class="logout-container">
+      <button class="nav-item logout-btn" (click)="toggleLogoutConfirm()" title="Cerrar sesión">
+        <span class="material-icons nav-icon">logout</span>
+        <span class="nav-label" *ngIf="!isCollapsed">Salir</span>
+      </button>
+      <div class="logout-confirm-tooltip" *ngIf="showLogoutConfirm">
+        <p>¿Cerrar sesión?</p>
+        <div class="logout-confirm-actions">
+          <button class="btn-confirm" (click)="confirmLogout()">Sí</button>
+          <button class="btn-cancel" (click)="cancelLogout()">No</button>
+        </div>
+      </div>
+    </div>
   </div>
 </aside>

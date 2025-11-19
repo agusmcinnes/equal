@@ -17,6 +17,7 @@ interface NavItem {
 })
 export class MobileNav {
   isDrawerOpen = false;
+  showLogoutConfirm = false;
 
   // Items principales en la barra inferior
   navItems: NavItem[] = [
@@ -45,12 +46,22 @@ export class MobileNav {
 
   closeDrawer() {
     this.isDrawerOpen = false;
+    this.showLogoutConfirm = false;
   }
 
   constructor(private authService: AuthService) {}
 
-  logout() {
+  toggleLogoutConfirm() {
+    this.showLogoutConfirm = !this.showLogoutConfirm;
+  }
+
+  confirmLogout() {
+    this.showLogoutConfirm = false;
     this.authService.signOut();
     this.closeDrawer();
+  }
+
+  cancelLogout() {
+    this.showLogoutConfirm = false;
   }
 }
