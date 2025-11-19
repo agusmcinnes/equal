@@ -1,0 +1,68 @@
+{
+  "nav": {
+    "dashboard": "Dashboard",
+    "transactions": "Transacciones",
+    "categories": "Categorías",
+    "scheduled": "Operaciones Futuras",
+    "goals": "Objetivos",
+    "wallets": "Billeteras",
+    "dollar": "Dólar",
+    "settings": "Configuración",
+    "profile": "Perfil",
+    "logout": "Salir"
+  },
+  "settings": {
+    "title": "Configuración",
+    "language": "Idioma",
+    "theme": "Tema",
+    "languageDescription": "Selecciona tu idioma preferido",
+    "spanish": "Español",
+    "english": "English",
+    "portuguese": "Português",
+    "darkMode": "Modo Oscuro",
+    "lightMode": "Modo Claro",
+    "autoMode": "Automático",
+    "saved": "Preferencias guardadas"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "balance": "Saldo Total",
+    "income": "Ingresos",
+    "expenses": "Gastos",
+    "balance_variation": "Variación de Saldo"
+  },
+  "transactions": {
+    "title": "Transacciones",
+    "add": "Agregar Transacción",
+    "recent": "Transacciones Recientes"
+  },
+  "categories": {
+    "title": "Categorías",
+    "add": "Agregar Categoría"
+  },
+  "login": {
+    "title": "Iniciar Sesión",
+    "email": "Email",
+    "password": "Contraseña",
+    "signin": "Iniciar Sesión",
+    "register": "Regístrate aquí",
+    "noAccount": "¿No tienes cuenta?"
+  },
+  "register": {
+    "title": "Registrarse",
+    "email": "Email",
+    "password": "Contraseña",
+    "confirmPassword": "Confirmar Contraseña",
+    "signup": "Registrarse",
+    "haveAccount": "¿Ya tienes cuenta?",
+    "signin": "Inicia sesión"
+  },
+  "dollar": {
+    "title": "Cotización del Dólar",
+    "official": "Oficial",
+    "blue": "Blue",
+    "buy": "Compra",
+    "sell": "Venta",
+    "difference": "Diferencia"
+  }
+}

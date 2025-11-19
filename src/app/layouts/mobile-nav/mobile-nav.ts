@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { AuthService } from '../../services/auth.service';
 
 interface NavItem {
   icon: string;
@@ -44,5 +45,12 @@ export class MobileNav {
 
   closeDrawer() {
     this.isDrawerOpen = false;
+  }
+
+  constructor(private authService: AuthService) {}
+
+  logout() {
+    this.authService.signOut();
+    this.closeDrawer();
   }
 }

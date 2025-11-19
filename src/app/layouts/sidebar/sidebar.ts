@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { SidebarStateService } from '../../shared/sidebar-state.service';
+import { AuthService } from '../../services/auth.service';
 
 interface MenuItem {
   icon: string;
@@ -27,7 +28,10 @@ export class Sidebar {
     { icon: 'settings', label: 'Configuración', route: '/settings' },
   ];
 
-  constructor(public sidebarState: SidebarStateService) {}
+  constructor(
+    public sidebarState: SidebarStateService,
+    private authService: AuthService
+  ) {}
 
   get isCollapsed(): boolean {
     return this.sidebarState.isCollapsed;
@@ -35,5 +39,9 @@ export class Sidebar {
 
   toggleSidebar() {
     this.sidebarState.toggle();
+  }
+
+  logout() {
+    this.authService.signOut();
   }
 }

@@ -41,7 +41,7 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  background: #f3f4f6;
+  background: var(--bg-secondary);
   transition: all 0.3s ease;
 }
 
@@ -51,7 +51,7 @@
 
 .stat-icon .material-icons {
   font-size: 28px;
-  color: #6b7280;
+  color: var(--text-secondary);
 }
 
 .stat-icon.gradient-bg .material-icons {
@@ -66,7 +66,7 @@
 .stat-title {
   font-size: 14px;
   font-weight: 500;
-  color: #6b7280;
+  color: var(--text-secondary);
   margin-bottom: 8px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -123,7 +123,7 @@
 .skeleton-line {
   height: 24px;
   width: 120px;
-  background: linear-gradient(90deg, #e5e7eb 25%, #f3f4f6 50%, #e5e7eb 75%);
+  background: linear-gradient(90deg, #e5e7eb 25%, var(--bg-secondary) 50%, #e5e7eb 75%);
   background-size: 200% 100%;
   animation: shimmer 1.5s ease-in-out infinite;
   border-radius: 6px;
