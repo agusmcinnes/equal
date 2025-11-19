@@ -28,6 +28,7 @@
   font-weight: 700;
   color: var(--color-dark);
   margin: 0;
+  letter-spacing: -0.5px;
 }
 
 .filters-row {

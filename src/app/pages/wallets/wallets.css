@@ -35,8 +35,8 @@
 .header-content h1 {
   font-size: 32px;
   font-weight: 700;
-  color: #1f2937;
-  margin: 0 0 8px 0;
+  color: var(--color-dark);
+  margin: 0;
   letter-spacing: -0.5px;
 }
 

@@ -12,8 +12,9 @@
 .page-header h1 {
   font-size: 32px;
   font-weight: 700;
-  color: var(--text-primary);
-  margin: 0 0 8px 0;
+  color: var(--color-dark);
+  margin: 0;
+  letter-spacing: -0.5px;
 }
 
 .header-subtitle {
@@ -79,16 +80,17 @@
   align-items: center;
   gap: 8px;
   padding: 12px 16px;
-  background: var(--bg-secondary);
+  background: rgba(70, 51, 151, 0.1);
   border-radius: 8px;
   margin-bottom: 24px;
-  color: var(--text-secondary);
+  color: var(--color-primary);
   font-size: 14px;
+  border: 1px solid rgba(70, 51, 151, 0.2);
 }
 
 .update-info .material-icons {
   font-size: 20px;
-  color: var(--text-secondary);
+  color: var(--color-primary);
 }
 
 /* Rates Grid */
@@ -123,9 +125,9 @@
 
 .rate-header h3 {
   font-size: 20px;
-  font-weight: 600;
+  font-weight: 700;
   margin: 0;
-  color: var(--text-primary);
+  color: var(--color-primary);
 }
 
 .rate-header .material-icons {
@@ -155,22 +157,24 @@
 
 .rate-row .label {
   font-size: 14px;
-  color: var(--text-secondary);
-  font-weight: 500;
+  color: var(--color-primary);
+  font-weight: 600;
 }
 
 .rate-row .value {
   font-size: 18px;
-  font-weight: 600;
-  color: var(--text-primary);
+  font-weight: 700;
+  color: var(--color-primary);
 }
 
 .rate-row .value.buy {
-  color: var(--success);
+  color: #10b981;
+  font-weight: 700;
 }
 
 .rate-row .value.sell {
-  color: var(--error);
+  color: #ef4444;
+  font-weight: 700;
 }
 
 .rate-difference {
@@ -178,13 +182,14 @@
   justify-content: space-between;
   align-items: center;
   padding: 12px;
-  background: var(--bg-secondary);
+  background: rgba(70, 51, 151, 0.1);
   border-radius: 8px;
+  border: 1px solid rgba(70, 51, 151, 0.2);
 }
 
 .rate-difference .label {
   font-size: 14px;
-  color: var(--text-secondary);
+  color: var(--color-primary);
 }
 
 .rate-difference .value {
@@ -228,7 +233,7 @@
   font-size: 18px;
   font-weight: 600;
   margin: 0;
-  color: var(--text-primary);
+  color: var(--color-primary);
 }
 
 .info-list {
@@ -247,7 +252,7 @@
 }
 
 .info-list li strong {
-  color: var(--text-primary);
+  color: var(--color-primary);
   font-weight: 600;
 }
 

@@ -22,10 +22,10 @@
 }
 
 .header-title h1 {
-  margin: 0;
   font-size: 32px;
   font-weight: 700;
-  color: var(--text-primary);
+  color: var(--color-dark);
+  margin: 0;
   letter-spacing: -0.5px;
 }
 
@@ -106,12 +106,13 @@
   gap: 12px;
   font-size: 22px;
   font-weight: 600;
-  color: var(--text-primary);
+  color: var(--color-dark);
 
   .material-icons {
     font-size: 26px;
     width: 26px;
     height: 26px;
+    color: var(--color-dark);
   }
 }
 
