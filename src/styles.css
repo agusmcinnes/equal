@@ -16,6 +16,13 @@
   --shadow-md: 0 4px 6px rgba(70, 51, 151, 0.15);
   --shadow-lg: 0 10px 15px rgba(70, 51, 151, 0.2);
   --shadow-xl: 0 20px 25px rgba(70, 51, 151, 0.25);
+  
+  /* Dark Mode Colors */
+  --bg-primary: #0d0d0f;
+  --bg-secondary: #16161b;
+  --text-primary: #f0f0f0;
+  --text-secondary: #8b8b8b;
+  --border: #e5e7eb;
 }
 
 * {
@@ -26,6 +33,7 @@ html, body {
   height: 100%;
   margin: 0;
   padding: 0;
+  overflow-x: hidden;
 }
 
 body {
@@ -49,6 +57,177 @@ body {
   word-wrap: normal;
   direction: ltr;
   -webkit-font-feature-settings: 'liga';
+  -webkit-text-stroke-width: 0.2px;
+  -webkit-user-select: none;
+}
+
+/* ===== GLOBAL MOBILE OPTIMIZATIONS ===== */
+
+/* Ensure proper touch targets (48px minimum) */
+button, a, input[type="button"], input[type="submit"] {
+  min-height: 48px;
+  min-width: 48px;
+}
+
+/* Remove default iOS styling */
+input, select, textarea, button {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+}
+
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+textarea,
+select {
+  font-size: 16px; /* Prevents zoom on iOS */
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Better tap feedback on mobile */
+a, button {
+  -webkit-tap-highlight-color: transparent;
+  tap-highlight-color: transparent;
+}
+
+/* ===== MOBILE VIEWPORT META ===== */
+@media (max-width: 768px) {
+  body {
+    font-size: 14px;
+  }
+
+  /* Reduce padding on mobile */
+  .dashboard-page,
+  .transactions-page,
+  .page-container {
+    padding: 16px !important;
+    padding-bottom: 90px !important; /* Space for bottom nav */
+  }
+
+  /* Make headers responsive */
+  h1 {
+    font-size: 24px !important;
+  }
+
+  h2 {
+    font-size: 20px !important;
+  }
+
+  h3 {
+    font-size: 16px !important;
+  }
+
+  /* Improve spacing on small screens */
+  .page-header {
+    flex-direction: column;
+    gap: 16px;
+    align-items: flex-start;
+  }
+
+  .header-content {
+    gap: 16px !important;
+  }
+
+  /* Make grids stack better */
+  .stats-grid,
+  .charts-grid,
+  .cards-grid {
+    grid-template-columns: 1fr !important;
+    gap: 16px !important;
+  }
+
+  /* Improve button spacing */
+  .button-group,
+  .action-buttons {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .button-group button,
+  .action-buttons button {
+    width: 100%;
+  }
+
+  /* Better modal sizing */
+  .modal, .dialog {
+    width: 90vw !important;
+    max-width: 90vw !important;
+  }
+
+  /* Improve table scrolling */
+  table {
+    font-size: 12px;
+  }
+
+  .table-wrapper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Better input sizing */
+  input, select, textarea {
+    width: 100%;
+    padding: 12px 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  body {
+    font-size: 13px;
+  }
+
+  h1 {
+    font-size: 20px !important;
+  }
+
+  h2 {
+    font-size: 18px !important;
+  }
+
+  /* Extra small adjustments */
+  .dashboard-page,
+  .transactions-page {
+    padding: 12px !important;
+  }
+
+  .page-header {
+    margin-bottom: 16px !important;
+  }
+
+  /* Single column for everything */
+  .stats-grid,
+  .charts-grid,
+  .cards-grid,
+  .filter-group {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Reduce icon sizes on very small screens */
+  .material-icons {
+    font-size: 20px;
+  }
+
+  /* Make filters stack vertically */
+  .filters-row {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .filter-select,
+  .currency-select {
+    width: 100%;
+    min-width: auto !important;
+  }
+}
+
+/* ===== MATERIAL ICONS ADDITIONAL STYLES ===== */
+.material-icons {
   -webkit-font-smoothing: antialiased;
 }
 

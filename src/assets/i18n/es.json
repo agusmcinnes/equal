@@ -64,5 +64,23 @@
     "buy": "Compra",
     "sell": "Venta",
     "difference": "Diferencia"
+  },
+  "profile": {
+    "title": "Mi Perfil",
+    "edit": "Editar Perfil",
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "fullName": "Nombre Completo",
+    "email": "Email",
+    "bio": "Biografía",
+    "memberSince": "Miembro desde",
+    "successUpdate": "Perfil actualizado correctamente",
+    "errorUpdate": "Error al actualizar el perfil",
+    "changeAvatar": "Cambiar foto de perfil",
+    "avatarUpdated": "Avatar actualizado correctamente",
+    "errorAvatar": "Error al subir la imagen",
+    "imageTooLarge": "La imagen no debe superar 5MB",
+    "invalidImage": "Por favor selecciona una imagen válida",
+    "notSpecified": "No especificado"
   }
 }

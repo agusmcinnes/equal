@@ -244,8 +244,113 @@
   }
 }
 
+@media (max-width: 768px) {
+  .login-container {
+    padding: 16px;
+  }
+
+  .login-card {
+    padding: 28px 24px;
+    border-radius: 20px;
+  }
+
+  .logo-icon {
+    width: 64px;
+    height: 64px;
+  }
+
+  .logo-title {
+    font-size: 24px;
+  }
+
+  .subtitle {
+    font-size: 12px;
+  }
+
+  .form-group input,
+  .password-input-wrapper input {
+    font-size: 16px; /* Prevent iOS zoom */
+    padding: 14px 16px;
+    min-height: 48px;
+  }
+
+  .form-actions button {
+    font-size: 15px;
+    padding: 14px 16px;
+    min-height: 48px;
+  }
+
+  .form-group label {
+    font-size: 13px;
+  }
+}
+
 @media (max-width: 480px) {
   .login-card {
-    padding: 24px 20px;
+    padding: 20px 16px;
+    border-radius: 16px;
+  }
+
+  .logo-section {
+    margin-bottom: 20px;
+  }
+
+  .logo-icon {
+    width: 56px;
+    height: 56px;
+  }
+
+  .logo-title {
+    font-size: 20px;
+    margin: 6px;
+  }
+
+  .subtitle {
+    font-size: 11px;
+  }
+
+  .login-form {
+    gap: 14px;
+  }
+
+  .form-group {
+    gap: 6px;
+  }
+
+  .form-group label {
+    font-size: 12px;
+  }
+
+  .form-group input,
+  .password-input-wrapper input {
+    font-size: 16px;
+    padding: 12px 14px;
+    border-radius: 10px;
+  }
+
+  .password-toggle-btn {
+    right: 10px;
+  }
+
+  .password-toggle-btn .material-icons {
+    font-size: 18px;
+  }
+
+  .form-actions {
+    gap: 10px;
+  }
+
+  .form-actions button {
+    font-size: 14px;
+    padding: 12px 14px;
+    min-height: 44px;
+  }
+
+  .register-link {
+    font-size: 12px;
+  }
+
+  .divider {
+    margin: 12px 0;
   }
 }

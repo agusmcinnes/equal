@@ -8,6 +8,7 @@ import { Goals } from './pages/goals/goals';
 import { Wallets } from './pages/wallets/wallets';
 import { ScheduledComponent } from './pages/scheduled/scheduled';
 import { DollarComponent } from './pages/dollar/dollar';
+import { Profile } from './pages/profile/profile';
 import { MainLayout } from './layouts/main-layout/main-layout';
 import { authGuard } from './guards/auth.guard';
 
@@ -68,7 +69,7 @@ export const routes: Routes = [
       },
       {
         path: 'profile',
-        loadComponent: () => import('./pages/dashboard/dashboard').then(m => m.Dashboard)
+        component: Profile
       }
     ]
   },

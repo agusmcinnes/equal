@@ -1,0 +1,86 @@
+{
+  "nav": {
+    "dashboard": "Dashboard",
+    "transactions": "Transactions",
+    "categories": "Categories",
+    "scheduled": "Scheduled",
+    "goals": "Goals",
+    "wallets": "Wallets",
+    "dollar": "Dollar",
+    "settings": "Settings",
+    "profile": "Profile",
+    "logout": "Logout"
+  },
+  "settings": {
+    "title": "Settings",
+    "language": "Language",
+    "theme": "Theme",
+    "languageDescription": "Select your preferred language",
+    "spanish": "Español",
+    "english": "English",
+    "portuguese": "Português",
+    "darkMode": "Dark Mode",
+    "lightMode": "Light Mode",
+    "autoMode": "Automatic",
+    "saved": "Preferences saved"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "balance": "Total Balance",
+    "income": "Income",
+    "expenses": "Expenses",
+    "balance_variation": "Balance Variation"
+  },
+  "transactions": {
+    "title": "Transactions",
+    "add": "Add Transaction",
+    "recent": "Recent Transactions"
+  },
+  "categories": {
+    "title": "Categories",
+    "add": "Add Category"
+  },
+  "login": {
+    "title": "Sign In",
+    "email": "Email",
+    "password": "Password",
+    "signin": "Sign In",
+    "register": "Sign up here",
+    "noAccount": "Don't have an account?"
+  },
+  "register": {
+    "title": "Sign Up",
+    "email": "Email",
+    "password": "Password",
+    "confirmPassword": "Confirm Password",
+    "signup": "Sign Up",
+    "haveAccount": "Already have an account?",
+    "signin": "Sign in"
+  },
+  "dollar": {
+    "title": "Dollar Exchange Rate",
+    "official": "Official",
+    "blue": "Blue",
+    "buy": "Buy",
+    "sell": "Sell",
+    "difference": "Difference"
+  },
+  "profile": {
+    "title": "My Profile",
+    "edit": "Edit Profile",
+    "save": "Save",
+    "cancel": "Cancel",
+    "fullName": "Full Name",
+    "email": "Email",
+    "bio": "Biography",
+    "memberSince": "Member Since",
+    "successUpdate": "Profile updated successfully",
+    "errorUpdate": "Error updating profile",
+    "changeAvatar": "Change profile picture",
+    "avatarUpdated": "Avatar updated successfully",
+    "errorAvatar": "Error uploading image",
+    "imageTooLarge": "Image must not exceed 5MB",
+    "invalidImage": "Please select a valid image",
+    "notSpecified": "Not specified"
+  }
+}

@@ -1,0 +1,86 @@
+{
+  "nav": {
+    "dashboard": "Painel de Controle",
+    "transactions": "Transações",
+    "categories": "Categorias",
+    "scheduled": "Agendado",
+    "goals": "Metas",
+    "wallets": "Carteiras",
+    "dollar": "Dólar",
+    "settings": "Configurações",
+    "profile": "Perfil",
+    "logout": "Sair"
+  },
+  "settings": {
+    "title": "Configurações",
+    "language": "Idioma",
+    "theme": "Tema",
+    "languageDescription": "Selecione seu idioma preferido",
+    "spanish": "Español",
+    "english": "English",
+    "portuguese": "Português",
+    "darkMode": "Modo Escuro",
+    "lightMode": "Modo Claro",
+    "autoMode": "Automático",
+    "saved": "Preferências salvas"
+  },
+  "dashboard": {
+    "title": "Painel de Controle",
+    "balance": "Saldo Total",
+    "income": "Renda",
+    "expenses": "Despesas",
+    "balance_variation": "Variação de Saldo"
+  },
+  "transactions": {
+    "title": "Transações",
+    "add": "Adicionar Transação",
+    "recent": "Transações Recentes"
+  },
+  "categories": {
+    "title": "Categorias",
+    "add": "Adicionar Categoria"
+  },
+  "login": {
+    "title": "Entrar",
+    "email": "Email",
+    "password": "Senha",
+    "signin": "Entrar",
+    "register": "Cadastre-se aqui",
+    "noAccount": "Não tem conta?"
+  },
+  "register": {
+    "title": "Cadastrar",
+    "email": "Email",
+    "password": "Senha",
+    "confirmPassword": "Confirmar Senha",
+    "signup": "Cadastrar",
+    "haveAccount": "Já tem conta?",
+    "signin": "Entre"
+  },
+  "dollar": {
+    "title": "Cotação do Dólar",
+    "official": "Oficial",
+    "blue": "Blue",
+    "buy": "Compra",
+    "sell": "Venda",
+    "difference": "Diferença"
+  },
+  "profile": {
+    "title": "Meu Perfil",
+    "edit": "Editar Perfil",
+    "save": "Salvar",
+    "cancel": "Cancelar",
+    "fullName": "Nome Completo",
+    "email": "Email",
+    "bio": "Biografia",
+    "memberSince": "Membro desde",
+    "successUpdate": "Perfil atualizado com sucesso",
+    "errorUpdate": "Erro ao atualizar o perfil",
+    "changeAvatar": "Alterar foto de perfil",
+    "avatarUpdated": "Avatar atualizado com sucesso",
+    "errorAvatar": "Erro ao enviar imagem",
+    "imageTooLarge": "A imagem não deve exceder 5MB",
+    "invalidImage": "Por favor selecione uma imagem válida",
+    "notSpecified": "Não especificado"
+  }
+}

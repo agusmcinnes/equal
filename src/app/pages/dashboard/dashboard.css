@@ -1232,4 +1232,78 @@
     gap: 8px;
     padding: 16px 12px;
   }
+
+  /* Stat card improvements for mobile */
+  .stat-card {
+    padding: 16px !important;
+  }
+
+  .stat-value {
+    font-size: 24px !important;
+  }
+
+  .stat-label {
+    font-size: 12px !important;
+  }
+
+  /* Chart adjustments */
+  .charts-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .chart-container {
+    min-height: 250px !important;
+  }
+
+  /* Modal improvements */
+  .modal-content {
+    width: 100vw !important;
+    max-height: 90vh !important;
+    border-radius: 20px 20px 0 0;
+  }
+
+  /* Better table for mobile */
+  .transactions-table {
+    font-size: 12px;
+  }
+
+  .transactions-table th,
+  .transactions-table td {
+    padding: 8px 4px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .dashboard-page {
+    padding: 12px;
+  }
+
+  .page-header h1 {
+    font-size: 20px;
+  }
+
+  .stat-card {
+    padding: 12px !important;
+  }
+
+  .stat-value {
+    font-size: 20px !important;
+  }
+
+  .quick-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .action-btn {
+    padding: 12px 8px;
+  }
+
+  /* Hide some elements on very small screens */
+  .header-subtitle {
+    display: none;
+  }
+
+  .stat-change {
+    font-size: 11px;
+  }
 }

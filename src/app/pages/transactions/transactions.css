@@ -853,6 +853,7 @@
   .transaction-card {
     flex-direction: column;
     align-items: flex-start;
+    padding: 16px !important;
   }
 
   .tx-right {
@@ -878,5 +879,157 @@
   .btn-primary,
   .btn-secondary {
     width: 100%;
+  }
+
+  /* Filters stack on mobile */
+  .filters-row {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .filters-row .filter-group {
+    width: 100%;
+    flex-direction: column;
+  }
+
+  .filters-row .filter-group label {
+    margin-bottom: 6px;
+  }
+
+  .filter-select {
+    width: 100%;
+  }
+
+  /* Better spacing for transaction items */
+  .transaction-item {
+    padding: 12px;
+    min-height: 56px;
+  }
+
+  .transaction-left {
+    gap: 12px;
+  }
+
+  .transaction-icon {
+    min-width: 40px;
+    width: 40px;
+    height: 40px;
+  }
+
+  .transaction-info h4 {
+    font-size: 14px;
+  }
+
+  /* Header adjustments */
+  .page-header {
+    gap: 12px;
+  }
+
+  .page-header h1 {
+    font-size: 24px;
+  }
+
+  /* Modal full-screen on mobile */
+  .transaction-modal {
+    position: fixed;
+    width: 100vw !important;
+    height: 100vh !important;
+    max-height: 100vh !important;
+    border-radius: 0;
+    top: 0;
+    left: 0;
+  }
+
+  /* Better empty state */
+  .empty-state-icon {
+    font-size: 48px;
+  }
+
+  .empty-state-text {
+    font-size: 14px;
+  }
+
+  /* Table responsive handling */
+  .table-container {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .table-container::-webkit-scrollbar {
+    height: 6px;
+  }
+
+  .table-container::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .table-container::-webkit-scrollbar-thumb {
+    background: rgba(70, 51, 151, 0.3);
+    border-radius: 3px;
+  }
+}
+
+@media (max-width: 480px) {
+  .transactions-page {
+    padding: 12px;
+  }
+
+  .page-header {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .page-header h1 {
+    font-size: 20px;
+  }
+
+  .transaction-card {
+    padding: 12px !important;
+  }
+
+  /* Single column filters */
+  .filters-row .filter-group {
+    flex-direction: column;
+  }
+
+  .filter-select {
+    width: 100%;
+  }
+
+  /* Minimize transaction item info on tiny screens */
+  .transaction-time {
+    font-size: 11px;
+  }
+
+  .transaction-category {
+    font-size: 12px;
+  }
+
+  .transaction-amount {
+    font-size: 14px;
+  }
+
+  /* Hide category icon if needed */
+  .transaction-icon {
+    min-width: 36px;
+    width: 36px;
+    height: 36px;
+  }
+
+  /* Form improvements */
+  .form-row {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  input, select, textarea {
+    font-size: 16px;
+    padding: 12px;
+  }
+
+  /* Button styling */
+  .btn-primary, .btn-secondary {
+    padding: 12px 16px;
+    font-size: 14px;
   }
 }
