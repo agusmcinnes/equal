@@ -4,6 +4,15 @@
   font-family: 'Poppins', sans-serif;
 }
 
+.select-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 999;
+}
+
 .select-trigger {
   display: flex;
   align-items: center;
@@ -30,6 +39,19 @@
   background: #f9fafb;
   cursor: not-allowed;
   opacity: 0.7;
+}
+
+.select-trigger.loading {
+  background: #f9fafb;
+}
+
+.spinning {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
 
 .select-label {
@@ -70,6 +92,23 @@
   max-height: 280px;
   overflow-y: auto;
   animation: slideDown 0.2s ease;
+}
+
+.select-dropdown.open-up {
+  top: auto;
+  bottom: calc(100% + 4px);
+  animation: slideUp 0.2s ease;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @keyframes slideDown {

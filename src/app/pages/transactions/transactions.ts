@@ -108,6 +108,12 @@ export class Transactions implements OnInit, OnDestroy {
     { value: 'USDT', label: 'Tether (USDT)', icon: 'currency_bitcoin' }
   ];
 
+  // Cached options (updated when data loads)
+  categorySelectOptions: SelectOption[] = [];
+  walletSelectOptions: SelectOption[] = [];
+  categoriesLoaded = false;
+  walletsLoaded = false;
+
   // Form model
   model: Transaction = this.getEmptyModel();
   fieldErrors: { [k: string]: string } = {};
@@ -154,6 +160,7 @@ export class Transactions implements OnInit, OnDestroy {
     this.wallets = await this.walletsService.list()
       .pipe(take(1))
       .toPromise() || [];
+    this.updateWalletOptions();
 
     // Load transactions and stats (last 30 days)
     await this.loadData();
@@ -176,6 +183,33 @@ export class Transactions implements OnInit, OnDestroy {
         this.categories = after || [];
       }
     }
+
+    // Update cached options
+    this.updateCategoryOptions();
+  }
+
+  private updateCategoryOptions(): void {
+    this.categorySelectOptions = [
+      { value: null, label: 'Sin categoría', icon: 'category' },
+      ...this.categories.map(cat => ({
+        value: cat.id,
+        label: cat.name,
+        icon: cat.icon || 'category'
+      }))
+    ];
+    this.categoriesLoaded = true;
+  }
+
+  private updateWalletOptions(): void {
+    this.walletSelectOptions = [
+      { value: null, label: 'Sin billetera', icon: 'account_balance_wallet' },
+      ...this.wallets.map(w => ({
+        value: w.id,
+        label: `${w.name} (${w.currency})`,
+        icon: 'account_balance_wallet'
+      }))
+    ];
+    this.walletsLoaded = true;
   }
 
   async loadData(): Promise<void> {
@@ -412,31 +446,6 @@ export class Transactions implements OnInit, OnDestroy {
     return Math;
   }
 
-  get categoryOptions(): SelectOption[] {
-    const options: SelectOption[] = [
-      { value: null, label: 'Sin categoría', icon: 'category' }
-    ];
-    return options.concat(
-      this.categories.map(cat => ({
-        value: cat.id,
-        label: cat.name,
-        icon: cat.icon || 'category'
-      }))
-    );
-  }
-
-  get walletOptions(): SelectOption[] {
-    const options: SelectOption[] = [
-      { value: null, label: 'Sin billetera', icon: 'account_balance_wallet' }
-    ];
-    return options.concat(
-      this.wallets.map(w => ({
-        value: w.id,
-        label: `${w.name} (${w.currency})`,
-        icon: 'account_balance_wallet'
-      }))
-    );
-  }
 
   private async loadTransactionsLegacy(): Promise<void> {
     const { data } = await this.txService.list();
