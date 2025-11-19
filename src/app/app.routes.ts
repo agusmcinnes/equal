@@ -7,6 +7,7 @@ import { Categories } from './pages/categories/categories';
 import { Goals } from './pages/goals/goals';
 import { Wallets } from './pages/wallets/wallets';
 import { ScheduledComponent } from './pages/scheduled/scheduled';
+import { DollarComponent } from './pages/dollar/dollar';
 import { MainLayout } from './layouts/main-layout/main-layout';
 import { authGuard } from './guards/auth.guard';
 
@@ -59,7 +60,7 @@ export const routes: Routes = [
       },
       {
         path: 'dollar',
-        loadComponent: () => import('./pages/dashboard/dashboard').then(m => m.Dashboard)
+        component: DollarComponent
       },
       {
         path: 'settings',

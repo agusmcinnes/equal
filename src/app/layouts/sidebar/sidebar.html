@@ -27,7 +27,7 @@
       <span class="material-icons nav-icon">account_circle</span>
       <span class="nav-label" *ngIf="!isCollapsed">Perfil</span>
     </a>
-    <button class="nav-item logout-btn" title="Cerrar sesión">
+    <button class="nav-item logout-btn" (click)="logout()" title="Cerrar sesión">
       <span class="material-icons nav-icon">logout</span>
       <span class="nav-label" *ngIf="!isCollapsed">Salir</span>
     </button>

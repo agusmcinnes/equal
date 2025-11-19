@@ -1,0 +1,88 @@
+<div class="dollar-page">
+  <!-- Page Header -->
+  <div class="page-header">
+    <div class="header-content">
+      <h1>Cotización del Dólar</h1>
+      <p class="header-subtitle">Cotización en vivo de diferentes tipos de dólar</p>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading" class="loading-state">
+    <div class="spinner"></div>
+    <p>Cargando cotizaciones...</p>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="error && !loading" class="error-message">
+    <span class="material-icons">error_outline</span>
+    <p>{{ error }}</p>
+  </div>
+
+  <!-- Main Content -->
+  <div *ngIf="!loading && dollarRates.length > 0" class="dollar-content">
+    <!-- Last Update -->
+    <div class="update-info">
+      <span class="material-icons">schedule</span>
+      <span>Última actualización: {{ formatTime(lastUpdate!) }}</span>
+    </div>
+
+    <!-- Rates Grid -->
+    <div class="rates-grid">
+      <div *ngFor="let rate of dollarRates" class="rate-card">
+        <div class="rate-header">
+          <h3>{{ rate.currency }}</h3>
+          <span class="material-icons" [class.trending-up]="getDifference(rate.buy, rate.sell) > 0">
+            trending_up
+          </span>
+        </div>
+
+        <div class="rate-body">
+          <div class="rate-row">
+            <span class="label">Compra</span>
+            <span class="value buy">{{ formatCurrency(rate.buy) }}</span>
+          </div>
+
+          <div class="rate-row">
+            <span class="label">Venta</span>
+            <span class="value sell">{{ formatCurrency(rate.sell) }}</span>
+          </div>
+
+          <div class="rate-difference">
+            <span class="label">Diferencia</span>
+            <span class="value" [class.positive]="getDifference(rate.buy, rate.sell) > 0">
+              {{ getDifference(rate.buy, rate.sell) | number: '1.2-2' }}%
+            </span>
+          </div>
+        </div>
+
+        <div class="rate-footer">
+          <small>Actualizado: {{ formatTime(rate.timestamp) }}</small>
+        </div>
+      </div>
+    </div>
+
+    <!-- Info Card -->
+    <div class="info-card">
+      <div class="info-header">
+        <span class="material-icons">info</span>
+        <h4>Tipos de Cotización</h4>
+      </div>
+      <ul class="info-list">
+        <li>
+          <strong>Oficial:</strong> Cotización del Banco Central de la República Argentina
+        </li>
+        <li>
+          <strong>Blue:</strong> Cotización del mercado informal (mercado negro)
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Empty State -->
+  <div *ngIf="!loading && dollarRates.length === 0 && !error" class="empty-state">
+    <span class="material-icons">trending_up</span>
+    <p>No hay datos disponibles</p>
+    <p style="font-size: 12px; color: var(--text-secondary);">Intenta recargar la página</p>
+  </div>
+</div>

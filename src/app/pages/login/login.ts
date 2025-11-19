@@ -15,6 +15,7 @@ export class Login {
   password = '';
   loading = false;
   errorMessage = '';
+  showPassword = false;
 
   constructor(
     private authService: AuthService,
@@ -39,5 +40,9 @@ export class Login {
     } else {
       this.router.navigate(['/dashboard']);
     }
+  }
+
+  togglePasswordVisibility() {
+    this.showPassword = !this.showPassword;
   }
 }
