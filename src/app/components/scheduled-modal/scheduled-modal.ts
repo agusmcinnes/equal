@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, OnInit, OnDestroy } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnInit, OnDestroy, OnChanges, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
 import { ScheduledTransaction, ScheduledTransactionWithDetails, FREQUENCY_OPTIONS } from '../../models/scheduled-transaction.model';
@@ -16,7 +16,7 @@ import { takeUntil } from 'rxjs/operators';
   templateUrl: './scheduled-modal.html',
   styleUrl: './scheduled-modal.css'
 })
-export class ScheduledModalComponent implements OnInit, OnDestroy {
+export class ScheduledModalComponent implements OnInit, OnDestroy, OnChanges {
   @Input() isOpen = false;
   @Input() mode: 'create' | 'edit' = 'create';
   @Input() transaction: ScheduledTransactionWithDetails | null = null;
@@ -44,6 +44,31 @@ export class ScheduledModalComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     if (this.transaction) {
       this.populateForm(this.transaction);
+    }
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    // When modal opens, reset form with correct values
+    if (changes['isOpen'] && changes['isOpen'].currentValue === true) {
+      this.errorMessage = '';
+
+      if (this.mode === 'edit' && this.transaction) {
+        // Edit mode: populate with transaction data
+        this.populateForm(this.transaction);
+      } else {
+        // Create mode: reset form with default values
+        this.form.reset({
+          description: '',
+          type: this.defaultType,
+          amount: '',
+          currency: 'ARS',
+          category_id: '',
+          wallet_id: null,
+          start_date: '',
+          end_date: '',
+          frequency: 'monthly'
+        });
+      }
     }
   }
 

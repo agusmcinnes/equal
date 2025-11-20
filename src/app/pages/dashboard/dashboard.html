@@ -104,13 +104,13 @@
             <h3>Balance</h3>
           </div>
           <div class="stat-breakdown">
-            <div *ngFor="let curr of getCurrencyKeys()" class="stat-row">
+            <div *ngFor="let curr of getWalletCurrencyKeys()" class="stat-row">
               <span class="currency-label">{{ curr }}</span>
-              <span class="currency-value" [class.positive]="multiCurrencyStats[curr].balance >= 0" [class.negative]="multiCurrencyStats[curr].balance < 0">
-                {{ formatCurrency(multiCurrencyStats[curr].balance, curr) }}
+              <span class="currency-value" [class.positive]="walletBalancesByCurrency[curr] >= 0" [class.negative]="walletBalancesByCurrency[curr] < 0">
+                {{ formatCurrency(walletBalancesByCurrency[curr], curr) }}
               </span>
             </div>
-            <div *ngIf="getCurrencyKeys().length === 0" class="stat-empty">Sin datos</div>
+            <div *ngIf="getWalletCurrencyKeys().length === 0" class="stat-empty">Sin billeteras</div>
           </div>
         </div>
 
@@ -252,7 +252,7 @@
               <p class="wallet-provider">{{ wallet.provider }}</p>
             </div>
             <div class="wallet-balance">
-              <p class="balance-amount">${{ wallet.balance | number: '1.2-2' }}</p>
+              <p class="balance-amount">${{ wallet.current_balance | number: '1.2-2' }}</p>
               <p class="balance-currency">{{ wallet.currency }}</p>
             </div>
           </div>

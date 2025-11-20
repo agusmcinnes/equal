@@ -13,7 +13,7 @@ import {
   CategoryDistribution
 } from '../../models/transaction.model';
 import { Category } from '../../models/category.model';
-import { Wallet } from '../../models/wallet.model';
+import { Wallet, WalletWithBalance } from '../../models/wallet.model';
 import { StatCardComponent } from '../../components/stat-card/stat-card';
 import { CategoryBadgeComponent } from '../../components/category-badge/category-badge';
 import { EmptyStateComponent } from '../../components/empty-state/empty-state';
@@ -50,12 +50,13 @@ export class Dashboard implements OnInit, OnDestroy {
   recentTransactions: TransactionWithDetails[] = [];
   allTransactions: TransactionWithDetails[] = [];
   categories: Category[] = [];
-  wallets: Wallet[] = [];
+  wallets: WalletWithBalance[] = [];
 
   // Statistics
   statistics: TransactionStatistics | null = null;
   topExpenses: TopCategory[] = [];
   totalWalletBalance = 0;
+  walletBalancesByCurrency: { [key: string]: number } = {};
 
   // Multi-currency stats (when filterCurrency === 'all')
   multiCurrencyStats: { [key: string]: { income: number; expenses: number; balance: number } } = {};
@@ -145,13 +146,31 @@ export class Dashboard implements OnInit, OnDestroy {
   }
 
   async loadWallets(): Promise<void> {
-    this.wallets = (await this.walletsService.list().pipe(take(1)).toPromise()) || [];
+    this.wallets = (await this.walletsService.listWithBalance().pipe(take(1)).toPromise()) || [];
 
-    // Calculate total balance from all wallets
-    this.totalWalletBalance = this.wallets.reduce((sum, w) => {
-      const balance = typeof w.balance === 'number' ? w.balance : 0;
-      return sum + balance;
-    }, 0);
+    // Calculate balances by currency
+    this.calculateWalletBalances();
+  }
+
+  calculateWalletBalances(): void {
+    const currencies = ['ARS', 'USD', 'EUR', 'CRYPTO'];
+    this.walletBalancesByCurrency = {};
+
+    currencies.forEach(curr => {
+      const walletsForCurrency = this.wallets.filter(w => w.currency === curr);
+      if (walletsForCurrency.length > 0) {
+        const balance = walletsForCurrency.reduce((sum, w) => sum + (w.current_balance || 0), 0);
+        this.walletBalancesByCurrency[curr] = balance;
+      }
+    });
+
+    // Calculate total for single currency view
+    if (this.filterCurrency !== 'all') {
+      this.totalWalletBalance = this.walletBalancesByCurrency[this.filterCurrency] || 0;
+    } else {
+      // For 'all', we don't sum different currencies together
+      this.totalWalletBalance = 0;
+    }
   }
 
   async loadTransactions(): Promise<void> {
@@ -314,6 +333,7 @@ export class Dashboard implements OnInit, OnDestroy {
 
   changeCurrencyFilter(currency: 'all' | 'ARS' | 'USD' | 'EUR' | 'CRYPTO'): void {
     this.filterCurrency = currency;
+    this.calculateWalletBalances();
     this.loadTransactions().then(() => {
       this.calculateStatistics();
       this.calculateTopExpenses();
@@ -326,5 +346,9 @@ export class Dashboard implements OnInit, OnDestroy {
 
   getCurrencyKeys(): string[] {
     return Object.keys(this.multiCurrencyStats);
+  }
+
+  getWalletCurrencyKeys(): string[] {
+    return Object.keys(this.walletBalancesByCurrency);
   }
 }
