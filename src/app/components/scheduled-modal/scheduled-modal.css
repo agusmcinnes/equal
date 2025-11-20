@@ -240,34 +240,200 @@
   transform: none;
 }
 
-@media (max-width: 640px) {
+@media (max-width: 768px) {
+  .modal-overlay {
+    padding: 12px;
+  }
+
   .modal-content {
     max-width: 100%;
-    margin: 10px;
+    max-height: 95vh;
   }
 
   .modal-header {
-    padding: 20px;
+    padding: 20px 18px;
   }
 
   .modal-title {
     font-size: 20px;
   }
 
+  .close-btn {
+    width: 36px;
+    height: 36px;
+  }
+
+  .close-btn .material-icons {
+    font-size: 22px;
+  }
+
   .modal-body {
-    padding: 20px;
+    padding: 18px;
+  }
+
+  .form-group label {
+    font-size: 13px;
+  }
+
+  .form-control {
+    padding: 10px 12px;
+    font-size: 14px;
   }
 
   .form-row {
     grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .form-section-title {
+    margin-top: 18px;
+    margin-bottom: 14px;
+    font-size: 14px;
+  }
+
+  .form-section-title .material-icons {
+    font-size: 18px;
+  }
+
+  .info-box {
+    padding: 10px 14px;
+    font-size: 12px;
+  }
+
+  .info-box .material-icons {
+    font-size: 18px;
+  }
+
+  .help-text {
+    font-size: 11px;
+  }
+
+  .error-text {
+    font-size: 11px;
+  }
+
+  .error-message {
+    padding: 10px 14px;
+    font-size: 12px;
+  }
+
+  .error-message .material-icons {
+    font-size: 18px;
   }
 
   .modal-footer {
-    padding: 16px 20px;
+    padding: 16px 18px;
     flex-direction: column-reverse;
+    gap: 10px;
   }
 
   .btn {
     width: 100%;
+    justify-content: center;
+    padding: 10px 20px;
+    font-size: 14px;
+  }
+
+  .btn .material-icons {
+    font-size: 18px;
+  }
+}
+
+@media (max-width: 480px) {
+  .modal-overlay {
+    padding: 8px;
+  }
+
+  .modal-content {
+    max-height: 96vh;
+  }
+
+  .modal-header {
+    padding: 18px 16px;
+  }
+
+  .modal-title {
+    font-size: 18px;
+  }
+
+  .close-btn {
+    width: 32px;
+    height: 32px;
+  }
+
+  .close-btn .material-icons {
+    font-size: 20px;
+  }
+
+  .modal-body {
+    padding: 16px;
+  }
+
+  .form-group {
+    margin-bottom: 14px;
+  }
+
+  .form-group label {
+    font-size: 12px;
+    margin-bottom: 6px;
+  }
+
+  .form-control {
+    padding: 9px 11px;
+    font-size: 13px;
+  }
+
+  .form-row {
+    gap: 12px;
+  }
+
+  .form-section-title {
+    margin-top: 16px;
+    margin-bottom: 12px;
+    font-size: 13px;
+  }
+
+  .form-section-title .material-icons {
+    font-size: 16px;
+  }
+
+  .info-box {
+    padding: 9px 12px;
+    font-size: 11px;
+  }
+
+  .info-box .material-icons {
+    font-size: 16px;
+  }
+
+  .help-text {
+    font-size: 10px;
+  }
+
+  .error-text {
+    font-size: 10px;
+  }
+
+  .error-message {
+    padding: 9px 12px;
+    font-size: 11px;
+  }
+
+  .error-message .material-icons {
+    font-size: 16px;
+  }
+
+  .modal-footer {
+    padding: 14px 16px;
+    gap: 8px;
+  }
+
+  .btn {
+    padding: 9px 18px;
+    font-size: 13px;
+  }
+
+  .btn .material-icons {
+    font-size: 16px;
   }
 }

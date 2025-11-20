@@ -363,6 +363,13 @@
       <!-- Add Movement Form -->
       <div class="movement-form-section" *ngIf="!selectedGoal.is_completed">
         <h4>Agregar Movimiento</h4>
+        <div class="info-banner" *ngIf="movementFormVisible">
+          <span class="material-icons">info</span>
+          <div class="info-text">
+            <strong>Depósito:</strong> Agrega dinero al objetivo (se registra como gasto en transacciones y resta de tu patrimonio).<br>
+            <strong>Retiro:</strong> Quita dinero del objetivo (se registra como ingreso en transacciones y suma a tu patrimonio).
+          </div>
+        </div>
 
         <div *ngIf="movementFormVisible" class="movement-form">
           <div class="form-row">
@@ -393,18 +400,21 @@
 
           <div class="form-row">
             <div class="form-group">
-              <label for="wallet">Billetera (opcional)</label>
+              <label for="wallet">Billetera</label>
               <select
                 id="wallet"
                 [(ngModel)]="movementModel.wallet_id"
                 class="form-select"
                 [class.error]="movementErrors['wallet_id']"
               >
-                <option value="">Sin billetera (opcional)</option>
+                <option value="">Sin billetera (movimiento manual)</option>
                 <option *ngFor="let wallet of availableWallets" [value]="wallet.id">
                   {{ wallet.name }} ({{ wallet.currency }})
                 </option>
               </select>
+              <span class="help-text" *ngIf="!movementErrors['wallet_id']">
+                Selecciona una billetera para que se actualice su saldo automáticamente
+              </span>
               <span class="error-message" *ngIf="movementErrors['wallet_id']">
                 {{ movementErrors['wallet_id'] }}
               </span>

@@ -96,3 +96,34 @@ select:focus option:checked {
   background: var(--color-primary) linear-gradient(0deg, var(--color-primary) 0%, var(--color-primary) 100%);
   color: white;
 }
+
+/* ===== GLOBAL RESPONSIVE UTILITIES ===== */
+@media (max-width: 768px) {
+  body {
+    font-size: 14px;
+  }
+
+  .material-icons {
+    font-size: 22px;
+  }
+
+  select {
+    background-position: right 10px center;
+    padding-right: 32px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  body {
+    font-size: 13px;
+  }
+
+  .material-icons {
+    font-size: 20px;
+  }
+
+  select {
+    background-position: right 8px center;
+    padding-right: 28px !important;
+  }
+}

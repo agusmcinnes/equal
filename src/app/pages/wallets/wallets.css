@@ -656,8 +656,13 @@
 
 /* ===== RESPONSIVE DESIGN ===== */
 @media (max-width: 1024px) {
+  .wallets-page {
+    padding: 20px;
+  }
+
   .wallets-grid {
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
   }
 
   .wallet-form {
@@ -666,13 +671,28 @@
 
   .summary-section {
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
   }
 }
 
 @media (max-width: 768px) {
+  .wallets-page {
+    padding: 16px;
+  }
+
   .page-header {
     flex-direction: column;
     align-items: stretch;
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+
+  .header-content h1 {
+    font-size: 26px;
+  }
+
+  .header-subtitle {
+    font-size: 13px;
   }
 
   .btn-primary {
@@ -680,39 +700,290 @@
     justify-content: center;
   }
 
-  .wallets-grid {
-    grid-template-columns: 1fr;
+  .filters-section {
+    padding: 16px;
+    gap: 12px;
   }
 
   .filter-tabs {
     width: 100%;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .filter-tab {
+    flex: 1;
+    min-width: calc(50% - 4px);
+    font-size: 13px;
+    padding: 10px 12px;
+  }
+
+  .summary-section {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .summary-card {
+    padding: 16px;
+  }
+
+  .summary-card h3 {
+    font-size: 13px;
+  }
+
+  .summary-card .amount {
+    font-size: 22px;
+  }
+
+  .wallets-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .wallet-card {
+    padding: 16px;
+  }
+
+  .card-header {
+    padding: 16px;
+    margin-bottom: 12px;
+  }
+
+  .wallet-header {
+    gap: 12px;
+  }
+
+  .wallet-icon {
+    width: 48px;
+    height: 48px;
+  }
+
+  .wallet-icon .material-icons {
+    font-size: 24px;
+  }
+
+  .wallet-info h3 {
+    font-size: 16px;
+  }
+
+  .wallet-type {
+    font-size: 12px;
+  }
+
+  .card-actions {
+    gap: 8px;
+  }
+
+  .btn-icon {
+    width: 36px;
+    height: 36px;
+  }
+
+  .btn-icon .material-icons {
+    font-size: 18px;
+  }
+
+  .card-body {
+    padding: 16px;
+    gap: 14px;
+  }
+
+  .balance-section .label {
+    font-size: 12px;
+  }
+
+  .balance-section .amount {
+    font-size: 20px;
+  }
+
+  .wallet-stats {
+    gap: 12px;
+  }
+
+  .stat-item {
+    gap: 8px;
+  }
+
+  .stat-label {
+    font-size: 12px;
+  }
+
+  .stat-value {
+    font-size: 15px;
+  }
+
+  .form-card {
+    padding: 20px;
+  }
+
+  .form-header {
+    margin-bottom: 20px;
+  }
+
+  .form-header h2 {
+    font-size: 20px;
+  }
+
+  .wallet-form {
+    gap: 16px;
+  }
+
+  .form-group label {
+    font-size: 13px;
+  }
+
+  .form-input,
+  .form-select {
+    padding: 10px 12px;
+    font-size: 14px;
   }
 
   .form-actions {
     flex-direction: column-reverse;
+    gap: 10px;
   }
 
   .form-actions button {
     width: 100%;
     justify-content: center;
   }
-
-  .summary-section {
-    grid-template-columns: 1fr;
-  }
 }
 
 @media (max-width: 480px) {
   .wallets-page {
-    padding: 16px;
+    padding: 12px;
   }
 
   .page-header {
-    margin-bottom: 24px;
+    margin-bottom: 20px;
+    gap: 12px;
   }
 
   .header-content h1 {
     font-size: 24px;
+  }
+
+  .header-subtitle {
+    font-size: 12px;
+  }
+
+  .btn-primary {
+    padding: 10px 20px;
+    font-size: 14px;
+  }
+
+  .btn-primary .material-icons {
+    font-size: 18px;
+  }
+
+  .filters-section {
+    padding: 14px;
+    gap: 10px;
+  }
+
+  .filter-tabs {
+    gap: 6px;
+  }
+
+  .filter-tab {
+    font-size: 12px;
+    padding: 8px 10px;
+  }
+
+  .summary-section {
+    gap: 10px;
+  }
+
+  .summary-card {
+    padding: 14px;
+  }
+
+  .summary-card h3 {
+    font-size: 12px;
+  }
+
+  .summary-card .amount {
+    font-size: 20px;
+  }
+
+  .summary-card .change {
+    font-size: 11px;
+  }
+
+  .wallets-grid {
+    gap: 12px;
+  }
+
+  .wallet-card {
+    padding: 14px;
+  }
+
+  .card-header {
+    padding: 14px;
+    margin-bottom: 10px;
+  }
+
+  .wallet-header {
+    gap: 10px;
+  }
+
+  .wallet-icon {
+    width: 40px;
+    height: 40px;
+  }
+
+  .wallet-icon .material-icons {
+    font-size: 20px;
+  }
+
+  .wallet-info h3 {
+    font-size: 15px;
+  }
+
+  .wallet-type {
+    font-size: 11px;
+  }
+
+  .card-actions {
+    gap: 6px;
+  }
+
+  .btn-icon {
+    width: 32px;
+    height: 32px;
+  }
+
+  .btn-icon .material-icons {
+    font-size: 16px;
+  }
+
+  .card-body {
+    padding: 14px;
+    gap: 12px;
+  }
+
+  .balance-section .label {
+    font-size: 11px;
+  }
+
+  .balance-section .amount {
+    font-size: 18px;
+  }
+
+  .wallet-stats {
+    gap: 10px;
+  }
+
+  .stat-item {
+    gap: 6px;
+  }
+
+  .stat-label {
+    font-size: 11px;
+  }
+
+  .stat-value {
+    font-size: 14px;
   }
 
   .form-card {
@@ -723,16 +994,52 @@
     margin-bottom: 16px;
   }
 
+  .form-header h2 {
+    font-size: 18px;
+  }
+
+  .btn-close {
+    width: 32px;
+    height: 32px;
+  }
+
+  .btn-close .material-icons {
+    font-size: 20px;
+  }
+
   .wallet-form {
-    gap: 12px;
+    gap: 14px;
   }
 
-  .card-header {
-    padding: 12px;
+  .form-group label {
+    font-size: 12px;
   }
 
-  .card-body {
-    padding: 12px;
-    gap: 12px;
+  .form-input,
+  .form-select {
+    padding: 9px 11px;
+    font-size: 13px;
+  }
+
+  .error-message {
+    font-size: 11px;
+  }
+
+  .form-actions {
+    gap: 8px;
+  }
+
+  .form-actions button {
+    padding: 10px 20px;
+    font-size: 14px;
+  }
+
+  .empty-state-section {
+    padding: 40px 16px;
+  }
+
+  .empty-state-section .btn-primary,
+  .empty-state-section .btn-secondary {
+    margin-top: 10px;
   }
 }

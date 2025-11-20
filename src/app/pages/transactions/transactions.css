@@ -792,17 +792,22 @@
 }
 
 .form-group input,
-.form-group select {
+.form-group select,
+.form-input {
   padding: 12px 14px;
-  border: 2px solid var(--border);
+  border: 2px solid #e5e7eb;
   border-radius: 10px;
   font-size: 15px;
   font-family: 'Poppins', sans-serif;
   transition: all 0.2s ease;
+  background: white;
+  color: #374151;
+  width: 100%;
 }
 
 .form-group input:focus,
-.form-group select:focus {
+.form-group select:focus,
+.form-input:focus {
   outline: none;
   border-color: var(--color-primary);
   box-shadow: 0 0 0 3px rgba(70, 51, 151, 0.1);
@@ -824,8 +829,17 @@
 
 /* ===== RESPONSIVE ===== */
 @media (max-width: 1024px) {
+  .transactions-page {
+    padding: 20px;
+  }
+
   .charts-grid {
     grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
   }
 }
 
@@ -838,6 +852,7 @@
     flex-direction: column;
     align-items: stretch;
     gap: 16px;
+    margin-bottom: 24px;
   }
 
   .page-header .header-content {
@@ -856,48 +871,113 @@
   }
 
   .page-header h1 {
-    font-size: 24px;
+    font-size: 26px;
   }
 
   .filters-row {
     width: 100%;
-    flex-wrap: wrap;
+    flex-direction: column;
+    gap: 12px;
   }
 
   .filters-row .filter-group {
-    flex: 1;
-    min-width: 120px;
+    width: 100%;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .filters-row .filter-group label {
+    font-size: 13px;
+  }
+
+  .filters-row .filter-group app-custom-select {
+    width: 100%;
+    min-width: auto;
   }
 
   .filter-select {
     flex: 1;
     min-width: auto;
+    width: 100%;
+  }
+
+  .btn-primary {
+    width: 100%;
+    justify-content: center;
   }
 
   .stats-grid {
     grid-template-columns: 1fr;
+    gap: 16px;
   }
 
   .charts-grid {
     grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .chart-card {
+    padding: 20px;
+  }
+
+  .chart-card h3 {
+    font-size: 16px;
+    margin-bottom: 16px;
   }
 
   .filters-header {
     flex-direction: column;
+    gap: 12px;
   }
 
   .search-box {
     width: 100%;
+    min-width: auto;
   }
 
   .filter-actions {
     width: 100%;
     flex-direction: column;
+    gap: 10px;
+  }
+
+  .btn-filter {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .transactions-section {
+    padding: 20px;
+  }
+
+  .section-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .section-header h2 {
+    font-size: 18px;
+  }
+
+  .sort-options {
+    width: 100%;
+    justify-content: flex-start;
   }
 
   .transaction-card {
     flex-direction: column;
     align-items: flex-start;
+    padding: 14px;
+    gap: 12px;
+  }
+
+  .tx-left {
+    width: 100%;
+  }
+
+  .tx-center {
+    width: 100%;
   }
 
   .tx-right {
@@ -907,21 +987,214 @@
     align-items: center;
   }
 
+  .tx-description {
+    font-size: 14px;
+  }
+
   .tx-metadata {
-    flex-direction: column;
-    gap: 6px;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .tx-metadata span {
+    font-size: 12px;
+  }
+
+  .tx-amount {
+    font-size: 16px;
+  }
+
+  .tx-actions {
+    flex-direction: row;
+  }
+
+  .modal-content {
+    max-width: 95%;
+    margin: 10px;
+  }
+
+  .transaction-form {
+    padding: 20px;
   }
 
   .form-row {
     grid-template-columns: 1fr;
+    gap: 16px;
   }
 
   .form-actions {
     flex-direction: column-reverse;
+    gap: 10px;
   }
 
   .btn-primary,
   .btn-secondary {
     width: 100%;
+    justify-content: center;
+  }
+
+  .pagination {
+    padding-top: 20px;
+    margin-top: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .transactions-page {
+    padding: 12px;
+  }
+
+  .page-header {
+    margin-bottom: 20px;
+    gap: 12px;
+  }
+
+  .page-header h1 {
+    font-size: 24px;
+  }
+
+  .btn-primary {
+    padding: 10px 20px;
+    font-size: 14px;
+  }
+
+  .btn-primary .material-icons {
+    font-size: 18px;
+  }
+
+  .stats-grid {
+    gap: 12px;
+  }
+
+  .charts-grid {
+    gap: 16px;
+  }
+
+  .chart-card {
+    padding: 16px;
+  }
+
+  .chart-card h3 {
+    font-size: 15px;
+    margin-bottom: 14px;
+  }
+
+  .transactions-section {
+    padding: 16px;
+  }
+
+  .section-header h2 {
+    font-size: 17px;
+  }
+
+  .sort-btn {
+    padding: 6px 10px;
+    font-size: 13px;
+  }
+
+  .sort-btn .material-icons {
+    font-size: 16px;
+  }
+
+  .group-label {
+    font-size: 12px;
+  }
+
+  .transaction-card {
+    padding: 12px;
+    gap: 10px;
+  }
+
+  .tx-description {
+    font-size: 13px;
+  }
+
+  .tx-metadata {
+    gap: 6px;
+  }
+
+  .tx-metadata span {
+    font-size: 11px;
+  }
+
+  .tx-metadata .material-icons {
+    font-size: 14px;
+  }
+
+  .tx-amount {
+    font-size: 15px;
+  }
+
+  .btn-icon {
+    width: 32px;
+    height: 32px;
+  }
+
+  .btn-icon .material-icons {
+    font-size: 18px;
+  }
+
+  .modal-overlay {
+    padding: 10px;
+  }
+
+  .modal-content {
+    max-width: 100%;
+    max-height: 95vh;
+  }
+
+  .modal-header {
+    padding: 20px 16px 16px;
+  }
+
+  .modal-header h2 {
+    font-size: 20px;
+  }
+
+  .transaction-form {
+    padding: 16px;
+    gap: 16px;
+  }
+
+  .form-group label {
+    font-size: 13px;
+  }
+
+  .form-group input,
+  .form-group select,
+  .form-input {
+    padding: 10px 12px;
+    font-size: 14px;
+  }
+
+  .form-group .error {
+    font-size: 12px;
+  }
+
+  .form-actions {
+    padding-top: 16px;
+    gap: 8px;
+  }
+
+  .btn-primary,
+  .btn-secondary {
+    padding: 10px 20px;
+    font-size: 14px;
+  }
+
+  .pagination {
+    flex-direction: column;
+    gap: 12px;
+    padding-top: 16px;
+    margin-top: 16px;
+  }
+
+  .pagination-btn {
+    width: 36px;
+    height: 36px;
+  }
+
+  .pagination-info {
+    font-size: 13px;
   }
 }

@@ -164,13 +164,101 @@
   }
 }
 
-/* Responsive */
+/* ===== RESPONSIVE DESIGN ===== */
 @media (max-width: 768px) {
+  .date-picker-trigger {
+    padding: 9px 14px;
+    font-size: 13px;
+  }
+
+  .date-picker-trigger .material-icons {
+    font-size: 18px;
+  }
+
   .dropdown-content {
     min-width: 280px;
+    padding: 14px;
+    border-radius: 14px;
   }
 
   .preset-buttons {
     grid-template-columns: 1fr;
+    gap: 6px;
+  }
+
+  .preset-button {
+    padding: 10px;
+    font-size: 12px;
+  }
+
+  .preset-button .material-icons {
+    font-size: 16px;
+  }
+
+  .custom-inputs {
+    padding-top: 14px;
+    gap: 10px;
+  }
+
+  .input-group label {
+    font-size: 12px;
+  }
+
+  .input-group input[type="date"] {
+    padding: 9px 11px;
+    font-size: 13px;
+  }
+
+  .apply-button {
+    padding: 10px;
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 480px) {
+  .date-picker-trigger {
+    padding: 8px 12px;
+    font-size: 12px;
+  }
+
+  .date-picker-trigger .material-icons {
+    font-size: 16px;
+  }
+
+  .dropdown-content {
+    min-width: 260px;
+    padding: 12px;
+  }
+
+  .preset-buttons {
+    gap: 5px;
+  }
+
+  .preset-button {
+    padding: 9px;
+    font-size: 11px;
+  }
+
+  .preset-button .material-icons {
+    font-size: 14px;
+  }
+
+  .custom-inputs {
+    padding-top: 12px;
+    gap: 8px;
+  }
+
+  .input-group label {
+    font-size: 11px;
+  }
+
+  .input-group input[type="date"] {
+    padding: 8px 10px;
+    font-size: 12px;
+  }
+
+  .apply-button {
+    padding: 9px;
+    font-size: 12px;
   }
 }

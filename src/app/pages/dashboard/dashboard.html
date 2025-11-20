@@ -137,15 +137,16 @@
           <span class="chart-info">Distribución actual</span>
         </div>
         <div class="chart-container-pie">
-          <ngx-charts-pie-chart
-            [results]="topExpensesChartData"
-            [scheme]="expenseCategoryColorScheme"
-            [view]="[500, 400]"
-            [labels]="true"
-            [legend]="false"
-            [doughnut]="false"
-          >
-          </ngx-charts-pie-chart>
+          <div class="chart-wrapper">
+            <ngx-charts-pie-chart
+              [results]="topExpensesChartData"
+              [scheme]="expenseCategoryColorScheme"
+              [labels]="true"
+              [legend]="false"
+              [doughnut]="false"
+            >
+            </ngx-charts-pie-chart>
+          </div>
         </div>
       </div>
     </div>

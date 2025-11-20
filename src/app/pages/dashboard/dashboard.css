@@ -295,6 +295,14 @@
   gap: 24px;
 }
 
+.chart-card {
+  background: #fff;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 4px 6px rgba(70, 51, 151, 0.08);
+  border: 1px solid rgba(0, 0, 0, 0.03);
+}
+
 .chart-header {
   display: flex;
   justify-content: space-between;
@@ -337,13 +345,21 @@
 }
 
 .chart-container-pie {
-  display: flex;
-  justify-content: center;
-  align-items: center;
   width: 100%;
-  padding: 20px 0;
-  overflow-x: auto;
-  min-height: 350px;
+  padding: 20px;
+  min-height: 500px;
+  text-align: center;
+}
+
+.chart-wrapper {
+  display: inline-block;
+  width: 700px;
+  height: 500px;
+}
+
+.chart-wrapper ngx-charts-pie-chart {
+  width: 700px !important;
+  height: 500px !important;
 }
 
 /* ===== EMPTY CHARTS ===== */
@@ -972,6 +988,24 @@
 }
 
 /* ===== RESPONSIVE DESIGN ===== */
+@media (max-width: 1024px) {
+  .dashboard-page {
+    padding: 20px;
+  }
+
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .multi-currency-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 @media (max-width: 768px) {
   .dashboard-page {
     padding: 16px;
@@ -981,6 +1015,7 @@
     flex-direction: column;
     align-items: stretch;
     gap: 16px;
+    margin-bottom: 24px;
   }
 
   .header-content {
@@ -995,36 +1030,159 @@
     gap: 12px;
   }
 
+  .currency-filter {
+    width: 100%;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+
+  .currency-filter label {
+    font-size: 13px;
+  }
+
+  .currency-filter app-custom-select {
+    width: 100%;
+    min-width: auto;
+  }
+
+  .currency-select {
+    width: 100%;
+    min-width: auto;
+  }
+
   .btn-primary {
     width: 100%;
     justify-content: center;
   }
 
   .page-header h1 {
-    font-size: 28px;
+    font-size: 26px;
+  }
+
+  .header-subtitle {
+    font-size: 13px;
+  }
+
+  .stats-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .multi-currency-stats {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .multi-stat-card {
+    padding: 20px;
   }
 
   .charts-section {
     grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .chart-card {
+    padding: 20px;
+  }
+
+  .chart-container {
+    min-height: 300px;
+  }
+
+  .chart-container-pie {
+    min-height: 380px;
+    padding: 10px;
+  }
+
+  .chart-wrapper {
+    width: 95vw;
+    max-width: 500px;
+    height: 380px;
+  }
+
+  .chart-wrapper ngx-charts-pie-chart {
+    width: 100% !important;
+    height: 380px !important;
   }
 
   .bottom-section {
     grid-template-columns: 1fr;
+    gap: 20px;
   }
 
-  .action-btn .material-icons {
-    font-size: 20px;
+  .recent-transactions-card,
+  .quick-actions-card,
+  .wallet-summary-card,
+  .top-expenses-card {
+    padding: 20px;
+  }
+
+  .card-header h3,
+  .chart-header h3 {
+    font-size: 16px;
+  }
+
+  .actions-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
   }
 
   .action-btn {
-    padding: 16px 12px;
-    font-size: 12px;
+    flex-direction: row;
+    justify-content: center;
+    padding: 16px 20px;
+    font-size: 14px;
+  }
+
+  .action-btn .material-icons {
+    font-size: 22px;
+  }
+
+  .transaction-item {
+    padding: 14px 0;
+  }
+
+  .tx-description {
+    font-size: 13px;
+  }
+
+  .tx-amount {
+    font-size: 13px;
+  }
+
+  .wallet-item {
+    padding: 14px;
+  }
+
+  .expenses-list.horizontal {
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .empty-charts-section {
+    padding: 60px 20px;
+    min-height: 350px;
+  }
+
+  .empty-actions {
+    flex-direction: column;
+  }
+
+  .empty-btn {
+    width: 100%;
   }
 }
 
 @media (max-width: 480px) {
   .dashboard-page {
     padding: 12px;
+  }
+
+  .page-header {
+    margin-bottom: 20px;
+    gap: 12px;
   }
 
   .page-header h1 {
@@ -1040,15 +1198,11 @@
     gap: 12px;
   }
 
-  .chart-card {
-    padding: 16px;
+  .multi-currency-stats {
+    gap: 12px;
   }
 
-  .card-header,
-  .chart-header {
-    margin-bottom: 16px;
-  }
-
+  .multi-stat-card,
   .recent-transactions-card,
   .quick-actions-card,
   .wallet-summary-card,
@@ -1056,19 +1210,109 @@
     padding: 16px;
   }
 
+  .stat-header {
+    margin-bottom: 12px;
+    padding-bottom: 10px;
+  }
+
+  .stat-header .material-icons {
+    font-size: 20px;
+  }
+
+  .stat-header h3 {
+    font-size: 14px;
+  }
+
+  .currency-label {
+    font-size: 12px;
+  }
+
+  .currency-value {
+    font-size: 16px;
+  }
+
+  .currency-value.large {
+    font-size: 24px;
+  }
+
+  .card-header,
+  .chart-header {
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+  }
+
+  .card-header h3,
+  .chart-header h3 {
+    font-size: 15px;
+  }
+
+  .btn-link {
+    font-size: 13px;
+  }
+
+  .chart-card {
+    padding: 14px;
+    margin: 0;
+    border-radius: 12px;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .chart-container {
+    min-height: 240px;
+  }
+
+  .chart-container-pie {
+    min-height: 280px;
+    padding: 0;
+    overflow: hidden;
+  }
+
+  .chart-wrapper {
+    width: 100%;
+    max-width: 100%;
+    height: 280px;
+  }
+
+  .chart-wrapper ngx-charts-pie-chart {
+    width: 100% !important;
+    height: 280px !important;
+  }
+
+  .chart-info {
+    font-size: 12px;
+  }
+
   .transaction-item {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 12px;
+    flex-wrap: wrap;
+    padding: 12px 0;
   }
 
   .tx-left {
     width: 100%;
+    margin-bottom: 8px;
   }
 
   .tx-right {
     width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     text-align: left;
+  }
+
+  .tx-description {
+    font-size: 13px;
+  }
+
+  .tx-date,
+  .tx-wallet {
+    font-size: 11px;
+  }
+
+  .tx-amount {
+    font-size: 14px;
+    font-weight: 700;
   }
 
   .wallet-item {
@@ -1089,13 +1333,73 @@
     font-size: 13px;
   }
 
+  .wallet-provider {
+    font-size: 11px;
+  }
+
+  .balance-amount {
+    font-size: 13px;
+  }
+
+  .balance-currency {
+    font-size: 10px;
+  }
+
   .actions-grid {
     gap: 10px;
   }
 
   .action-btn {
-    padding: 14px 10px;
+    padding: 14px 16px;
     gap: 8px;
+    font-size: 13px;
+  }
+
+  .action-btn .material-icons {
+    font-size: 20px;
+  }
+
+  .expense-name {
+    font-size: 13px;
+  }
+
+  .expense-amount {
+    font-size: 13px;
+  }
+
+  .expense-percentage {
+    font-size: 11px;
+  }
+
+  .empty-charts-section {
+    padding: 40px 16px;
+    min-height: 300px;
+  }
+
+  .empty-state .material-icons {
+    font-size: 48px;
+  }
+
+  .empty-state p {
+    font-size: 14px;
+  }
+
+  .empty-subtitle {
+    font-size: 12px !important;
+  }
+
+  .empty-btn {
+    padding: 12px 20px;
+    font-size: 13px;
+    min-width: 100%;
+  }
+
+  .empty-btn .material-icons {
+    font-size: 18px;
+  }
+
+  .quick-actions {
+    grid-template-columns: 1fr;
   }
 }
 
