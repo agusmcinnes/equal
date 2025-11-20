@@ -27,12 +27,13 @@
   margin-bottom: 32px;
   gap: 24px;
   flex-wrap: wrap;
+  padding: 0;
 }
 
 .header-content {
   display: flex;
-  align-items: center;
-  gap: 32px;
+  flex-direction: column;
+  gap: 12px;
   flex: 1;
 }
 
@@ -45,9 +46,12 @@
 .header-content h1 {
   font-size: 32px;
   font-weight: 700;
-  color: var(--color-dark);
+  color: #463397;
   margin: 0;
+  padding: 4px 0;
   letter-spacing: -0.5px;
+  text-shadow: 0 2px 8px rgba(70, 51, 151, 0.15);
+  line-height: 1.2;
 }
 
 .header-subtitle {
@@ -57,10 +61,18 @@
   font-weight: 400;
 }
 
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
 .currency-filter {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 8px;
+  flex-direction: row;
 }
 
 .currency-filter label {
@@ -68,6 +80,10 @@
   font-weight: 500;
   color: var(--color-dark);
   white-space: nowrap;
+}
+
+.currency-filter app-custom-select {
+  min-width: 140px;
 }
 
 .currency-select {
@@ -157,11 +173,29 @@
   box-shadow: 0 4px 6px rgba(70, 51, 151, 0.08);
   border: 1px solid rgba(0, 0, 0, 0.03);
   transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.multi-stat-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(135deg, #463397, #7c5fd6);
+  opacity: 0;
+  transition: opacity 0.3s ease;
 }
 
 .multi-stat-card:hover {
   transform: translateY(-4px);
   box-shadow: 0 8px 16px rgba(70, 51, 151, 0.12);
+}
+
+.multi-stat-card:hover::before {
+  opacity: 1;
 }
 
 .stat-header {
@@ -390,27 +424,27 @@
 
 /* ===== BOTTOM SECTION ===== */
 .bottom-section {
-  display: grid;
-  grid-template-columns: 1fr;
+  display: flex;
+  flex-direction: column;
   gap: 24px;
 }
 
 @media (max-width: 1024px) {
   .bottom-section {
-    grid-template-columns: 1fr;
+    flex-direction: column;
   }
 }
 
 /* ===== TRANSACTIONS & ACTIONS ROW ===== */
 .transactions-actions-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
+  display: flex;
+  flex-direction: column;
   gap: 24px;
 }
 
 @media (max-width: 768px) {
   .transactions-actions-row {
-    grid-template-columns: 1fr;
+    flex-direction: column;
   }
 }
 
@@ -422,10 +456,29 @@
   box-shadow: 0 4px 6px rgba(70, 51, 151, 0.08);
   border: 1px solid rgba(0, 0, 0, 0.03);
   transition: all 0.3s ease;
+  width: 100%;
+  position: relative;
+  overflow: hidden;
+}
+
+.recent-transactions-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(135deg, #463397, #7c5fd6);
+  opacity: 0;
+  transition: opacity 0.3s ease;
 }
 
 .recent-transactions-card:hover {
   box-shadow: 0 8px 12px rgba(70, 51, 151, 0.12);
+}
+
+.recent-transactions-card:hover::before {
+  opacity: 1;
 }
 
 .card-header {
@@ -557,10 +610,29 @@
   box-shadow: 0 4px 6px rgba(70, 51, 151, 0.08);
   border: 1px solid rgba(0, 0, 0, 0.03);
   transition: all 0.3s ease;
+  width: 100%;
+  position: relative;
+  overflow: hidden;
+}
+
+.quick-actions-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(135deg, #463397, #7c5fd6);
+  opacity: 0;
+  transition: opacity 0.3s ease;
 }
 
 .quick-actions-card:hover {
   box-shadow: 0 8px 12px rgba(70, 51, 151, 0.12);
+}
+
+.quick-actions-card:hover::before {
+  opacity: 1;
 }
 
 .quick-actions-card h3 {
@@ -574,6 +646,7 @@
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 12px;
+  width: 100%;
 }
 
 @media (max-width: 768px) {
@@ -628,10 +701,29 @@
   box-shadow: 0 4px 6px rgba(70, 51, 151, 0.08);
   border: 1px solid rgba(0, 0, 0, 0.03);
   transition: all 0.3s ease;
+  width: 100%;
+  position: relative;
+  overflow: hidden;
+}
+
+.wallet-summary-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(135deg, #463397, #7c5fd6);
+  opacity: 0;
+  transition: opacity 0.3s ease;
 }
 
 .wallet-summary-card:hover {
   box-shadow: 0 8px 12px rgba(70, 51, 151, 0.12);
+}
+
+.wallet-summary-card:hover::before {
+  opacity: 1;
 }
 
 .wallet-summary-card h3 {
@@ -730,10 +822,28 @@
   border: 1px solid rgba(0, 0, 0, 0.03);
   transition: all 0.3s ease;
   grid-column: 1 / -1;
+  position: relative;
+  overflow: hidden;
+}
+
+.top-expenses-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(135deg, #463397, #7c5fd6);
+  opacity: 0;
+  transition: opacity 0.3s ease;
 }
 
 .top-expenses-card:hover {
   box-shadow: 0 8px 12px rgba(70, 51, 151, 0.12);
+}
+
+.top-expenses-card:hover::before {
+  opacity: 1;
 }
 
 .top-expenses-card h3 {
@@ -877,8 +987,15 @@
     order: 1;
   }
 
-  .btn-primary {
+  .header-actions {
     order: 2;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .btn-primary {
     width: 100%;
     justify-content: center;
   }

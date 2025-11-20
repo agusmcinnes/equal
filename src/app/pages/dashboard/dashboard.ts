@@ -17,6 +17,7 @@ import { Wallet } from '../../models/wallet.model';
 import { StatCardComponent } from '../../components/stat-card/stat-card';
 import { CategoryBadgeComponent } from '../../components/category-badge/category-badge';
 import { EmptyStateComponent } from '../../components/empty-state/empty-state';
+import { CustomSelectComponent, SelectOption } from '../../components/custom-select/custom-select';
 import { NgxChartsModule } from '@swimlane/ngx-charts';
 
 interface TopCategory {
@@ -36,6 +37,7 @@ interface TopCategory {
     StatCardComponent,
     CategoryBadgeComponent,
     EmptyStateComponent,
+    CustomSelectComponent,
     NgxChartsModule
   ],
   templateUrl: './dashboard.html',
@@ -65,6 +67,14 @@ export class Dashboard implements OnInit, OnDestroy {
   loading = false;
   statsLoading = false;
   filterCurrency: 'all' | 'ARS' | 'USD' | 'EUR' | 'CRYPTO' = 'all';
+
+  currencyOptions: SelectOption[] = [
+    { value: 'all', label: 'Todas', icon: 'currency_exchange' },
+    { value: 'ARS', label: 'ARS', icon: 'attach_money' },
+    { value: 'USD', label: 'USD', icon: 'attach_money' },
+    { value: 'EUR', label: 'EUR', icon: 'euro' },
+    { value: 'CRYPTO', label: 'CRYPTO', icon: 'currency_bitcoin' }
+  ];
 
     // Chart options
   colorScheme: any = {

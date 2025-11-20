@@ -25,7 +25,6 @@ export class Sidebar {
     { icon: 'schedule', label: 'Operaciones Futuras', route: '/scheduled' },
     { icon: 'flag', label: 'Objetivos', route: '/goals' },
     { icon: 'attach_money', label: 'Dólar', route: '/dollar' },
-    { icon: 'settings', label: 'Configuración', route: '/settings' },
   ];
 
   showLogoutConfirm = false;

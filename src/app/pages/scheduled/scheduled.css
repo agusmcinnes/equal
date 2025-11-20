@@ -9,30 +9,35 @@
 .page-header {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
+  align-items: center;
   margin-bottom: 32px;
   gap: 24px;
+  flex-wrap: wrap;
+  padding: 0;
 }
 
 .header-content {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 12px;
   flex: 1;
 }
 
-.header-title h1 {
+.header-content h1 {
   margin: 0;
+  padding: 4px 0;
   font-size: 32px;
   font-weight: 700;
-  color: var(--text-primary);
+  color: #463397;
   letter-spacing: -0.5px;
+  text-shadow: 0 2px 8px rgba(70, 51, 151, 0.15);
+  line-height: 1.2;
 }
 
-.header-title p {
+.header-subtitle {
   margin: 0;
   font-size: 14px;
-  color: var(--text-secondary);
+  color: #6b7280;
   font-weight: 400;
 }
 

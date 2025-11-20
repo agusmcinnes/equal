@@ -3,6 +3,8 @@
   <div class="page-header">
     <div class="header-content">
       <h1>Transacciones</h1>
+    </div>
+    <div class="header-actions">
       <div class="filters-row">
         <div class="filter-group">
           <label>Tipo:</label>
@@ -23,11 +25,11 @@
           ></app-custom-select>
         </div>
       </div>
+      <button class="btn-primary" (click)="showForm()">
+        <span class="material-icons">add</span>
+        Nueva transacción
+      </button>
     </div>
-    <button class="btn-primary" (click)="showForm()">
-      <span class="material-icons">add</span>
-      Nueva transacción
-    </button>
   </div>
 
   <!-- Statistics Section -->
