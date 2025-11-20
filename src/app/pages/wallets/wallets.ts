@@ -4,7 +4,9 @@ import { FormsModule } from '@angular/forms';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { WalletsService } from '../../services/wallets.service';
+import { TransactionsService } from '../../services/transactions.service';
 import { Wallet, WalletWithBalance } from '../../models/wallet.model';
+import { Transaction } from '../../models/transaction.model';
 import { EmptyStateComponent } from '../../components/empty-state/empty-state';
 
 interface WalletForm {
@@ -63,7 +65,10 @@ export class Wallets implements OnInit, OnDestroy {
     { code: 'CRYPTO', name: 'Criptomonedas', symbol: '₿', color: '#f59e0b' }
   ];
 
-  constructor(private walletsService: WalletsService) {}
+  constructor(
+    private walletsService: WalletsService,
+    private transactionsService: TransactionsService
+  ) {}
 
   ngOnInit(): void {
     this.loadWallets();
@@ -173,14 +178,20 @@ export class Wallets implements OnInit, OnDestroy {
         }
       });
     } else {
-      // Create new wallet
+      // Create new wallet with balance = 0 (initial balance will be a transaction)
+      const initialBalance = this.model.balance;
+
       this.walletsService.create({
         name: this.model.name,
         provider: this.model.provider,
         currency: this.model.currency,
-        balance: this.model.balance
+        balance: 0  // Always 0, initial balance goes as transaction
       }).pipe(takeUntil(this.destroy$)).subscribe({
-        next: () => {
+        next: async (walletCreated) => {
+          // Create initial transaction if there's an initial balance
+          if (walletCreated && initialBalance > 0) {
+            await this.createInitialTransaction(walletCreated, initialBalance);
+          }
           this.closeWalletForm();
           this.loadWallets();
         },
@@ -250,6 +261,24 @@ export class Wallets implements OnInit, OnDestroy {
         .filter(w => w.currency === 'CRYPTO')
         .reduce((sum, w) => sum + (w.current_balance || 0), 0)
     };
+  }
+
+  private async createInitialTransaction(wallet: Wallet, amount: number): Promise<void> {
+    const initialTransaction: Transaction = {
+      date: new Date().toISOString(),
+      description: `Balance inicial - ${wallet.name}`,
+      amount: amount,
+      currency: wallet.currency || 'ARS',
+      type: 'income',
+      wallet_id: wallet.id || null,
+      category_id: null,
+      is_recurring: false
+    };
+
+    const { error } = await this.transactionsService.create(initialTransaction);
+    if (error) {
+      console.error('Error creating initial transaction:', error);
+    }
   }
 
   private getEmptyWalletModel(): WalletForm {

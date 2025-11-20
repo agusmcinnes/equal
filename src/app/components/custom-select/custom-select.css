@@ -200,3 +200,87 @@
 .select-dropdown::-webkit-scrollbar-thumb:hover {
   background: #9ca3af;
 }
+
+/* ===== RESPONSIVE DESIGN ===== */
+@media (max-width: 768px) {
+  .select-trigger {
+    padding: 10px 12px;
+    min-height: 44px;
+  }
+
+  .select-label {
+    font-size: 14px;
+  }
+
+  .select-arrow {
+    font-size: 18px;
+  }
+
+  .select-dropdown {
+    max-height: 240px;
+    border-radius: 10px;
+  }
+
+  .select-option {
+    padding: 10px 14px;
+  }
+
+  .select-option:first-child {
+    border-radius: 10px 10px 0 0;
+  }
+
+  .select-option:last-child {
+    border-radius: 0 0 10px 10px;
+  }
+
+  .select-option:only-child {
+    border-radius: 10px;
+  }
+
+  .option-icon {
+    font-size: 18px;
+  }
+
+  .option-label {
+    font-size: 13px;
+  }
+
+  .check-icon {
+    font-size: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .select-trigger {
+    padding: 9px 11px;
+    min-height: 40px;
+  }
+
+  .select-label {
+    font-size: 13px;
+  }
+
+  .select-arrow {
+    font-size: 16px;
+  }
+
+  .select-dropdown {
+    max-height: 200px;
+  }
+
+  .select-option {
+    padding: 9px 12px;
+  }
+
+  .option-icon {
+    font-size: 16px;
+  }
+
+  .option-label {
+    font-size: 12px;
+  }
+
+  .check-icon {
+    font-size: 14px;
+  }
+}

@@ -327,6 +327,11 @@ export class Transactions implements OnInit, OnDestroy {
     } else {
       this.editing = null;
       this.model = this.getEmptyModel();
+      // Asegurar valores por defecto explícitos
+      this.model.type = 'expense';
+      this.model.currency = 'ARS';
+      this.model.category_id = null;
+      this.model.wallet_id = null;
     }
     this.fieldErrors = {};
     this.formVisible = true;
@@ -353,21 +358,21 @@ export class Transactions implements OnInit, OnDestroy {
     // ONLY include valid transaction table fields
     const clean: any = {
       date: model.date,
-      type: model.type,
-      amount: model.amount,
-      currency: model.currency
+      type: model.type || 'expense',
+      amount: model.amount || 0,
+      currency: model.currency || 'ARS'
     };
 
-    // Add optional fields only if defined
-    if (model.description !== undefined && model.description !== null) {
-      clean.description = model.description;
+    // Add optional fields - permitir null explícitamente para category_id y wallet_id
+    if (model.description !== undefined) {
+      clean.description = model.description || '';
     }
-    if (model.category_id !== undefined && model.category_id !== null) {
-      clean.category_id = model.category_id;
-    }
-    if (model.wallet_id !== undefined && model.wallet_id !== null) {
-      clean.wallet_id = model.wallet_id;
-    }
+    // Siempre incluir category_id, incluso si es null
+    clean.category_id = model.category_id !== undefined ? model.category_id : null;
+    
+    // Siempre incluir wallet_id, incluso si es null
+    clean.wallet_id = model.wallet_id !== undefined ? model.wallet_id : null;
+    
     if (model.crypto_type !== undefined && model.crypto_type !== null) {
       clean.crypto_type = model.crypto_type;
     }

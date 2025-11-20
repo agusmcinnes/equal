@@ -3,6 +3,8 @@
   <div class="page-header">
     <div class="header-content">
       <h1>Transacciones</h1>
+    </div>
+    <div class="header-actions">
       <div class="filters-row">
         <div class="filter-group">
           <label>Tipo:</label>
@@ -23,11 +25,11 @@
           ></app-custom-select>
         </div>
       </div>
+      <button class="btn-primary" (click)="showForm()">
+        <span class="material-icons">add</span>
+        Nueva transacción
+      </button>
     </div>
-    <button class="btn-primary" (click)="showForm()">
-      <span class="material-icons">add</span>
-      Nueva transacción
-    </button>
   </div>
 
   <!-- Statistics Section -->
@@ -242,6 +244,7 @@
             <app-custom-select
               [options]="transactionTypeOptions"
               [(ngModel)]="model.type"
+              name="type"
               placeholder="Seleccionar tipo"
             ></app-custom-select>
             <span class="error" *ngIf="fieldErrors['type']">{{ fieldErrors['type'] }}</span>
@@ -252,6 +255,7 @@
           <label>Descripción</label>
           <input
             type="text"
+            class="form-input"
             [(ngModel)]="model.description"
             name="description"
             placeholder="Ej: Compra en supermercado"
@@ -263,6 +267,7 @@
             <label>Monto *</label>
             <input
               type="number"
+              class="form-input"
               [(ngModel)]="model.amount"
               name="amount"
               min="0"
@@ -278,6 +283,7 @@
             <app-custom-select
               [options]="formCurrencyOptions"
               [(ngModel)]="model.currency"
+              name="currency"
               placeholder="Seleccionar moneda"
             ></app-custom-select>
             <span class="error" *ngIf="fieldErrors['currency']">{{ fieldErrors['currency'] }}</span>
@@ -289,6 +295,7 @@
           <app-custom-select
             [options]="cryptoTypeOptions"
             [(ngModel)]="model.crypto_type"
+            name="crypto_type"
             placeholder="Seleccionar cripto"
           ></app-custom-select>
           <span class="error" *ngIf="fieldErrors['crypto_type']">{{ fieldErrors['crypto_type'] }}</span>
@@ -300,6 +307,7 @@
             <app-custom-select
               [options]="categorySelectOptions"
               [(ngModel)]="model.category_id"
+              name="category_id"
               placeholder="Sin categoría"
               [loading]="!categoriesLoaded"
             ></app-custom-select>
@@ -310,6 +318,7 @@
             <app-custom-select
               [options]="walletSelectOptions"
               [(ngModel)]="model.wallet_id"
+              name="wallet_id"
               placeholder="Sin billetera"
               [loading]="!walletsLoaded"
             ></app-custom-select>

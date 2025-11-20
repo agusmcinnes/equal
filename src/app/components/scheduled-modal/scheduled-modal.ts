@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, OnInit, OnDestroy } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnInit, OnDestroy, OnChanges, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
 import { ScheduledTransaction, ScheduledTransactionWithDetails, FREQUENCY_OPTIONS } from '../../models/scheduled-transaction.model';
@@ -16,7 +16,7 @@ import { takeUntil } from 'rxjs/operators';
   templateUrl: './scheduled-modal.html',
   styleUrl: './scheduled-modal.css'
 })
-export class ScheduledModalComponent implements OnInit, OnDestroy {
+export class ScheduledModalComponent implements OnInit, OnDestroy, OnChanges {
   @Input() isOpen = false;
   @Input() mode: 'create' | 'edit' = 'create';
   @Input() transaction: ScheduledTransactionWithDetails | null = null;
@@ -47,6 +47,31 @@ export class ScheduledModalComponent implements OnInit, OnDestroy {
     }
   }
 
+  ngOnChanges(changes: SimpleChanges): void {
+    // When modal opens, reset form with correct values
+    if (changes['isOpen'] && changes['isOpen'].currentValue === true) {
+      this.errorMessage = '';
+
+      if (this.mode === 'edit' && this.transaction) {
+        // Edit mode: populate with transaction data
+        this.populateForm(this.transaction);
+      } else {
+        // Create mode: reset form with default values
+        this.form.reset({
+          description: '',
+          type: this.defaultType,
+          amount: '',
+          currency: 'ARS',
+          category_id: '',
+          wallet_id: null,
+          start_date: '',
+          end_date: '',
+          frequency: 'monthly'
+        });
+      }
+    }
+  }
+
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
@@ -58,12 +83,34 @@ export class ScheduledModalComponent implements OnInit, OnDestroy {
       type: [this.defaultType, Validators.required],
       amount: ['', [Validators.required, Validators.min(0.01)]],
       currency: ['ARS', Validators.required],
-      category_id: ['', Validators.required],
-      wallet_id: [''],
+      category_id: ['', [Validators.required]],
+      wallet_id: [null],
       start_date: ['', Validators.required],
       end_date: [''],
       frequency: ['monthly', Validators.required]
     }, { validators: this.endDateAfterStartDate });
+
+    // Listen to type changes to reset category if it's not valid for the new type
+    this.form.get('type')?.valueChanges.pipe(takeUntil(this.destroy$)).subscribe(() => {
+      const currentCategoryId = this.form.get('category_id')?.value;
+      if (currentCategoryId && currentCategoryId !== '') {
+        const category = this.categories.find(c => c.id === currentCategoryId);
+        if (category && category.type !== this.form.get('type')?.value) {
+          this.form.patchValue({ category_id: '' });
+        }
+      }
+    });
+
+    // Listen to currency changes to reset wallet if it's not valid for the new currency
+    this.form.get('currency')?.valueChanges.pipe(takeUntil(this.destroy$)).subscribe(() => {
+      const currentWalletId = this.form.get('wallet_id')?.value;
+      if (currentWalletId) {
+        const wallet = this.wallets.find(w => w.id === currentWalletId);
+        if (wallet && wallet.currency !== this.form.get('currency')?.value) {
+          this.form.patchValue({ wallet_id: null });
+        }
+      }
+    });
   }
 
   // Custom validator: end_date must be after start_date
@@ -128,8 +175,14 @@ export class ScheduledModalComponent implements OnInit, OnDestroy {
   }
 
   onSubmit(): void {
+    // Marcar todos los campos como touched para mostrar errores de validación
+    Object.keys(this.form.controls).forEach(key => {
+      this.form.get(key)?.markAsTouched();
+    });
+
     if (this.form.invalid) {
       this.errorMessage = 'Por favor completa todos los campos requeridos correctamente';
+      console.log('Form is invalid. Errors:', this.getFormValidationErrors());
       return;
     }
 
@@ -151,7 +204,7 @@ export class ScheduledModalComponent implements OnInit, OnDestroy {
       type: formValue.type,
       amount: parseFloat(formValue.amount),
       currency: formValue.currency,
-      category_id: formValue.category_id || null,
+      category_id: formValue.category_id && formValue.category_id !== '' ? formValue.category_id : null,
       wallet_id: formValue.wallet_id || null,
       start_date: this.formatDateForSubmission(formValue.start_date),
       end_date: formValue.end_date ? this.formatDateForSubmission(formValue.end_date) : null,
@@ -194,6 +247,30 @@ export class ScheduledModalComponent implements OnInit, OnDestroy {
   }
 
   get isFormValid(): boolean {
-    return this.form.valid;
+    const isValid = this.form.valid;
+    
+    // Debug logging (remover después de solucionar el problema)
+    console.log('=== Form Validation Check ===');
+    console.log('Form valid:', this.form.valid);
+    console.log('Form values:', this.form.value);
+    console.log('Form errors:', this.getFormValidationErrors());
+    console.log('Result (isFormValid):', isValid);
+    console.log('=============================');
+    
+    return isValid;
+  }
+
+  private getFormValidationErrors(): any {
+    const errors: any = {};
+    Object.keys(this.form.controls).forEach(key => {
+      const control = this.form.get(key);
+      if (control && control.errors) {
+        errors[key] = control.errors;
+      }
+    });
+    if (this.form.errors) {
+      errors['_form'] = this.form.errors;
+    }
+    return errors;
   }
 }

@@ -20,18 +20,28 @@
   max-width: calc(100vw - 120px);
 }
 
+/* Tablet styles */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .content {
+    margin-left: 120px;
+    max-width: calc(100vw - 120px);
+    padding: 28px;
+  }
+}
+
 /* Mobile styles */
 @media (max-width: 768px) {
   .content {
     margin-left: 0;
+    max-width: 100vw;
     padding: 20px 16px;
     padding-bottom: 80px; /* Space for mobile nav */
   }
 }
 
-/* Tablet styles */
-@media (min-width: 769px) and (max-width: 1024px) {
+@media (max-width: 480px) {
   .content {
-    margin-left: 120px;
+    padding: 16px 12px;
+    padding-bottom: 76px;
   }
 }

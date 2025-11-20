@@ -15,14 +15,31 @@
   margin-bottom: 32px;
   gap: 24px;
   flex-wrap: wrap;
+  padding: 0;
+}
+
+.header-content {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  flex: 1;
+}
+
+.header-text {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
 .header-content h1 {
   font-size: 32px;
   font-weight: 700;
-  color: #1f2937;
-  margin: 0 0 8px 0;
+  color: #463397;
+  margin: 0;
+  padding: 4px 0;
   letter-spacing: -0.5px;
+  text-shadow: 0 2px 8px rgba(70, 51, 151, 0.15);
+  line-height: 1.2;
 }
 
 .header-subtitle {
@@ -435,11 +452,29 @@
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  position: relative;
+}
+
+.category-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(135deg, #463397, #7c5fd6);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: 10;
 }
 
 .category-card:hover {
   box-shadow: 0 8px 12px rgba(70, 51, 151, 0.12);
   transform: translateY(-2px);
+}
+
+.category-card:hover::before {
+  opacity: 1;
 }
 
 .card-header {
@@ -593,8 +628,13 @@
 
 /* ===== RESPONSIVE DESIGN ===== */
 @media (max-width: 1024px) {
+  .categories-page {
+    padding: 20px;
+  }
+
   .categories-grid {
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
   }
 
   .category-form {
@@ -603,9 +643,23 @@
 }
 
 @media (max-width: 768px) {
+  .categories-page {
+    padding: 16px;
+  }
+
   .page-header {
     flex-direction: column;
     align-items: stretch;
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+
+  .header-content h1 {
+    font-size: 26px;
+  }
+
+  .header-subtitle {
+    font-size: 13px;
   }
 
   .btn-primary {
@@ -615,26 +669,127 @@
 
   .filters-section {
     flex-direction: column;
+    gap: 12px;
+    padding: 16px;
   }
 
   .search-box {
     min-width: unset;
+    width: 100%;
   }
 
   .filter-tabs {
     width: 100%;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .filter-tab {
+    flex: 1;
+    min-width: calc(50% - 4px);
+    font-size: 13px;
+    padding: 10px 12px;
   }
 
   .categories-grid {
     grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .category-card {
+    padding: 16px;
+  }
+
+  .card-header {
+    padding: 16px;
+  }
+
+  .card-body {
+    padding: 16px;
+  }
+
+  .category-icon {
+    width: 48px;
+    height: 48px;
+  }
+
+  .category-icon .material-icons {
+    font-size: 24px;
+  }
+
+  .category-info h3 {
+    font-size: 16px;
+  }
+
+  .category-type {
+    font-size: 12px;
+  }
+
+  .card-actions {
+    gap: 8px;
+  }
+
+  .btn-icon {
+    width: 36px;
+    height: 36px;
+  }
+
+  .btn-icon .material-icons {
+    font-size: 18px;
+  }
+
+  .form-card {
+    padding: 20px;
+  }
+
+  .form-header {
+    margin-bottom: 20px;
+  }
+
+  .form-header h2 {
+    font-size: 20px;
+  }
+
+  .category-form {
+    gap: 16px;
+  }
+
+  .form-group label {
+    font-size: 13px;
+  }
+
+  .form-input,
+  .form-select {
+    padding: 10px 12px;
+    font-size: 14px;
   }
 
   .icon-picker {
     grid-template-columns: repeat(5, 1fr);
+    gap: 8px;
+  }
+
+  .icon-option {
+    width: 44px;
+    height: 44px;
+  }
+
+  .icon-option .material-icons {
+    font-size: 20px;
+  }
+
+  .color-picker {
+    gap: 8px;
+  }
+
+  .color-option {
+    width: 36px;
+    height: 36px;
   }
 
   .form-actions {
     flex-direction: column-reverse;
+    gap: 10px;
   }
 
   .form-actions button {
@@ -645,15 +800,116 @@
 
 @media (max-width: 480px) {
   .categories-page {
-    padding: 16px;
+    padding: 12px;
   }
 
   .page-header {
-    margin-bottom: 24px;
+    margin-bottom: 20px;
+    gap: 12px;
   }
 
   .header-content h1 {
     font-size: 24px;
+  }
+
+  .header-subtitle {
+    font-size: 12px;
+  }
+
+  .btn-primary {
+    padding: 10px 20px;
+    font-size: 14px;
+  }
+
+  .btn-primary .material-icons {
+    font-size: 18px;
+  }
+
+  .filters-section {
+    padding: 14px;
+    gap: 10px;
+  }
+
+  .search-box input {
+    padding: 9px 9px 9px 38px;
+    font-size: 13px;
+  }
+
+  .search-box .material-icons {
+    font-size: 18px;
+    left: 10px;
+  }
+
+  .filter-tabs {
+    gap: 6px;
+  }
+
+  .filter-tab {
+    font-size: 12px;
+    padding: 8px 10px;
+  }
+
+  .categories-grid {
+    gap: 12px;
+  }
+
+  .category-card {
+    padding: 14px;
+  }
+
+  .card-header {
+    padding: 14px;
+    margin-bottom: 12px;
+  }
+
+  .category-icon {
+    width: 40px;
+    height: 40px;
+  }
+
+  .category-icon .material-icons {
+    font-size: 20px;
+  }
+
+  .category-info h3 {
+    font-size: 15px;
+  }
+
+  .category-type {
+    font-size: 11px;
+  }
+
+  .card-body {
+    padding: 14px;
+  }
+
+  .usage-stats {
+    gap: 10px;
+  }
+
+  .usage-item {
+    gap: 6px;
+  }
+
+  .usage-label {
+    font-size: 11px;
+  }
+
+  .usage-value {
+    font-size: 13px;
+  }
+
+  .card-actions {
+    gap: 6px;
+  }
+
+  .btn-icon {
+    width: 32px;
+    height: 32px;
+  }
+
+  .btn-icon .material-icons {
+    font-size: 16px;
   }
 
   .form-card {
@@ -664,19 +920,74 @@
     margin-bottom: 16px;
   }
 
-  .category-form {
-    gap: 12px;
+  .form-header h2 {
+    font-size: 18px;
   }
 
-  .card-header {
-    padding: 12px;
+  .btn-close {
+    width: 32px;
+    height: 32px;
+  }
+
+  .btn-close .material-icons {
+    font-size: 20px;
+  }
+
+  .category-form {
+    gap: 14px;
+  }
+
+  .form-group label {
+    font-size: 12px;
+  }
+
+  .form-input,
+  .form-select {
+    padding: 9px 11px;
+    font-size: 13px;
+  }
+
+  .error-message {
+    font-size: 11px;
   }
 
   .icon-picker {
     grid-template-columns: repeat(4, 1fr);
+    gap: 6px;
+  }
+
+  .icon-option {
+    width: 40px;
+    height: 40px;
+  }
+
+  .icon-option .material-icons {
+    font-size: 18px;
   }
 
   .color-picker {
-    grid-template-columns: repeat(5, 1fr);
+    gap: 6px;
+  }
+
+  .color-option {
+    width: 32px;
+    height: 32px;
+  }
+
+  .form-actions {
+    gap: 8px;
+  }
+
+  .form-actions button {
+    padding: 10px 20px;
+    font-size: 14px;
+  }
+
+  .empty-state-section {
+    padding: 40px 16px;
+  }
+
+  .empty-state-section .btn-primary {
+    margin-top: 10px;
   }
 }

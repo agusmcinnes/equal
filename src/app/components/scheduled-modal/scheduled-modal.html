@@ -77,7 +77,7 @@
       <div class="form-group">
         <label for="category_id">Categoría *</label>
         <select id="category_id" formControlName="category_id" class="form-control">
-          <option [ngValue]="null">Seleccionar categoría</option>
+          <option value="">Seleccionar categoría</option>
           <option *ngFor="let cat of getFilteredCategories()" [ngValue]="cat.id">
             {{ cat.name }}
           </option>
@@ -165,7 +165,7 @@
       <button 
         type="submit" 
         class="btn btn-primary"
-        [disabled]="!isFormValid || isLoading"
+        [disabled]="form.invalid || isLoading"
         (click)="onSubmit()"
       >
         <i class="material-icons" *ngIf="isLoading">hourglass_empty</i>
