@@ -1,10 +1,15 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Subject, takeUntil } from 'rxjs';
+import { Subject, takeUntil, take } from 'rxjs';
 import { CategoriesService } from '../../services/categories.service';
+import { TransactionsService } from '../../services/transactions.service';
+import { StatisticsService } from '../../services/statistics.service';
 import { Category } from '../../models/category.model';
+import { CategoryDistribution, TransactionWithDetails } from '../../models/transaction.model';
 import { EmptyStateComponent } from '../../components/empty-state/empty-state';
+import { CustomSelectComponent, SelectOption } from '../../components/custom-select/custom-select';
+import { NgxChartsModule } from '@swimlane/ngx-charts';
 
 interface CategoryForm {
   name: string;
@@ -20,7 +25,7 @@ interface IconOption {
 
 @Component({
   selector: 'app-categories',
-  imports: [CommonModule, FormsModule, EmptyStateComponent],
+  imports: [CommonModule, FormsModule, EmptyStateComponent, CustomSelectComponent, NgxChartsModule],
   templateUrl: './categories.html',
   styleUrl: './categories.css'
 })
@@ -39,6 +44,24 @@ export class Categories implements OnInit, OnDestroy {
   searchQuery = '';
   filterType: 'all' | 'income' | 'expense' = 'all';
   deleteConfirmId: string | null = null;
+
+  // Analytics
+  showAnalytics = true;
+  analyticsLoading = false;
+  analyticsCurrency: 'ARS' | 'USD' | 'EUR' | 'CRYPTO' = 'ARS';
+  incomeDistribution: CategoryDistribution[] = [];
+  expenseDistribution: CategoryDistribution[] = [];
+  incomeChartData: any[] = [];
+  expenseChartData: any[] = [];
+  incomeColorScheme: any = { domain: [] };
+  expenseColorScheme: any = { domain: [] };
+
+  currencyOptions: SelectOption[] = [
+    { value: 'ARS', label: 'ARS', icon: 'attach_money' },
+    { value: 'USD', label: 'USD', icon: 'attach_money' },
+    { value: 'EUR', label: 'EUR', icon: 'euro' },
+    { value: 'CRYPTO', label: 'CRYPTO', icon: 'currency_bitcoin' }
+  ];
 
   // Form model
   model: CategoryForm = this.getEmptyModel();
@@ -75,10 +98,15 @@ export class Categories implements OnInit, OnDestroy {
     '#6366f1', '#8b5cf6', '#d946ef', '#ec4899', '#f43f5e'
   ];
 
-  constructor(private catService: CategoriesService) {}
+  constructor(
+    private catService: CategoriesService,
+    private txService: TransactionsService,
+    public statsService: StatisticsService
+  ) {}
 
   ngOnInit(): void {
     this.loadCategories();
+    this.loadDistributionData();
   }
 
   ngOnDestroy(): void {
@@ -234,6 +262,181 @@ export class Categories implements OnInit, OnDestroy {
 
   getTypeIcon(type: string): string {
     return type === 'income' ? 'trending_up' : 'trending_down';
+  }
+
+  toggleAnalytics(): void {
+    this.showAnalytics = !this.showAnalytics;
+  }
+
+  async loadDistributionData(): Promise<void> {
+    this.analyticsLoading = true;
+
+    try {
+      // Load transactions from last 30 days, filtered by selected currency
+      const allTransactions = await this.txService
+        .listWithDetails({ currency: this.analyticsCurrency })
+        .pipe(take(1))
+        .toPromise() || [];
+
+      // Filter for last 30 days
+      const today = new Date();
+      const thirtyDaysAgo = new Date(today);
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+      const recentTransactions = allTransactions.filter((t: TransactionWithDetails) => {
+        const txDate = new Date(t.date);
+        return txDate >= thirtyDaysAgo && txDate <= today;
+      });
+
+      // Group by category for income
+      const incomeMap = new Map<string, {
+        category_id: string;
+        category_name: string;
+        category_color: string;
+        category_icon: string;
+        total_amount: number;
+        transaction_count: number;
+      }>();
+
+      // Group by category for expense
+      const expenseMap = new Map<string, {
+        category_id: string;
+        category_name: string;
+        category_color: string;
+        category_icon: string;
+        total_amount: number;
+        transaction_count: number;
+      }>();
+
+      recentTransactions.forEach((t: TransactionWithDetails) => {
+        const categoryId = t.category_id || 'uncategorized';
+        const categoryData = {
+          category_id: categoryId,
+          category_name: t.category_name || 'Sin categoría',
+          category_color: t.category_color || '#6b7280',
+          category_icon: t.category_icon || 'category',
+          total_amount: 0,
+          transaction_count: 0
+        };
+
+        if (t.type === 'income') {
+          const existing = incomeMap.get(categoryId) || { ...categoryData };
+          existing.total_amount += t.amount;
+          existing.transaction_count += 1;
+          incomeMap.set(categoryId, existing);
+        } else {
+          const existing = expenseMap.get(categoryId) || { ...categoryData };
+          existing.total_amount += t.amount;
+          existing.transaction_count += 1;
+          expenseMap.set(categoryId, existing);
+        }
+      });
+
+      // Calculate totals for percentages
+      const totalIncome = Array.from(incomeMap.values()).reduce((sum, item) => sum + item.total_amount, 0);
+      const totalExpense = Array.from(expenseMap.values()).reduce((sum, item) => sum + item.total_amount, 0);
+
+      // Convert to CategoryDistribution arrays with percentages
+      this.incomeDistribution = Array.from(incomeMap.values())
+        .map(item => ({
+          ...item,
+          percentage: totalIncome > 0 ? (item.total_amount / totalIncome) * 100 : 0
+        }))
+        .sort((a, b) => b.total_amount - a.total_amount);
+
+      this.expenseDistribution = Array.from(expenseMap.values())
+        .map(item => ({
+          ...item,
+          percentage: totalExpense > 0 ? (item.total_amount / totalExpense) * 100 : 0
+        }))
+        .sort((a, b) => b.total_amount - a.total_amount);
+
+      // Prepare chart data for horizontal bars (sorted by amount)
+      this.incomeChartData = this.incomeDistribution
+        .slice(0, 8)
+        .map(item => ({
+          name: item.category_name,
+          value: item.total_amount,
+          extra: {
+            color: item.category_color,
+            icon: item.category_icon,
+            percentage: item.percentage
+          }
+        }));
+
+      this.expenseChartData = this.expenseDistribution
+        .slice(0, 8)
+        .map(item => ({
+          name: item.category_name,
+          value: item.total_amount,
+          extra: {
+            color: item.category_color,
+            icon: item.category_icon,
+            percentage: item.percentage
+          }
+        }));
+
+      // Build color schemes
+      this.incomeColorScheme = {
+        domain: this.incomeChartData.length > 0
+          ? this.incomeChartData.map(item => item.extra?.color || '#10b981')
+          : ['#10b981']
+      };
+
+      this.expenseColorScheme = {
+        domain: this.expenseChartData.length > 0
+          ? this.expenseChartData.map(item => item.extra?.color || '#ef4444')
+          : ['#ef4444']
+      };
+
+    } catch (error) {
+      console.error('Error loading distribution data:', error);
+      this.incomeDistribution = [];
+      this.expenseDistribution = [];
+      this.incomeChartData = [];
+      this.expenseChartData = [];
+    } finally {
+      this.analyticsLoading = false;
+    }
+  }
+
+  getFilteredIncomeDistribution(): CategoryDistribution[] {
+    return this.incomeDistribution
+      .sort((a, b) => b.total_amount - a.total_amount)
+      .slice(0, 8);
+  }
+
+  getFilteredExpenseDistribution(): CategoryDistribution[] {
+    return this.expenseDistribution
+      .sort((a, b) => b.total_amount - a.total_amount)
+      .slice(0, 8);
+  }
+
+  formatCurrency(amount: number): string {
+    return this.statsService.formatCurrency(amount, this.analyticsCurrency);
+  }
+
+  changeAnalyticsCurrency(currency: 'ARS' | 'USD' | 'EUR' | 'CRYPTO'): void {
+    this.analyticsCurrency = currency;
+    this.loadDistributionData();
+  }
+
+  shouldShowIncomeAnalytics(): boolean {
+    return this.filterType === 'all' || this.filterType === 'income';
+  }
+
+  shouldShowExpenseAnalytics(): boolean {
+    return this.filterType === 'all' || this.filterType === 'expense';
+  }
+
+  hasAnalyticsData(): boolean {
+    if (this.filterType === 'income') {
+      return this.incomeDistribution.length > 0;
+    }
+    if (this.filterType === 'expense') {
+      return this.expenseDistribution.length > 0;
+    }
+    return this.incomeDistribution.length > 0 || this.expenseDistribution.length > 0;
   }
 
   private getEmptyModel(): CategoryForm {

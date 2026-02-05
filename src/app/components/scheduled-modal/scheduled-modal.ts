@@ -5,6 +5,7 @@ import { ScheduledTransaction, ScheduledTransactionWithDetails, FREQUENCY_OPTION
 import { Category } from '../../models/category.model';
 import { Wallet } from '../../models/wallet.model';
 import { ScheduledTransactionsService } from '../../services/scheduled-transactions.service';
+import { ModalStateService } from '../../shared/modal-state.service';
 import { DatetimePickerComponent } from '../datetime-picker/datetime-picker';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
@@ -32,11 +33,17 @@ export class ScheduledModalComponent implements OnInit, OnDestroy, OnChanges {
   isLoading = false;
   errorMessage = '';
 
+  // Swipe gesture handling for mobile bottom sheet
+  private touchStartY = 0;
+  private touchCurrentY = 0;
+  private isSwiping = false;
+
   private destroy$ = new Subject<void>();
 
   constructor(
     private fb: FormBuilder,
-    private scheduledTransactionsService: ScheduledTransactionsService
+    private scheduledTransactionsService: ScheduledTransactionsService,
+    private modalStateService: ModalStateService
   ) {
     this.initializeForm();
   }
@@ -48,33 +55,72 @@ export class ScheduledModalComponent implements OnInit, OnDestroy, OnChanges {
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    // When modal opens, reset form with correct values
-    if (changes['isOpen'] && changes['isOpen'].currentValue === true) {
-      this.errorMessage = '';
+    // Handle modal open/close state
+    if (changes['isOpen']) {
+      if (changes['isOpen'].currentValue === true) {
+        this.modalStateService.openModal();
+        this.errorMessage = '';
 
-      if (this.mode === 'edit' && this.transaction) {
-        // Edit mode: populate with transaction data
-        this.populateForm(this.transaction);
-      } else {
-        // Create mode: reset form with default values
-        this.form.reset({
-          description: '',
-          type: this.defaultType,
-          amount: '',
-          currency: 'ARS',
-          category_id: '',
-          wallet_id: null,
-          start_date: '',
-          end_date: '',
-          frequency: 'monthly'
-        });
+        if (this.mode === 'edit' && this.transaction) {
+          // Edit mode: populate with transaction data
+          this.populateForm(this.transaction);
+        } else {
+          // Create mode: reset form with default values
+          this.form.reset({
+            description: '',
+            type: this.defaultType,
+            amount: '',
+            currency: 'ARS',
+            category_id: '',
+            wallet_id: null,
+            start_date: '',
+            end_date: '',
+            frequency: 'monthly'
+          });
+        }
+      } else if (changes['isOpen'].previousValue === true && changes['isOpen'].currentValue === false) {
+        this.modalStateService.closeModal();
       }
     }
   }
 
   ngOnDestroy(): void {
+    // Ensure modal is closed when component is destroyed
+    if (this.isOpen) {
+      this.modalStateService.closeModal();
+    }
     this.destroy$.next();
     this.destroy$.complete();
+  }
+
+  // Touch event handlers for swipe-to-close
+  onTouchStart(event: TouchEvent): void {
+    const target = event.target as HTMLElement;
+    // Only enable swipe on handle or near the top of the modal
+    if (target.closest('.modal-handle') || target.closest('.modal-header')) {
+      this.touchStartY = event.touches[0].clientY;
+      this.isSwiping = true;
+    }
+  }
+
+  onTouchMove(event: TouchEvent): void {
+    if (!this.isSwiping) return;
+    this.touchCurrentY = event.touches[0].clientY;
+  }
+
+  onTouchEnd(event: TouchEvent): void {
+    if (!this.isSwiping) return;
+
+    const swipeDistance = this.touchCurrentY - this.touchStartY;
+    const swipeThreshold = 100; // pixels
+
+    if (swipeDistance > swipeThreshold) {
+      this.onClose();
+    }
+
+    this.isSwiping = false;
+    this.touchStartY = 0;
+    this.touchCurrentY = 0;
   }
 
   private initializeForm(): void {

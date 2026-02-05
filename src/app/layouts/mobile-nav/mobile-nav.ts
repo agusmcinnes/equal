@@ -1,7 +1,10 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../services/auth.service';
+import { ModalStateService } from '../../shared/modal-state.service';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 
 interface NavItem {
   icon: string;
@@ -15,9 +18,12 @@ interface NavItem {
   templateUrl: './mobile-nav.html',
   styleUrl: './mobile-nav.css',
 })
-export class MobileNav {
+export class MobileNav implements OnInit, OnDestroy {
   isDrawerOpen = false;
   showLogoutConfirm = false;
+  isModalOpen = false;
+
+  private destroy$ = new Subject<void>();
 
   // Items principales en la barra inferior
   navItems: NavItem[] = [
@@ -36,6 +42,24 @@ export class MobileNav {
     { icon: 'attach_money', label: 'Dólar', route: '/dollar' },
   ];
 
+  constructor(
+    private authService: AuthService,
+    private modalStateService: ModalStateService
+  ) {}
+
+  ngOnInit(): void {
+    this.modalStateService.isModalOpen$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(isOpen => {
+        this.isModalOpen = isOpen;
+      });
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
   toggleDrawer() {
     this.isDrawerOpen = !this.isDrawerOpen;
   }
@@ -44,8 +68,6 @@ export class MobileNav {
     this.isDrawerOpen = false;
     this.showLogoutConfirm = false;
   }
-
-  constructor(private authService: AuthService) {}
 
   toggleLogoutConfirm() {
     this.showLogoutConfirm = !this.showLogoutConfirm;

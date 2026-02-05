@@ -6,6 +6,7 @@ import { TransactionsService } from '../../services/transactions.service';
 import { CategoriesService } from '../../services/categories.service';
 import { WalletsService } from '../../services/wallets.service';
 import { StatisticsService } from '../../services/statistics.service';
+import { ModalStateService } from '../../shared/modal-state.service';
 import {
   Transaction,
   TransactionWithDetails,
@@ -59,6 +60,9 @@ export class Transactions implements OnInit, OnDestroy {
   pieChartData: any[] = [];
   incomeByCategoryData: any[] = [];
   expensesByCategoryData: any[] = [];
+
+  // Multi-currency stats (when filterCurrency === 'all')
+  multiCurrencyStats: { [key: string]: { income: number; expenses: number; balance: number } } = {};
 
   // Sorting & Pagination
   sort: TransactionSort = { field: 'date', order: 'desc' };
@@ -138,7 +142,8 @@ export class Transactions implements OnInit, OnDestroy {
     private txService: TransactionsService,
     private catService: CategoriesService,
     private walletsService: WalletsService,
-    public statsService: StatisticsService
+    public statsService: StatisticsService,
+    private modalStateService: ModalStateService
   ) {}
 
   ngOnInit(): void {
@@ -146,6 +151,10 @@ export class Transactions implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    // Ensure modal is closed when component is destroyed
+    if (this.formVisible) {
+      this.modalStateService.closeModal();
+    }
     this.destroy$.next();
     this.destroy$.complete();
   }
@@ -162,7 +171,7 @@ export class Transactions implements OnInit, OnDestroy {
       .toPromise() || [];
     this.updateWalletOptions();
 
-    // Load transactions and stats (last 30 days)
+    // Load all transactions and stats
     await this.loadData();
 
     this.loading = false;
@@ -216,7 +225,7 @@ export class Transactions implements OnInit, OnDestroy {
     this.loading = true;
     this.statsLoading = true;
 
-    // Load transactions (last 30 days automatically)
+    // Load all transactions
     await this.loadTransactionsLegacy();
   }
 
@@ -257,19 +266,12 @@ export class Transactions implements OnInit, OnDestroy {
   }
 
   private applyFilters(): void {
-    const today = new Date();
-    const thirtyDaysAgo = new Date(today);
-    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-
-    // Filter from cached raw data
+    // Filter from cached raw data (show all transactions, no date filter)
     let filtered = this.rawTransactions.filter(tx => {
       // Filter by currency
       if (this.filterCurrency !== 'all' && tx.currency !== this.filterCurrency) return false;
       // Filter by type
       if (this.filterType !== 'all' && tx.type !== this.filterType) return false;
-      // Filter by last 30 days
-      const txDate = new Date(tx.date);
-      if (txDate < thirtyDaysAgo || txDate > today) return false;
       return true;
     });
 
@@ -335,6 +337,7 @@ export class Transactions implements OnInit, OnDestroy {
     }
     this.fieldErrors = {};
     this.formVisible = true;
+    this.modalStateService.openModal();
   }
 
   closeForm(): void {
@@ -342,6 +345,7 @@ export class Transactions implements OnInit, OnDestroy {
     this.editing = null;
     this.model = this.getEmptyModel();
     this.fieldErrors = {};
+    this.modalStateService.closeModal();
   }
 
   validateModel(): boolean {
@@ -451,6 +455,10 @@ export class Transactions implements OnInit, OnDestroy {
     return Math;
   }
 
+  getCurrencyKeys(): string[] {
+    return Object.keys(this.multiCurrencyStats);
+  }
+
 
   private async loadTransactionsLegacy(): Promise<void> {
     const { data } = await this.txService.list();
@@ -478,26 +486,65 @@ export class Transactions implements OnInit, OnDestroy {
   }
 
   private calculateStatistics(): void {
-    // All transactions are already filtered to selected currency in last 30 days
+    // All transactions are already filtered by selected currency and type
     const filtered = this.allTransactions;
 
+    if (this.filterCurrency === 'all') {
+      // Calculate stats for each currency separately
+      this.multiCurrencyStats = {};
+      const currencies = ['ARS', 'USD', 'EUR', 'CRYPTO'];
+
+      currencies.forEach(curr => {
+        const txForCurrency = filtered.filter(t => t.currency === curr);
+        const income = txForCurrency.filter(t => t.type === 'income').reduce((sum, t) => sum + t.amount, 0);
+        const expenses = txForCurrency.filter(t => t.type === 'expense').reduce((sum, t) => sum + t.amount, 0);
+
+        if (income > 0 || expenses > 0) {
+          this.multiCurrencyStats[curr] = {
+            income: income,
+            expenses: expenses,
+            balance: income - expenses
+          };
+        }
+      });
+
+      // Set general statistics (for transaction count)
+      this.statistics = {
+        total_income: 0,
+        total_expenses: 0,
+        net_balance: 0,
+        transaction_count: filtered.length,
+        income_count: filtered.filter(t => t.type === 'income').length,
+        expense_count: filtered.filter(t => t.type === 'expense').length,
+        currency: 'all'
+      };
+    } else {
+      // Single currency statistics
+      this.multiCurrencyStats = {};
+
+      const income = filtered.filter(t => t.type === 'income');
+      const expenses = filtered.filter(t => t.type === 'expense');
+
+      const total_income = income.reduce((sum, t) => sum + t.amount, 0);
+      const total_expenses = expenses.reduce((sum, t) => sum + t.amount, 0);
+
+      this.statistics = {
+        total_income,
+        total_expenses,
+        net_balance: total_income - total_expenses,
+        transaction_count: filtered.length,
+        income_count: income.length,
+        expense_count: expenses.length,
+        currency: this.filterCurrency
+      };
+    }
+
+    // Create simple Income vs Expenses pie chart data
     const income = filtered.filter(t => t.type === 'income');
     const expenses = filtered.filter(t => t.type === 'expense');
-
     const total_income = income.reduce((sum, t) => sum + t.amount, 0);
     const total_expenses = expenses.reduce((sum, t) => sum + t.amount, 0);
 
-    this.statistics = {
-      total_income,
-      total_expenses,
-      net_balance: total_income - total_expenses,
-      transaction_count: filtered.length,
-      income_count: income.length,
-      expense_count: expenses.length,
-      currency: this.filterCurrency === 'all' ? 'ARS' : this.filterCurrency
-    };
-
-    // Create simple Income vs Expenses pie chart data
     this.pieChartData = [
       {
         name: 'Ingresos',

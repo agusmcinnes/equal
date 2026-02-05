@@ -18,6 +18,7 @@ import { StatCardComponent } from '../../components/stat-card/stat-card';
 import { CategoryBadgeComponent } from '../../components/category-badge/category-badge';
 import { EmptyStateComponent } from '../../components/empty-state/empty-state';
 import { CustomSelectComponent, SelectOption } from '../../components/custom-select/custom-select';
+import { QuickTransactionModalComponent } from '../../components/quick-transaction-modal/quick-transaction-modal';
 import { NgxChartsModule } from '@swimlane/ngx-charts';
 
 interface TopCategory {
@@ -26,6 +27,15 @@ interface TopCategory {
   percentage: number;
   color: string;
   icon: string;
+}
+
+interface ChartDataItem {
+  name: string;
+  value: number;
+  extra?: {
+    color: string;
+    icon: string;
+  };
 }
 
 @Component({
@@ -38,6 +48,7 @@ interface TopCategory {
     CategoryBadgeComponent,
     EmptyStateComponent,
     CustomSelectComponent,
+    QuickTransactionModalComponent,
     NgxChartsModule
   ],
   templateUrl: './dashboard.html',
@@ -58,8 +69,26 @@ export class Dashboard implements OnInit, OnDestroy {
   totalWalletBalance = 0;
   walletBalancesByCurrency: { [key: string]: number } = {};
 
+  // Total balance (all transactions, no period filter)
+  totalBalanceByCurrency: { [key: string]: { income: number; expenses: number; balance: number } } = {};
+
   // Multi-currency stats (when filterCurrency === 'all')
   multiCurrencyStats: { [key: string]: { income: number; expenses: number; balance: number } } = {};
+
+  // Category distribution data
+  incomeDistribution: CategoryDistribution[] = [];
+  expenseDistribution: CategoryDistribution[] = [];
+  incomeChartData: ChartDataItem[] = [];
+  expenseChartData: ChartDataItem[] = [];
+  distributionLoading = false;
+  distributionCurrency: 'ARS' | 'USD' | 'EUR' | 'CRYPTO' = 'ARS';
+
+  distributionCurrencyOptions: SelectOption[] = [
+    { value: 'ARS', label: 'ARS', icon: 'attach_money' },
+    { value: 'USD', label: 'USD', icon: 'attach_money' },
+    { value: 'EUR', label: 'EUR', icon: 'euro' },
+    { value: 'CRYPTO', label: 'CRYPTO', icon: 'currency_bitcoin' }
+  ];
 
   // Charts data
   topExpensesChartData: any[] = [];
@@ -68,6 +97,7 @@ export class Dashboard implements OnInit, OnDestroy {
   loading = false;
   statsLoading = false;
   filterCurrency: 'all' | 'ARS' | 'USD' | 'EUR' | 'CRYPTO' = 'all';
+  isQuickModalOpen = false;
 
   currencyOptions: SelectOption[] = [
     { value: 'all', label: 'Todas', icon: 'currency_exchange' },
@@ -77,15 +107,31 @@ export class Dashboard implements OnInit, OnDestroy {
     { value: 'CRYPTO', label: 'CRYPTO', icon: 'currency_bitcoin' }
   ];
 
+  // Period filter
+  filterPeriod: '7_days' | '30_days' | '90_days' | 'this_month' | 'last_month' | 'this_year' = '30_days';
+
+  periodOptions: SelectOption[] = [
+    { value: '7_days', label: 'Últimos 7 días', icon: 'schedule' },
+    { value: '30_days', label: 'Últimos 30 días', icon: 'date_range' },
+    { value: '90_days', label: 'Últimos 90 días', icon: 'calendar_month' },
+    { value: 'this_month', label: 'Este mes', icon: 'today' },
+    { value: 'last_month', label: 'Mes pasado', icon: 'event' },
+    { value: 'this_year', label: 'Este año', icon: 'calendar_today' }
+  ];
+
     // Chart options
   colorScheme: any = {
     domain: ['#10b981', '#ef4444', '#463397']
   };
 
-  // Color scheme for expenses
+  // Color scheme for expenses (fallback)
   expenseCategoryColorScheme: any = {
     domain: ['#ef4444', '#f87171', '#fca5a5', '#fecaca', '#fee2e2', '#dc2626', '#b91c1c', '#991b1b']
   };
+
+  // Dynamic color schemes based on category colors
+  incomeColorScheme: any = { domain: [] };
+  expenseColorScheme: any = { domain: [] };
 
   constructor(
     private txService: TransactionsService,
@@ -113,12 +159,18 @@ export class Dashboard implements OnInit, OnDestroy {
     // Load wallets and calculate balance
     await this.loadWallets();
 
-    // Load transactions
+    // Calculate total balance from all transactions (no period filter)
+    await this.calculateTotalBalance();
+
+    // Load transactions (filtered by period)
     await this.loadTransactions();
 
     // Calculate statistics and trends
     this.calculateStatistics();
     this.calculateTopExpenses();
+
+    // Calculate category distribution from loaded transactions
+    this.calculateCategoryDistribution();
 
     this.loading = false;
   }
@@ -173,6 +225,43 @@ export class Dashboard implements OnInit, OnDestroy {
     }
   }
 
+  async calculateTotalBalance(): Promise<void> {
+    try {
+      const data = await this.txService.listWithDetails()
+        .pipe(take(1))
+        .toPromise();
+
+      if (!data) {
+        this.totalBalanceByCurrency = {};
+        return;
+      }
+
+      const currencies = ['ARS', 'USD', 'EUR', 'CRYPTO'];
+      this.totalBalanceByCurrency = {};
+
+      currencies.forEach(curr => {
+        const txForCurrency = data.filter((t: TransactionWithDetails) => t.currency === curr);
+        const income = txForCurrency.filter((t: TransactionWithDetails) => t.type === 'income').reduce((sum: number, t: TransactionWithDetails) => sum + t.amount, 0);
+        const expenses = txForCurrency.filter((t: TransactionWithDetails) => t.type === 'expense').reduce((sum: number, t: TransactionWithDetails) => sum + t.amount, 0);
+
+        if (income > 0 || expenses > 0) {
+          this.totalBalanceByCurrency[curr] = {
+            income,
+            expenses,
+            balance: income - expenses
+          };
+        }
+      });
+    } catch (error) {
+      console.error('Error calculating total balance:', error);
+      this.totalBalanceByCurrency = {};
+    }
+  }
+
+  getTotalBalanceCurrencyKeys(): string[] {
+    return Object.keys(this.totalBalanceByCurrency);
+  }
+
   async loadTransactions(): Promise<void> {
     this.statsLoading = true;
 
@@ -188,16 +277,14 @@ export class Dashboard implements OnInit, OnDestroy {
         return;
       }
 
-      // Calculate date range for last 30 days
-      const today = new Date();
-      const thirtyDaysAgo = new Date(today);
-      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+      // Calculate date range based on selected period
+      const { start, end } = this.getDateRangeForPeriod();
 
-      // Filter for selected currency and last 30 days
+      // Filter for selected currency and period
       this.allTransactions = data.filter((t: TransactionWithDetails) => {
-        // Filter by last 30 days
+        // Filter by selected period
         const txDate = new Date(t.date);
-        if (txDate < thirtyDaysAgo || txDate > today) return false;
+        if (txDate < start || txDate > end) return false;
 
         // Filter by currency (if not 'all')
         if (this.filterCurrency !== 'all' && t.currency !== this.filterCurrency) return false;
@@ -315,6 +402,151 @@ export class Dashboard implements OnInit, OnDestroy {
     }));
   }
 
+  calculateCategoryDistribution(): void {
+    this.distributionLoading = true;
+
+    try {
+      // Calculate distribution from allTransactions (already filtered by date)
+      // Filter by the selected distributionCurrency for the charts
+
+      // Filter transactions for the selected distribution currency
+      const filteredTransactions = this.allTransactions.filter(t => t.currency === this.distributionCurrency);
+
+      // Group income by category
+      const incomeMap = new Map<string, {
+        category_id: string;
+        category_name: string;
+        category_color: string;
+        category_icon: string;
+        total_amount: number;
+        transaction_count: number;
+      }>();
+
+      // Group expense by category
+      const expenseMap = new Map<string, {
+        category_id: string;
+        category_name: string;
+        category_color: string;
+        category_icon: string;
+        total_amount: number;
+        transaction_count: number;
+      }>();
+
+      filteredTransactions.forEach(t => {
+        const categoryId = t.category_id || 'uncategorized';
+        const categoryData = {
+          category_id: categoryId,
+          category_name: t.category_name || 'Sin categoría',
+          category_color: t.category_color || '#6b7280',
+          category_icon: t.category_icon || 'category',
+          total_amount: 0,
+          transaction_count: 0
+        };
+
+        if (t.type === 'income') {
+          const existing = incomeMap.get(categoryId) || { ...categoryData };
+          existing.total_amount += t.amount;
+          existing.transaction_count += 1;
+          incomeMap.set(categoryId, existing);
+        } else {
+          const existing = expenseMap.get(categoryId) || { ...categoryData };
+          existing.total_amount += t.amount;
+          existing.transaction_count += 1;
+          expenseMap.set(categoryId, existing);
+        }
+      });
+
+      // Calculate totals for percentages
+      const totalIncome = Array.from(incomeMap.values()).reduce((sum, item) => sum + item.total_amount, 0);
+      const totalExpense = Array.from(expenseMap.values()).reduce((sum, item) => sum + item.total_amount, 0);
+
+      // Convert to CategoryDistribution arrays with percentages
+      this.incomeDistribution = Array.from(incomeMap.values())
+        .map(item => ({
+          ...item,
+          percentage: totalIncome > 0 ? (item.total_amount / totalIncome) * 100 : 0
+        }))
+        .sort((a, b) => b.total_amount - a.total_amount);
+
+      this.expenseDistribution = Array.from(expenseMap.values())
+        .map(item => ({
+          ...item,
+          percentage: totalExpense > 0 ? (item.total_amount / totalExpense) * 100 : 0
+        }))
+        .sort((a, b) => b.total_amount - a.total_amount);
+
+      // Prepare chart data (limit to top 8)
+      this.incomeChartData = this.incomeDistribution
+        .slice(0, 8)
+        .map(item => ({
+          name: item.category_name,
+          value: item.total_amount,
+          extra: {
+            color: item.category_color,
+            icon: item.category_icon
+          }
+        }));
+
+      this.expenseChartData = this.expenseDistribution
+        .slice(0, 8)
+        .map(item => ({
+          name: item.category_name,
+          value: item.total_amount,
+          extra: {
+            color: item.category_color,
+            icon: item.category_icon
+          }
+        }));
+
+      // Build dynamic color schemes from category colors
+      this.incomeColorScheme = {
+        domain: this.incomeChartData.length > 0
+          ? this.incomeChartData.map(item => item.extra?.color || '#10b981')
+          : ['#10b981']
+      };
+
+      this.expenseColorScheme = {
+        domain: this.expenseChartData.length > 0
+          ? this.expenseChartData.map(item => item.extra?.color || '#ef4444')
+          : ['#ef4444']
+      };
+
+    } catch (error) {
+      console.error('Error calculating category distribution:', error);
+      this.incomeDistribution = [];
+      this.expenseDistribution = [];
+      this.incomeChartData = [];
+      this.expenseChartData = [];
+    } finally {
+      this.distributionLoading = false;
+    }
+  }
+
+  getDistributionCurrency(): string {
+    return this.distributionCurrency;
+  }
+
+  changeDistributionCurrency(currency: 'ARS' | 'USD' | 'EUR' | 'CRYPTO'): void {
+    this.distributionCurrency = currency;
+    this.calculateCategoryDistribution();
+  }
+
+  getTopIncomeCategories(): CategoryDistribution[] {
+    return this.incomeDistribution
+      .sort((a, b) => b.total_amount - a.total_amount)
+      .slice(0, 8);
+  }
+
+  getTopExpenseCategories(): CategoryDistribution[] {
+    return this.expenseDistribution
+      .sort((a, b) => b.total_amount - a.total_amount)
+      .slice(0, 8);
+  }
+
+  navigateToCategoryTransactions(categoryId: string): void {
+    this.router.navigate(['/transactions'], { queryParams: { category: categoryId } });
+  }
+
   formatDate(dateStr: string): string {
     const date = new Date(dateStr);
     return date.toLocaleDateString('es-AR', {
@@ -333,10 +565,59 @@ export class Dashboard implements OnInit, OnDestroy {
 
   changeCurrencyFilter(currency: 'all' | 'ARS' | 'USD' | 'EUR' | 'CRYPTO'): void {
     this.filterCurrency = currency;
+    // Sync distribution currency when a specific currency is selected
+    if (currency !== 'all') {
+      this.distributionCurrency = currency;
+    }
     this.calculateWalletBalances();
     this.loadTransactions().then(() => {
       this.calculateStatistics();
       this.calculateTopExpenses();
+      this.calculateCategoryDistribution();
+    });
+  }
+
+  getDateRangeForPeriod(): { start: Date; end: Date } {
+    const today = new Date();
+    const end = new Date(today);
+    let start = new Date(today);
+
+    switch (this.filterPeriod) {
+      case '7_days':
+        start.setDate(start.getDate() - 7);
+        break;
+      case '30_days':
+        start.setDate(start.getDate() - 30);
+        break;
+      case '90_days':
+        start.setDate(start.getDate() - 90);
+        break;
+      case 'this_month':
+        start = new Date(today.getFullYear(), today.getMonth(), 1);
+        break;
+      case 'last_month':
+        start = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+        end.setDate(0); // Last day of previous month
+        break;
+      case 'this_year':
+        start = new Date(today.getFullYear(), 0, 1);
+        break;
+    }
+
+    return { start, end };
+  }
+
+  getPeriodLabel(): string {
+    const option = this.periodOptions.find(o => o.value === this.filterPeriod);
+    return option?.label || 'Últimos 30 días';
+  }
+
+  changePeriodFilter(period: string): void {
+    this.filterPeriod = period as typeof this.filterPeriod;
+    this.loadTransactions().then(() => {
+      this.calculateStatistics();
+      this.calculateTopExpenses();
+      this.calculateCategoryDistribution();
     });
   }
 
@@ -350,5 +631,22 @@ export class Dashboard implements OnInit, OnDestroy {
 
   getWalletCurrencyKeys(): string[] {
     return Object.keys(this.walletBalancesByCurrency);
+  }
+
+  openQuickTransactionModal(): void {
+    this.isQuickModalOpen = true;
+  }
+
+  closeQuickTransactionModal(): void {
+    this.isQuickModalOpen = false;
+  }
+
+  onQuickTransactionCreated(): void {
+    this.loadTransactions().then(() => {
+      this.calculateStatistics();
+      this.calculateTopExpenses();
+      this.calculateCategoryDistribution();
+    });
+    this.loadWallets();
   }
 }

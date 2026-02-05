@@ -68,14 +68,16 @@
   flex-wrap: wrap;
 }
 
-.currency-filter {
+.currency-filter,
+.period-filter {
   display: flex;
   align-items: center;
   gap: 8px;
   flex-direction: row;
 }
 
-.currency-filter label {
+.currency-filter label,
+.period-filter label {
   font-size: 14px;
   font-weight: 500;
   color: var(--color-dark);
@@ -84,6 +86,10 @@
 
 .currency-filter app-custom-select {
   min-width: 140px;
+}
+
+.period-filter app-custom-select {
+  min-width: 180px;
 }
 
 .currency-select {
@@ -146,6 +152,113 @@
   display: flex;
   flex-direction: column;
   gap: 32px;
+}
+
+/* ===== TOTAL BALANCE SECTION ===== */
+.total-balance-section {
+  background: linear-gradient(135deg, #463397 0%, #7c5fd6 100%);
+  border-radius: 20px;
+  padding: 28px 32px;
+  color: white;
+  box-shadow: 0 8px 24px rgba(70, 51, 151, 0.3);
+  position: relative;
+  overflow: hidden;
+}
+
+.total-balance-section::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  right: -20%;
+  width: 300px;
+  height: 300px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 50%;
+}
+
+.total-balance-section::after {
+  content: '';
+  position: absolute;
+  bottom: -30%;
+  left: -10%;
+  width: 200px;
+  height: 200px;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 50%;
+}
+
+.total-balance-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+  position: relative;
+  z-index: 1;
+}
+
+.total-balance-header .material-icons {
+  font-size: 28px;
+  opacity: 0.9;
+}
+
+.total-balance-header h2 {
+  font-size: 20px;
+  font-weight: 600;
+  margin: 0;
+  flex: 1;
+}
+
+.balance-subtitle {
+  font-size: 13px;
+  opacity: 0.7;
+  font-weight: 400;
+}
+
+.total-balance-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+  position: relative;
+  z-index: 1;
+}
+
+.total-balance-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 120px;
+  padding: 16px 20px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  backdrop-filter: blur(10px);
+  transition: all 0.2s ease;
+}
+
+.total-balance-item:hover {
+  background: rgba(255, 255, 255, 0.15);
+  transform: translateY(-2px);
+}
+
+.balance-currency-label {
+  font-size: 13px;
+  font-weight: 600;
+  opacity: 0.8;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.balance-value {
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+}
+
+.balance-value.positive {
+  color: #86efac;
+}
+
+.balance-value.negative {
+  color: #fca5a5;
 }
 
 /* ===== SUMMARY SECTION ===== */
@@ -286,6 +399,264 @@
   .multi-currency-stats {
     grid-template-columns: 1fr;
   }
+}
+
+/* ===== DISTRIBUTION SECTION ===== */
+.distribution-section {
+  margin-bottom: 24px;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.section-title-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.section-header h2 {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--color-dark);
+  margin: 0;
+}
+
+.section-subtitle {
+  font-size: 13px;
+  color: #9ca3af;
+  font-weight: 500;
+}
+
+.distribution-currency-filter {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.distribution-currency-filter label {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-dark);
+  white-space: nowrap;
+}
+
+.distribution-currency-filter app-custom-select {
+  min-width: 120px;
+}
+
+.distribution-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+}
+
+.distribution-card {
+  background: #fff;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 4px 6px rgba(70, 51, 151, 0.08);
+  border: 1px solid rgba(0, 0, 0, 0.03);
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.distribution-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(135deg, #463397, #7c5fd6);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.distribution-card:hover {
+  box-shadow: 0 8px 16px rgba(70, 51, 151, 0.12);
+  transform: translateY(-2px);
+}
+
+.distribution-card:hover::before {
+  opacity: 1;
+}
+
+.distribution-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.distribution-type {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.distribution-type .material-icons {
+  font-size: 24px;
+}
+
+.distribution-card.income .distribution-type .material-icons {
+  color: #10b981;
+}
+
+.distribution-card.expense .distribution-type .material-icons {
+  color: #ef4444;
+}
+
+.distribution-type h3 {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--color-dark);
+  margin: 0;
+}
+
+.distribution-content {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.chart-area {
+  width: 100%;
+  height: 200px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.chart-area ngx-charts-pie-chart {
+  width: 200px !important;
+  height: 200px !important;
+}
+
+.category-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.category-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px;
+  background: #f9fafb;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.category-item:hover {
+  background: #f3f4f6;
+  transform: translateX(4px);
+}
+
+.category-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  min-width: 0;
+}
+
+.category-icon-wrapper {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.category-icon-wrapper .material-icons {
+  font-size: 18px;
+}
+
+.category-details {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.category-name {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-dark);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.category-amount {
+  font-size: 12px;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.category-percentage {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.percentage-bar {
+  width: 60px;
+  height: 6px;
+  background: #e5e7eb;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.percentage-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #463397, #9850eb);
+  border-radius: 3px;
+  transition: width 0.3s ease;
+}
+
+.percentage-value {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-dark);
+  min-width: 45px;
+  text-align: right;
+}
+
+.empty-distribution {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  text-align: center;
+}
+
+.empty-distribution .material-icons {
+  font-size: 48px;
+  color: #d1d5db;
+  margin-bottom: 12px;
+}
+
+.empty-distribution p {
+  font-size: 14px;
+  color: #9ca3af;
+  margin: 0;
 }
 
 /* ===== CHARTS SECTION ===== */
@@ -540,36 +911,54 @@
 .transactions-list {
   display: flex;
   flex-direction: column;
-  gap: 0;
-}
-
-.transaction-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 16px 0;
-  border-bottom: 1px solid var(--bg-secondary);
-  transition: all 0.2s ease;
-}
-
-.transaction-item:last-child {
-  border-bottom: none;
-}
-
-.transaction-item:hover {
-  background: #f9fafb;
-  padding: 16px 12px;
-  border-radius: 8px;
-  margin: 0 -12px;
-  padding-left: 12px;
-  padding-right: 12px;
-}
-
-.tx-left {
-  display: flex;
-  align-items: center;
   gap: 12px;
+}
+
+/* ===== TRANSACTION CARD STYLE ===== */
+.transaction-card {
+  display: flex;
+  align-items: stretch;
+  background: #fafafa;
+  border-radius: 12px;
+  overflow: hidden;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.transaction-card:hover {
+  background: #f3f4f6;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+}
+
+/* Type indicator bar */
+.tx-type-indicator {
+  width: 4px;
+  flex-shrink: 0;
+  background: #ef4444;
+  border-radius: 4px 0 0 4px;
+}
+
+.transaction-card.income .tx-type-indicator {
+  background: #10b981;
+}
+
+.transaction-card.expense .tx-type-indicator {
+  background: #ef4444;
+}
+
+/* Main content wrapper - use CSS Grid for consistent columns */
+.tx-content {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  padding: 16px 20px;
   flex: 1;
+  gap: 14px;
+}
+
+.tx-main {
+  display: contents;
 }
 
 .tx-category {
@@ -578,6 +967,7 @@
 
 .tx-info {
   min-width: 0;
+  overflow: hidden;
 }
 
 .tx-description {
@@ -590,32 +980,49 @@
   text-overflow: ellipsis;
 }
 
-.tx-date {
+.tx-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
   font-size: 12px;
-  color: #9ca3af;
-  margin: 0;
+  color: #6b7280;
 }
 
-.tx-right {
-  text-align: right;
+.tx-date {
+  margin: 0;
   flex-shrink: 0;
 }
 
+.tx-separator {
+  color: #d1d5db;
+  font-size: 8px;
+  flex-shrink: 0;
+}
+
+.tx-wallet {
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Amount wrapper - fixed width for alignment */
+.tx-amount-wrapper {
+  text-align: right;
+  min-width: 110px;
+}
+
 .tx-amount {
-  font-size: 14px;
-  font-weight: 600;
+  font-size: 18px;
+  font-weight: 700;
   color: #ef4444;
-  margin: 0 0 4px 0;
+  margin: 0;
+  letter-spacing: -0.02em;
+  white-space: nowrap;
 }
 
 .tx-amount.positive {
   color: #10b981;
-}
-
-.tx-wallet {
-  font-size: 12px;
-  color: #9ca3af;
-  margin: 0;
 }
 
 /* ===== QUICK ACTIONS CARD ===== */
@@ -1030,18 +1437,21 @@
     gap: 12px;
   }
 
-  .currency-filter {
+  .currency-filter,
+  .period-filter {
     width: 100%;
     flex-direction: column;
     align-items: stretch;
     gap: 8px;
   }
 
-  .currency-filter label {
+  .currency-filter label,
+  .period-filter label {
     font-size: 13px;
   }
 
-  .currency-filter app-custom-select {
+  .currency-filter app-custom-select,
+  .period-filter app-custom-select {
     width: 100%;
     min-width: auto;
   }
@@ -1076,6 +1486,116 @@
 
   .multi-stat-card {
     padding: 20px;
+  }
+
+  /* Total balance section mobile */
+  .total-balance-section {
+    padding: 20px 24px;
+    border-radius: 16px;
+  }
+
+  .total-balance-header {
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+
+  .total-balance-header .material-icons {
+    font-size: 24px;
+  }
+
+  .total-balance-header h2 {
+    font-size: 18px;
+  }
+
+  .balance-subtitle {
+    width: 100%;
+    margin-top: 4px;
+  }
+
+  .total-balance-grid {
+    gap: 12px;
+  }
+
+  .total-balance-item {
+    flex: 1;
+    min-width: calc(50% - 6px);
+    padding: 14px 16px;
+  }
+
+  .balance-currency-label {
+    font-size: 12px;
+  }
+
+  .balance-value {
+    font-size: 20px;
+  }
+
+  /* Distribution section mobile */
+  .section-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .distribution-currency-filter {
+    width: 100%;
+  }
+
+  .distribution-currency-filter app-custom-select {
+    flex: 1;
+    min-width: auto;
+  }
+
+  .distribution-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .distribution-card {
+    padding: 20px;
+  }
+
+  .distribution-type h3 {
+    font-size: 16px;
+  }
+
+  .chart-area {
+    height: 180px;
+  }
+
+  .chart-area ngx-charts-pie-chart {
+    width: 180px !important;
+    height: 180px !important;
+  }
+
+  .category-item {
+    padding: 10px;
+  }
+
+  .category-icon-wrapper {
+    width: 32px;
+    height: 32px;
+  }
+
+  .category-icon-wrapper .material-icons {
+    font-size: 16px;
+  }
+
+  .category-name {
+    font-size: 13px;
+  }
+
+  .category-amount {
+    font-size: 11px;
+  }
+
+  .percentage-bar {
+    width: 50px;
+  }
+
+  .percentage-value {
+    font-size: 12px;
+    min-width: 40px;
   }
 
   .charts-section {
@@ -1140,8 +1660,12 @@
     font-size: 22px;
   }
 
-  .transaction-item {
-    padding: 14px 0;
+  .transaction-card {
+    border-radius: 10px;
+  }
+
+  .tx-content {
+    padding: 14px 16px;
   }
 
   .tx-description {
@@ -1149,7 +1673,7 @@
   }
 
   .tx-amount {
-    font-size: 13px;
+    font-size: 16px;
   }
 
   .wallet-item {
@@ -1208,6 +1732,135 @@
   .wallet-summary-card,
   .top-expenses-card {
     padding: 16px;
+  }
+
+  /* Total balance section small mobile */
+  .total-balance-section {
+    padding: 16px 20px;
+  }
+
+  .total-balance-header .material-icons {
+    font-size: 22px;
+  }
+
+  .total-balance-header h2 {
+    font-size: 16px;
+  }
+
+  .balance-subtitle {
+    font-size: 12px;
+  }
+
+  .total-balance-grid {
+    gap: 10px;
+  }
+
+  .total-balance-item {
+    min-width: calc(50% - 5px);
+    padding: 12px 14px;
+  }
+
+  .balance-currency-label {
+    font-size: 11px;
+  }
+
+  .balance-value {
+    font-size: 18px;
+  }
+
+  /* Distribution section small mobile */
+  .section-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+    margin-bottom: 16px;
+  }
+
+  .section-header h2 {
+    font-size: 18px;
+  }
+
+  .distribution-card {
+    padding: 16px;
+  }
+
+  .distribution-card-header {
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+  }
+
+  .distribution-type .material-icons {
+    font-size: 20px;
+  }
+
+  .distribution-type h3 {
+    font-size: 15px;
+  }
+
+  .chart-area {
+    height: 150px;
+  }
+
+  .chart-area ngx-charts-pie-chart {
+    width: 150px !important;
+    height: 150px !important;
+  }
+
+  .category-list {
+    gap: 8px;
+  }
+
+  .category-item {
+    padding: 8px;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .category-info {
+    gap: 10px;
+  }
+
+  .category-icon-wrapper {
+    width: 28px;
+    height: 28px;
+  }
+
+  .category-icon-wrapper .material-icons {
+    font-size: 14px;
+  }
+
+  .category-name {
+    font-size: 12px;
+  }
+
+  .category-amount {
+    font-size: 10px;
+  }
+
+  .category-percentage {
+    gap: 8px;
+  }
+
+  .percentage-bar {
+    width: 40px;
+    height: 5px;
+  }
+
+  .percentage-value {
+    font-size: 11px;
+    min-width: 35px;
+  }
+
+  .empty-distribution {
+    padding: 30px 16px;
+  }
+
+  .empty-distribution .material-icons {
+    font-size: 40px;
+  }
+
+  .empty-distribution p {
+    font-size: 13px;
   }
 
   .stat-header {
@@ -1283,35 +1936,48 @@
     font-size: 12px;
   }
 
-  .transaction-item {
-    flex-wrap: wrap;
-    padding: 12px 0;
+  .transaction-card {
+    border-radius: 8px;
   }
 
-  .tx-left {
-    width: 100%;
-    margin-bottom: 8px;
+  .tx-content {
+    grid-template-columns: auto 1fr;
+    grid-template-rows: auto auto;
+    gap: 8px 12px;
+    padding: 12px 14px;
   }
 
-  .tx-right {
-    width: 100%;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+  .tx-main {
+    display: contents;
+  }
+
+  .tx-category {
+    grid-row: 1 / 3;
+    align-self: center;
+  }
+
+  .tx-info {
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  .tx-amount-wrapper {
+    grid-column: 2;
+    grid-row: 2;
     text-align: left;
+    min-width: unset;
   }
 
   .tx-description {
     font-size: 13px;
   }
 
-  .tx-date,
-  .tx-wallet {
+  .tx-meta {
     font-size: 11px;
   }
 
   .tx-amount {
-    font-size: 14px;
+    font-size: 16px;
     font-weight: 700;
   }
 
@@ -1400,6 +2066,333 @@
 
   .quick-actions {
     grid-template-columns: 1fr;
+  }
+}
+
+/* ===== EXTRA SMALL MOBILE (≤320px) ===== */
+@media (max-width: 320px) {
+  .dashboard-page {
+    padding: 8px;
+  }
+
+  .page-header {
+    margin-bottom: 16px;
+    gap: 10px;
+  }
+
+  .page-header h1 {
+    font-size: 20px;
+  }
+
+  .header-subtitle {
+    font-size: 11px;
+  }
+
+  /* Total balance section extra small */
+  .total-balance-section {
+    padding: 14px 16px;
+    border-radius: 12px;
+  }
+
+  .total-balance-header {
+    margin-bottom: 12px;
+  }
+
+  .total-balance-header .material-icons {
+    font-size: 20px;
+  }
+
+  .total-balance-header h2 {
+    font-size: 15px;
+  }
+
+  .total-balance-item {
+    padding: 10px 12px;
+    border-radius: 10px;
+  }
+
+  .balance-currency-label {
+    font-size: 10px;
+  }
+
+  .balance-value {
+    font-size: 16px;
+  }
+
+  /* Compact stats cards */
+  .multi-stat-card,
+  .recent-transactions-card,
+  .quick-actions-card,
+  .wallet-summary-card,
+  .top-expenses-card {
+    padding: 12px;
+    border-radius: 12px;
+  }
+
+  .stat-header {
+    margin-bottom: 10px;
+    padding-bottom: 8px;
+    gap: 8px;
+  }
+
+  .stat-header .material-icons {
+    font-size: 18px;
+  }
+
+  .stat-header h3 {
+    font-size: 13px;
+  }
+
+  .stat-row {
+    padding: 6px 10px;
+  }
+
+  .currency-label {
+    font-size: 11px;
+  }
+
+  .currency-value {
+    font-size: 14px;
+  }
+
+  .currency-value.large {
+    font-size: 20px;
+  }
+
+  /* Distribution section compact */
+  .distribution-section {
+    margin-bottom: 16px;
+  }
+
+  .section-header {
+    margin-bottom: 12px;
+    gap: 8px;
+  }
+
+  .section-header h2 {
+    font-size: 16px;
+  }
+
+  .section-subtitle {
+    font-size: 11px;
+  }
+
+  .distribution-grid {
+    gap: 12px;
+  }
+
+  .distribution-card {
+    padding: 12px;
+    border-radius: 12px;
+  }
+
+  .distribution-card-header {
+    margin-bottom: 12px;
+    padding-bottom: 10px;
+  }
+
+  .distribution-type .material-icons {
+    font-size: 18px;
+  }
+
+  .distribution-type h3 {
+    font-size: 14px;
+  }
+
+  /* Smaller pie charts */
+  .chart-area {
+    height: 120px;
+  }
+
+  .chart-area ngx-charts-pie-chart {
+    width: 120px !important;
+    height: 120px !important;
+  }
+
+  .category-list {
+    gap: 6px;
+  }
+
+  .category-item {
+    padding: 6px;
+    gap: 6px;
+  }
+
+  .category-icon-wrapper {
+    width: 24px;
+    height: 24px;
+    border-radius: 6px;
+  }
+
+  .category-icon-wrapper .material-icons {
+    font-size: 12px;
+  }
+
+  .category-name {
+    font-size: 11px;
+    max-width: 80px;
+  }
+
+  .category-amount {
+    font-size: 9px;
+  }
+
+  .percentage-bar {
+    width: 30px;
+    height: 4px;
+  }
+
+  .percentage-value {
+    font-size: 10px;
+    min-width: 30px;
+  }
+
+  /* Cards compact */
+  .card-header,
+  .chart-header {
+    margin-bottom: 12px;
+    padding-bottom: 10px;
+  }
+
+  .card-header h3,
+  .chart-header h3 {
+    font-size: 14px;
+  }
+
+  .btn-link {
+    font-size: 12px;
+  }
+
+  /* Smaller chart wrapper */
+  .chart-card {
+    padding: 10px;
+    border-radius: 10px;
+  }
+
+  .chart-container {
+    min-height: 200px;
+  }
+
+  .chart-container-pie {
+    min-height: 240px;
+  }
+
+  .chart-wrapper {
+    height: 240px;
+  }
+
+  .chart-wrapper ngx-charts-pie-chart {
+    height: 240px !important;
+  }
+
+  .chart-info {
+    font-size: 11px;
+  }
+
+  /* Transaction cards compact */
+  .transaction-card {
+    border-radius: 6px;
+  }
+
+  .tx-content {
+    padding: 10px 12px;
+    gap: 6px 10px;
+  }
+
+  .tx-description {
+    font-size: 12px;
+  }
+
+  .tx-meta {
+    font-size: 10px;
+  }
+
+  .tx-amount {
+    font-size: 14px;
+  }
+
+  /* Wallet items */
+  .wallet-item {
+    gap: 10px;
+    padding: 10px;
+  }
+
+  .wallet-icon {
+    width: 36px;
+    height: 36px;
+  }
+
+  .wallet-icon .material-icons {
+    font-size: 18px;
+  }
+
+  .wallet-name {
+    font-size: 12px;
+  }
+
+  .wallet-provider {
+    font-size: 10px;
+  }
+
+  .balance-amount {
+    font-size: 12px;
+  }
+
+  .balance-currency {
+    font-size: 9px;
+  }
+
+  /* Action buttons */
+  .actions-grid {
+    gap: 8px;
+  }
+
+  .action-btn {
+    padding: 12px 14px;
+    gap: 6px;
+    font-size: 12px;
+  }
+
+  .action-btn .material-icons {
+    font-size: 18px;
+  }
+
+  /* Empty state */
+  .empty-charts-section {
+    padding: 30px 12px;
+    min-height: 250px;
+  }
+
+  .empty-state .material-icons {
+    font-size: 40px;
+  }
+
+  .empty-state p {
+    font-size: 12px;
+  }
+
+  .empty-subtitle {
+    font-size: 11px !important;
+  }
+
+  .empty-btn {
+    padding: 10px 16px;
+    font-size: 12px;
+    min-width: 100%;
+  }
+
+  .empty-btn .material-icons {
+    font-size: 16px;
+  }
+
+  /* Button sizes */
+  .btn-primary {
+    padding: 10px 18px;
+    font-size: 13px;
+  }
+
+  .btn-primary .material-icons {
+    font-size: 18px;
   }
 }
 

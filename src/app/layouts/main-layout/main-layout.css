@@ -35,13 +35,29 @@
     margin-left: 0;
     max-width: 100vw;
     padding: 20px 16px;
-    padding-bottom: 80px; /* Space for mobile nav */
+    /* Space for mobile nav + safe area for devices with home indicator */
+    padding-bottom: calc(80px + env(safe-area-inset-bottom, 0px));
+    /* Respect safe area on sides for landscape */
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
   }
 }
 
 @media (max-width: 480px) {
   .content {
     padding: 16px 12px;
-    padding-bottom: 76px;
+    padding-bottom: calc(76px + env(safe-area-inset-bottom, 0px));
+    padding-left: max(12px, env(safe-area-inset-left, 0px));
+    padding-right: max(12px, env(safe-area-inset-right, 0px));
+  }
+}
+
+/* Extra small mobile */
+@media (max-width: 320px) {
+  .content {
+    padding: 12px 8px;
+    padding-bottom: calc(72px + env(safe-area-inset-bottom, 0px));
+    padding-left: max(8px, env(safe-area-inset-left, 0px));
+    padding-right: max(8px, env(safe-area-inset-right, 0px));
   }
 }

@@ -1,11 +1,11 @@
 .modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.6);
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1000;
+  z-index: 9999;
   padding: 20px;
   animation: fadeIn 0.2s ease;
 }
@@ -25,6 +25,18 @@
   box-shadow: 0 20px 25px rgba(0, 0, 0, 0.25);
   animation: slideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   font-family: 'Poppins', sans-serif;
+}
+
+/* Handle - hidden on desktop */
+.modal-handle {
+  display: none;
+}
+
+.modal-handle-bar {
+  width: 36px;
+  height: 4px;
+  background: #d1d5db;
+  border-radius: 2px;
 }
 
 @keyframes slideUp {
@@ -242,16 +254,39 @@
 
 @media (max-width: 768px) {
   .modal-overlay {
-    padding: 12px;
+    padding: 0;
+    align-items: flex-end;
   }
 
   .modal-content {
     max-width: 100%;
-    max-height: 95vh;
+    max-height: 90vh;
+    border-radius: 24px 24px 0 0;
+    box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.15);
+    animation: slideUpMobile 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  @keyframes slideUpMobile {
+    from {
+      opacity: 0;
+      transform: translateY(100%);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Bottom sheet handle */
+  .modal-handle {
+    display: flex;
+    justify-content: center;
+    padding: 12px 0 8px;
   }
 
   .modal-header {
-    padding: 20px 18px;
+    padding: 8px 18px 16px;
   }
 
   .modal-title {
@@ -259,8 +294,10 @@
   }
 
   .close-btn {
-    width: 36px;
-    height: 36px;
+    width: 40px;
+    height: 40px;
+    min-width: 44px;
+    min-height: 44px;
   }
 
   .close-btn .material-icons {
@@ -269,15 +306,19 @@
 
   .modal-body {
     padding: 18px;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
   }
 
   .form-group label {
     font-size: 13px;
   }
 
+  /* Maintain 16px font to prevent zoom on iOS */
   .form-control {
-    padding: 10px 12px;
-    font-size: 14px;
+    padding: 14px 14px;
+    font-size: 16px;
+    min-height: 52px;
   }
 
   .form-row {
@@ -296,8 +337,8 @@
   }
 
   .info-box {
-    padding: 10px 14px;
-    font-size: 12px;
+    padding: 12px 14px;
+    font-size: 13px;
   }
 
   .info-box .material-icons {
@@ -305,16 +346,16 @@
   }
 
   .help-text {
-    font-size: 11px;
+    font-size: 12px;
   }
 
   .error-text {
-    font-size: 11px;
+    font-size: 12px;
   }
 
   .error-message {
-    padding: 10px 14px;
-    font-size: 12px;
+    padding: 12px 14px;
+    font-size: 13px;
   }
 
   .error-message .material-icons {
@@ -325,13 +366,15 @@
     padding: 16px 18px;
     flex-direction: column-reverse;
     gap: 10px;
+    padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px));
   }
 
   .btn {
     width: 100%;
     justify-content: center;
-    padding: 10px 20px;
-    font-size: 14px;
+    padding: 14px 20px;
+    font-size: 15px;
+    min-height: 52px;
   }
 
   .btn .material-icons {
@@ -341,15 +384,15 @@
 
 @media (max-width: 480px) {
   .modal-overlay {
-    padding: 8px;
+    padding: 0;
   }
 
   .modal-content {
-    max-height: 96vh;
+    max-height: 92vh;
   }
 
   .modal-header {
-    padding: 18px 16px;
+    padding: 6px 16px 14px;
   }
 
   .modal-title {
@@ -357,8 +400,8 @@
   }
 
   .close-btn {
-    width: 32px;
-    height: 32px;
+    width: 40px;
+    height: 40px;
   }
 
   .close-btn .material-icons {
@@ -374,13 +417,15 @@
   }
 
   .form-group label {
-    font-size: 12px;
+    font-size: 13px;
     margin-bottom: 6px;
   }
 
+  /* Keep 16px minimum to prevent iOS zoom */
   .form-control {
-    padding: 9px 11px;
-    font-size: 13px;
+    padding: 12px 12px;
+    font-size: 16px;
+    min-height: 48px;
   }
 
   .form-row {
@@ -398,8 +443,8 @@
   }
 
   .info-box {
-    padding: 9px 12px;
-    font-size: 11px;
+    padding: 10px 12px;
+    font-size: 12px;
   }
 
   .info-box .material-icons {
@@ -407,16 +452,16 @@
   }
 
   .help-text {
-    font-size: 10px;
+    font-size: 11px;
   }
 
   .error-text {
-    font-size: 10px;
+    font-size: 11px;
   }
 
   .error-message {
-    padding: 9px 12px;
-    font-size: 11px;
+    padding: 10px 12px;
+    font-size: 12px;
   }
 
   .error-message .material-icons {
@@ -429,11 +474,52 @@
   }
 
   .btn {
-    padding: 9px 18px;
-    font-size: 13px;
+    padding: 12px 18px;
+    font-size: 14px;
+    min-height: 48px;
   }
 
   .btn .material-icons {
     font-size: 16px;
+  }
+}
+
+/* Extra small mobile */
+@media (max-width: 320px) {
+  .modal-content {
+    max-height: 94vh;
+  }
+
+  .modal-header {
+    padding: 4px 14px 12px;
+  }
+
+  .modal-title {
+    font-size: 16px;
+  }
+
+  .modal-body {
+    padding: 14px;
+  }
+
+  .form-group label {
+    font-size: 12px;
+  }
+
+  .form-section-title {
+    font-size: 12px;
+  }
+
+  .info-box {
+    font-size: 11px;
+  }
+
+  .modal-footer {
+    padding: 12px 14px;
+  }
+
+  .btn {
+    font-size: 13px;
+    min-height: 44px;
   }
 }

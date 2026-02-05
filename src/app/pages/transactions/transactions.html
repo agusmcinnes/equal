@@ -34,7 +34,8 @@
 
   <!-- Statistics Section -->
   <div class="statistics-section" *ngIf="!loading">
-    <div class="stats-grid">
+    <!-- Single Currency View -->
+    <div *ngIf="filterCurrency !== 'all'" class="stats-grid">
       <app-stat-card
         title="Total Ingresos"
         [value]="statistics?.total_income || 0"
@@ -67,8 +68,67 @@
       ></app-stat-card>
     </div>
 
-    <!-- Charts -->
-    <div class="charts-grid" *ngIf="!statsLoading && statistics && (incomeByCategoryData.length > 0 || expensesByCategoryData.length > 0)">
+    <!-- Multi-Currency View -->
+    <div *ngIf="filterCurrency === 'all'" class="multi-currency-stats">
+      <div class="multi-stat-card">
+        <div class="stat-header">
+          <span class="material-icons">trending_up</span>
+          <h3>Total Ingresos</h3>
+        </div>
+        <div class="stat-breakdown">
+          <div *ngFor="let curr of getCurrencyKeys()" class="stat-row">
+            <span class="currency-label">{{ curr }}</span>
+            <span class="currency-value">{{ formatCurrency(multiCurrencyStats[curr].income, curr) }}</span>
+          </div>
+          <div *ngIf="getCurrencyKeys().length === 0" class="stat-empty">Sin ingresos</div>
+        </div>
+      </div>
+
+      <div class="multi-stat-card">
+        <div class="stat-header">
+          <span class="material-icons">trending_down</span>
+          <h3>Total Gastos</h3>
+        </div>
+        <div class="stat-breakdown">
+          <div *ngFor="let curr of getCurrencyKeys()" class="stat-row">
+            <span class="currency-label">{{ curr }}</span>
+            <span class="currency-value">{{ formatCurrency(multiCurrencyStats[curr].expenses, curr) }}</span>
+          </div>
+          <div *ngIf="getCurrencyKeys().length === 0" class="stat-empty">Sin gastos</div>
+        </div>
+      </div>
+
+      <div class="multi-stat-card">
+        <div class="stat-header">
+          <span class="material-icons">account_balance_wallet</span>
+          <h3>Balance</h3>
+        </div>
+        <div class="stat-breakdown">
+          <div *ngFor="let curr of getCurrencyKeys()" class="stat-row">
+            <span class="currency-label">{{ curr }}</span>
+            <span class="currency-value" [class.positive]="multiCurrencyStats[curr].balance >= 0" [class.negative]="multiCurrencyStats[curr].balance < 0">
+              {{ formatCurrency(multiCurrencyStats[curr].balance, curr) }}
+            </span>
+          </div>
+          <div *ngIf="getCurrencyKeys().length === 0" class="stat-empty">Sin transacciones</div>
+        </div>
+      </div>
+
+      <div class="multi-stat-card">
+        <div class="stat-header">
+          <span class="material-icons">receipt_long</span>
+          <h3>Transacciones</h3>
+        </div>
+        <div class="stat-breakdown">
+          <div class="stat-row single">
+            <span class="currency-value large">{{ statistics?.transaction_count || 0 }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Charts (only shown when a specific currency is selected) -->
+    <div class="charts-grid" *ngIf="!statsLoading && statistics && filterCurrency !== 'all' && (incomeByCategoryData.length > 0 || expensesByCategoryData.length > 0)">
       <div class="chart-card" *ngIf="incomeByCategoryData.length > 0">
         <h3>Distribución de Ingresos por Categoría</h3>
         <ngx-charts-pie-chart
@@ -93,6 +153,14 @@
           [legend]="false"
         >
         </ngx-charts-pie-chart>
+      </div>
+    </div>
+
+    <!-- Charts hint when all currencies selected -->
+    <div class="charts-hint" *ngIf="!statsLoading && filterCurrency === 'all' && getCurrencyKeys().length > 0">
+      <div class="hint-content">
+        <span class="material-icons">pie_chart</span>
+        <p>Selecciona una moneda específica para ver los gráficos de distribución por categoría</p>
       </div>
     </div>
   </div>

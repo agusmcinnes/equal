@@ -16,6 +16,12 @@
   --shadow-md: 0 4px 6px rgba(70, 51, 151, 0.15);
   --shadow-lg: 0 10px 15px rgba(70, 51, 151, 0.2);
   --shadow-xl: 0 20px 25px rgba(70, 51, 151, 0.25);
+
+  /* Safe Areas for mobile devices */
+  --safe-area-inset-top: env(safe-area-inset-top, 0px);
+  --safe-area-inset-right: env(safe-area-inset-right, 0px);
+  --safe-area-inset-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-area-inset-left: env(safe-area-inset-left, 0px);
 }
 
 * {
@@ -125,5 +131,68 @@ select:focus option:checked {
   select {
     background-position: right 8px center;
     padding-right: 28px !important;
+  }
+}
+
+/* ===== MOBILE UX ENHANCEMENTS ===== */
+
+/* Prevent zoom on iOS when focusing inputs (minimum 16px font-size) */
+@media (max-width: 768px) {
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="number"],
+  input[type="tel"],
+  input[type="url"],
+  input[type="search"],
+  input[type="date"],
+  input[type="datetime-local"],
+  textarea,
+  select {
+    font-size: 16px !important;
+  }
+}
+
+/* Remove tap highlight on mobile */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Better touch states */
+@media (hover: none) and (pointer: coarse) {
+  button,
+  a,
+  [role="button"],
+  .clickable {
+    cursor: pointer;
+  }
+
+  /* Ensure touch targets are at least 44px */
+  button:not(.btn-icon):not(.close-btn),
+  [role="button"]:not(.btn-icon) {
+    min-height: 44px;
+  }
+}
+
+/* Focus visible for keyboard accessibility */
+:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* Hide focus outline for mouse/touch users */
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* Smooth scroll for better UX */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Prevent overscroll bounce on iOS */
+@media (max-width: 768px) {
+  body {
+    overscroll-behavior-y: none;
   }
 }

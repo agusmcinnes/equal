@@ -241,6 +241,14 @@
   z-index: 1000;
   border-top: 1px solid rgba(70, 51, 151, 0.1);
   min-height: 72px;
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+/* Hide mobile nav when modal is open */
+.mobile-nav.hidden {
+  transform: translateY(100%);
+  opacity: 0;
+  pointer-events: none;
 }
 
 .nav-item {

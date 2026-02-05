@@ -47,8 +47,8 @@
   </div>
 </aside>
 
-<!-- Bottom Navigation Bar -->
-<nav class="mobile-nav">
+<!-- Bottom Navigation Bar - hidden when modal is open -->
+<nav class="mobile-nav" [class.hidden]="isModalOpen">
   <button class="nav-item menu-btn" (click)="toggleDrawer()">
     <span class="material-icons nav-icon">menu</span>
     <span class="nav-label">Menú</span>

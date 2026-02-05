@@ -126,6 +126,121 @@
       </form>
     </div>
 
+    <!-- Analytics Section -->
+    <div *ngIf="!formVisible && hasAnalyticsData()" class="analytics-section">
+      <div class="analytics-header">
+        <div class="analytics-title">
+          <span class="material-icons">bar_chart</span>
+          <h2>Análisis de Uso</h2>
+          <span class="analytics-period">Últimos 30 días</span>
+        </div>
+        <div class="analytics-actions">
+          <div class="analytics-currency-filter">
+            <label>Moneda:</label>
+            <app-custom-select
+              [options]="currencyOptions"
+              [(ngModel)]="analyticsCurrency"
+              (selectionChange)="changeAnalyticsCurrency($event)"
+              placeholder="Moneda"
+            ></app-custom-select>
+          </div>
+          <button class="toggle-btn" (click)="toggleAnalytics()">
+            <span class="material-icons">{{ showAnalytics ? 'expand_less' : 'expand_more' }}</span>
+            {{ showAnalytics ? 'Ocultar' : 'Mostrar' }}
+          </button>
+        </div>
+      </div>
+
+      <div *ngIf="showAnalytics" class="analytics-content" [@.disabled]="true">
+        <div *ngIf="analyticsLoading" class="analytics-loading">
+          <div class="spinner-small"></div>
+          <span>Cargando análisis...</span>
+        </div>
+
+        <div *ngIf="!analyticsLoading" class="analytics-grid">
+          <!-- Income Analytics -->
+          <div *ngIf="shouldShowIncomeAnalytics()" class="analytics-card income">
+            <div class="analytics-card-header">
+              <span class="material-icons">trending_up</span>
+              <h3>Ingresos</h3>
+            </div>
+
+            <div *ngIf="incomeDistribution.length > 0; else noIncomeAnalytics" class="analytics-bars">
+              <div
+                *ngFor="let cat of getFilteredIncomeDistribution()"
+                class="analytics-bar-item"
+              >
+                <div class="bar-info">
+                  <div class="bar-category">
+                    <div class="bar-icon" [style.backgroundColor]="cat.category_color + '20'">
+                      <span class="material-icons" [style.color]="cat.category_color">{{ cat.category_icon }}</span>
+                    </div>
+                    <span class="bar-name">{{ cat.category_name }}</span>
+                  </div>
+                  <span class="bar-amount">{{ formatCurrency(cat.total_amount) }}</span>
+                </div>
+                <div class="bar-track">
+                  <div
+                    class="bar-fill"
+                    [style.width.%]="cat.percentage"
+                    [style.backgroundColor]="cat.category_color"
+                  ></div>
+                </div>
+                <span class="bar-percentage">{{ cat.percentage | number:'1.1-1' }}%</span>
+              </div>
+            </div>
+
+            <ng-template #noIncomeAnalytics>
+              <div class="empty-analytics">
+                <span class="material-icons">trending_up</span>
+                <p>Sin ingresos registrados</p>
+              </div>
+            </ng-template>
+          </div>
+
+          <!-- Expense Analytics -->
+          <div *ngIf="shouldShowExpenseAnalytics()" class="analytics-card expense">
+            <div class="analytics-card-header">
+              <span class="material-icons">trending_down</span>
+              <h3>Gastos</h3>
+            </div>
+
+            <div *ngIf="expenseDistribution.length > 0; else noExpenseAnalytics" class="analytics-bars">
+              <div
+                *ngFor="let cat of getFilteredExpenseDistribution()"
+                class="analytics-bar-item"
+              >
+                <div class="bar-info">
+                  <div class="bar-category">
+                    <div class="bar-icon" [style.backgroundColor]="cat.category_color + '20'">
+                      <span class="material-icons" [style.color]="cat.category_color">{{ cat.category_icon }}</span>
+                    </div>
+                    <span class="bar-name">{{ cat.category_name }}</span>
+                  </div>
+                  <span class="bar-amount">{{ formatCurrency(cat.total_amount) }}</span>
+                </div>
+                <div class="bar-track">
+                  <div
+                    class="bar-fill"
+                    [style.width.%]="cat.percentage"
+                    [style.backgroundColor]="cat.category_color"
+                  ></div>
+                </div>
+                <span class="bar-percentage">{{ cat.percentage | number:'1.1-1' }}%</span>
+              </div>
+            </div>
+
+            <ng-template #noExpenseAnalytics>
+              <div class="empty-analytics">
+                <span class="material-icons">trending_down</span>
+                <p>Sin gastos registrados</p>
+              </div>
+            </ng-template>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Filters & Search -->
     <div *ngIf="!formVisible" class="filters-section">
       <div class="search-box">

@@ -3,8 +3,8 @@
   <div class="page-header">
     <div class="header-content">
       <div class="header-text">
-        <h1>Cotización del Dólar</h1>
-        <p class="header-subtitle">Cotización en vivo de diferentes tipos de dólar</p>
+        <h1>Cambio de Moneda</h1>
+        <p class="header-subtitle">Comprá y vendé dólares al instante</p>
       </div>
     </div>
   </div>
@@ -21,70 +21,317 @@
     <p>{{ error }}</p>
   </div>
 
-  <!-- Main Content -->
-  <div *ngIf="!loading && dollarRates.length > 0" class="dollar-content">
-    <!-- Last Update -->
-    <div class="update-info">
-      <span class="material-icons">schedule</span>
-      <span>Última actualización: {{ formatTime(lastUpdate!) }}</span>
-    </div>
-
-    <!-- Rates Grid -->
-    <div class="rates-grid">
-      <div *ngFor="let rate of dollarRates" class="rate-card">
-        <div class="rate-header">
-          <h3>{{ rate.currency }}</h3>
-          <span class="material-icons" [class.trending-up]="getDifference(rate.buy, rate.sell) > 0">
-            trending_up
-          </span>
-        </div>
-
-        <div class="rate-body">
-          <div class="rate-row">
-            <span class="label">Compra</span>
-            <span class="value buy">{{ formatCurrency(rate.buy) }}</span>
-          </div>
-
-          <div class="rate-row">
-            <span class="label">Venta</span>
-            <span class="value sell">{{ formatCurrency(rate.sell) }}</span>
-          </div>
-
-          <div class="rate-difference">
-            <span class="label">Diferencia</span>
-            <span class="value" [class.positive]="getDifference(rate.buy, rate.sell) > 0">
-              {{ getDifference(rate.buy, rate.sell) | number: '1.2-2' }}%
-            </span>
-          </div>
-        </div>
-
-        <div class="rate-footer">
-          <small>Actualizado: {{ formatTime(rate.timestamp) }}</small>
-        </div>
-      </div>
-    </div>
-
-    <!-- Info Card -->
-    <div class="info-card">
-      <div class="info-header">
-        <span class="material-icons">info</span>
-        <h4>Tipos de Cotización</h4>
-      </div>
-      <ul class="info-list">
-        <li>
-          <strong>Oficial:</strong> Cotización del Banco Central de la República Argentina
-        </li>
-        <li>
-          <strong>Blue:</strong> Cotización del mercado informal (mercado negro)
-        </li>
-      </ul>
-    </div>
+  <!-- Success Message -->
+  <div *ngIf="successMessage" class="success-message">
+    <span class="material-icons">check_circle</span>
+    <p>{{ successMessage }}</p>
   </div>
 
-  <!-- Empty State -->
-  <div *ngIf="!loading && dollarRates.length === 0 && !error" class="empty-state">
-    <span class="material-icons">trending_up</span>
-    <p>No hay datos disponibles</p>
-    <p style="font-size: 12px; color: var(--text-secondary);">Intenta recargar la página</p>
+  <!-- Main Content -->
+  <div *ngIf="!loading" class="dollar-content">
+    <!-- Live Rates Section -->
+    <div class="rates-section" *ngIf="dollarRates.length > 0">
+      <div class="rates-header">
+        <span class="rates-title">Cotizaciones en vivo</span>
+        <div class="live-indicator">
+          <span class="live-dot"></span>
+          <span>{{ formatTime(lastUpdate!) }}</span>
+        </div>
+      </div>
+      <div class="rates-cards">
+        <!-- Oficial Card -->
+        <div class="rate-card-compact oficial" *ngIf="getRateByType('Oficial') as rate">
+          <div class="rate-icon">
+            <span class="material-icons">account_balance</span>
+          </div>
+          <div class="rate-info">
+            <span class="rate-name">Oficial</span>
+            <span class="rate-main-value">{{ formatCurrency(rate.sell) }}</span>
+            <span class="rate-secondary">compra {{ formatCurrency(rate.buy) }}</span>
+          </div>
+        </div>
+        <!-- Blue Card -->
+        <div class="rate-card-compact blue" *ngIf="getRateByType('Blue') as rate">
+          <div class="rate-icon">
+            <span class="material-icons">currency_exchange</span>
+          </div>
+          <div class="rate-info">
+            <span class="rate-name">Blue</span>
+            <span class="rate-main-value">{{ formatCurrency(rate.sell) }}</span>
+            <span class="rate-secondary">compra {{ formatCurrency(rate.buy) }}</span>
+          </div>
+          <span class="popular-badge">Popular</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Converter Section -->
+    <div class="converter-section">
+      <!-- Operation Type Tabs -->
+      <div class="operation-tabs">
+        <button
+          class="tab-btn"
+          [class.active]="operationType === 'buy_usd'"
+          (click)="operationType = 'buy_usd'; onOperationTypeChange()"
+        >
+          <span class="material-icons">arrow_upward</span>
+          Comprar USD
+        </button>
+        <button
+          class="tab-btn sell"
+          [class.active]="operationType === 'sell_usd'"
+          (click)="operationType = 'sell_usd'; onOperationTypeChange()"
+        >
+          <span class="material-icons">arrow_downward</span>
+          Vender USD
+        </button>
+      </div>
+
+      <!-- Step 1: Select Wallets -->
+      <div class="converter-step">
+        <div class="step-label">
+          <span class="step-number">1</span>
+          <span>Seleccioná las billeteras</span>
+        </div>
+
+        <div class="wallets-selection">
+          <div class="wallet-select-box">
+            <label>Desde</label>
+            <select [(ngModel)]="sourceWalletId" (ngModelChange)="updateAmountFromSource()">
+              <option value="" disabled>Seleccionar</option>
+              <option *ngFor="let wallet of sourceWallets" [value]="wallet.id">
+                {{ wallet.name }}
+              </option>
+            </select>
+            <div class="wallet-balance-display" *ngIf="sourceWallet">
+              <span class="balance-label">Disponible:</span>
+              <span class="balance-value">{{ formatCurrency(sourceWallet.transaction_total, sourceWallet.currency) }}</span>
+            </div>
+          </div>
+
+          <div class="wallet-arrow">
+            <span class="material-icons">arrow_forward</span>
+          </div>
+
+          <div class="wallet-select-box">
+            <label>Hacia</label>
+            <select [(ngModel)]="destinationWalletId" (ngModelChange)="updateAmountFromSource()">
+              <option value="" disabled>Seleccionar</option>
+              <option *ngFor="let wallet of destinationWallets" [value]="wallet.id">
+                {{ wallet.name }}
+              </option>
+            </select>
+            <div class="wallet-balance-display" *ngIf="destinationWallet">
+              <span class="balance-label">Actual:</span>
+              <span class="balance-value">{{ formatCurrency(destinationWallet.transaction_total, destinationWallet.currency) }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="no-wallet-warning" *ngIf="sourceWallets.length === 0 || destinationWallets.length === 0">
+          <span class="material-icons">warning</span>
+          <span>Necesitás billeteras en ambas monedas para realizar cambios</span>
+        </div>
+      </div>
+
+      <!-- Step 2: Select Rate -->
+      <div class="converter-step" *ngIf="sourceWallet && destinationWallet">
+        <div class="step-label">
+          <span class="step-number">2</span>
+          <span>Elegí la cotización</span>
+        </div>
+
+        <div class="rate-selection">
+          <button
+            class="rate-select-btn"
+            [class.active]="rateSource === 'blue'"
+            (click)="onRateSourceChange('blue')"
+            *ngIf="getRateByType('Blue') as rate"
+          >
+            <span class="rate-select-name">Blue</span>
+            <span class="rate-select-value">{{ formatCurrency(operationType === 'buy_usd' ? rate.sell : rate.buy) }}</span>
+          </button>
+          <button
+            class="rate-select-btn"
+            [class.active]="rateSource === 'oficial'"
+            (click)="onRateSourceChange('oficial')"
+            *ngIf="getRateByType('Oficial') as rate"
+          >
+            <span class="rate-select-name">Oficial</span>
+            <span class="rate-select-value">{{ formatCurrency(operationType === 'buy_usd' ? rate.sell : rate.buy) }}</span>
+          </button>
+          <button
+            class="rate-select-btn custom"
+            [class.active]="rateSource === 'custom'"
+            (click)="onRateSourceChange('custom')"
+          >
+            <span class="rate-select-name">Manual</span>
+            <input
+              type="number"
+              [(ngModel)]="customRate"
+              (ngModelChange)="updateAmountFromSource()"
+              (click)="$event.stopPropagation(); rateSource = 'custom'"
+              placeholder="Ingresá tasa"
+              class="custom-rate-input"
+            />
+          </button>
+        </div>
+      </div>
+
+      <!-- Step 3: Select Amount with Slider -->
+      <div class="converter-step" *ngIf="sourceWallet && destinationWallet && getSelectedRate() > 0">
+        <div class="step-label">
+          <span class="step-number">3</span>
+          <span>¿Cuánto querés {{ operationType === 'buy_usd' ? 'cambiar' : 'vender' }}?</span>
+        </div>
+
+        <!-- Source Amount Display -->
+        <div class="amount-display">
+          <div class="amount-main">
+            <span class="amount-currency">{{ operationType === 'buy_usd' ? '$' : '$' }}</span>
+            <input
+              type="number"
+              [(ngModel)]="sourceAmount"
+              (ngModelChange)="onSourceAmountChange()"
+              [max]="maxSourceAmount"
+              min="0"
+              class="amount-input"
+            />
+            <span class="amount-code">{{ operationType === 'buy_usd' ? 'ARS' : 'USD' }}</span>
+          </div>
+        </div>
+
+        <!-- Slider -->
+        <div class="slider-container">
+          <input
+            type="range"
+            [(ngModel)]="sourceAmount"
+            (ngModelChange)="updateAmountFromSource()"
+            [min]="0"
+            [max]="maxSourceAmount"
+            [step]="sliderStep"
+            class="amount-slider"
+          />
+          <div class="slider-labels">
+            <span>{{ formatCurrency(0, operationType === 'buy_usd' ? 'ARS' : 'USD') }}</span>
+            <button class="use-all-btn" (click)="useMaxAmount()">Usar todo</button>
+            <span>{{ formatCurrency(maxSourceAmount, operationType === 'buy_usd' ? 'ARS' : 'USD') }}</span>
+          </div>
+        </div>
+
+        <!-- Conversion Result -->
+        <div class="conversion-result" *ngIf="sourceAmount > 0">
+          <div class="result-icon">
+            <span class="material-icons">arrow_downward</span>
+          </div>
+          <div class="result-text">
+            <span class="result-label">Recibís</span>
+            <span class="result-amount">{{ formatCurrency(destinationAmount, operationType === 'buy_usd' ? 'USD' : 'ARS') }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Preview: Balance Impact -->
+      <div class="balance-preview" *ngIf="preview && sourceAmount > 0">
+        <div class="preview-title">
+          <span class="material-icons">account_balance_wallet</span>
+          <span>Nuevos balances</span>
+        </div>
+
+        <div class="balance-changes">
+          <!-- Source Wallet Change -->
+          <div class="balance-change source">
+            <div class="change-wallet-name">{{ sourceWallet?.name }}</div>
+            <div class="change-values">
+              <span class="change-current">{{ formatCurrency(sourceWallet!.transaction_total, sourceWallet!.currency) }}</span>
+              <span class="change-arrow-inline">→</span>
+              <span class="change-new">{{ formatCurrency(sourceWallet!.transaction_total - preview.source_amount, sourceWallet!.currency) }}</span>
+            </div>
+          </div>
+
+          <!-- Destination Wallet Change -->
+          <div class="balance-change destination">
+            <div class="change-wallet-name">{{ destinationWallet?.name }}</div>
+            <div class="change-values">
+              <span class="change-current">{{ formatCurrency(destinationWallet!.transaction_total, destinationWallet!.currency) }}</span>
+              <span class="change-arrow-inline">→</span>
+              <span class="change-new success">{{ formatCurrency(destinationWallet!.transaction_total + preview.destination_amount, destinationWallet!.currency) }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="exchange-rate-info">
+          Tasa: 1 USD = {{ formatCurrency(preview.exchange_rate) }}
+        </div>
+      </div>
+
+      <!-- Notes -->
+      <div class="notes-section" *ngIf="sourceWallet && destinationWallet">
+        <input
+          type="text"
+          [(ngModel)]="notes"
+          placeholder="Agregar nota (opcional)"
+          class="notes-input"
+        />
+      </div>
+
+      <!-- Submit Button -->
+      <button
+        class="confirm-btn"
+        [class.buy]="operationType === 'buy_usd'"
+        [class.sell]="operationType === 'sell_usd'"
+        [disabled]="!canSubmit"
+        (click)="submitExchange()"
+      >
+        <span class="spinner-btn" *ngIf="submitting"></span>
+        <span class="material-icons" *ngIf="!submitting">
+          {{ operationType === 'buy_usd' ? 'shopping_cart' : 'sell' }}
+        </span>
+        {{ submitting ? 'Procesando...' : (operationType === 'buy_usd' ? 'Confirmar Compra' : 'Confirmar Venta') }}
+      </button>
+    </div>
+
+    <!-- History Section -->
+    <div class="history-section" *ngIf="exchanges.length > 0 || loadingExchanges">
+      <div class="history-header">
+        <span class="material-icons">history</span>
+        <h3>Historial reciente</h3>
+      </div>
+
+      <div class="loading-state small" *ngIf="loadingExchanges">
+        <div class="spinner"></div>
+      </div>
+
+      <div class="history-list-compact" *ngIf="!loadingExchanges">
+        <div class="history-item-compact" *ngFor="let exchange of exchanges.slice(0, 5)">
+          <div class="history-type-icon" [class.buy]="exchange.operation_type === 'buy_usd'" [class.sell]="exchange.operation_type === 'sell_usd'">
+            <span class="material-icons">{{ exchange.operation_type === 'buy_usd' ? 'north_east' : 'south_west' }}</span>
+          </div>
+          <div class="history-main">
+            <span class="history-operation">{{ exchange.operation_type === 'buy_usd' ? 'Compra' : 'Venta' }}</span>
+            <span class="history-amount">{{ formatCurrency(exchange.destination_amount, exchange.destination_currency) }}</span>
+          </div>
+          <div class="history-secondary">
+            <span class="history-source">{{ formatCurrency(exchange.source_amount, exchange.source_currency) }}</span>
+            <span class="history-date-text">{{ formatDate(exchange.executed_at!) }}</span>
+          </div>
+          <button class="delete-btn-small" (click)="deleteExchange(exchange)" title="Eliminar">
+            <span class="material-icons">close</span>
+          </button>
+        </div>
+      </div>
+
+      <a class="see-all-link" *ngIf="exchanges.length > 5">
+        Ver todos ({{ exchanges.length }})
+        <span class="material-icons">arrow_forward</span>
+      </a>
+    </div>
+
+    <!-- Empty State for History -->
+    <div class="empty-history" *ngIf="!loadingExchanges && exchanges.length === 0">
+      <span class="material-icons">swap_horiz</span>
+      <p>Aún no realizaste ningún cambio</p>
+      <p class="hint">Usá el conversor de arriba para cambiar moneda</p>
+    </div>
   </div>
 </div>

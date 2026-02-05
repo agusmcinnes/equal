@@ -1,0 +1,294 @@
+<div class="modal-overlay" *ngIf="isOpen" (click)="onClose()">
+  <div
+    class="modal-content"
+    (click)="$event.stopPropagation()"
+    (touchstart)="onTouchStart($event)"
+    (touchmove)="onTouchMove($event)"
+    (touchend)="onTouchEnd($event)"
+  >
+    <!-- Mobile Handle for Bottom Sheet -->
+    <div class="modal-handle">
+      <div class="modal-handle-bar"></div>
+    </div>
+
+    <!-- Header -->
+    <div class="modal-header">
+      <h2 class="modal-title">Transacción Rápida</h2>
+      <button class="close-btn" type="button" (click)="onClose()" title="Cerrar">
+        <i class="material-icons">close</i>
+      </button>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs">
+      <button
+        class="tab-btn"
+        [class.active]="activeTab === 'quick'"
+        (click)="setActiveTab('quick')"
+      >
+        <i class="material-icons">flash_on</i>
+        <span>Rápida</span>
+      </button>
+      <button
+        class="tab-btn"
+        [class.active]="activeTab === 'templates'"
+        (click)="setActiveTab('templates')"
+      >
+        <i class="material-icons">bookmarks</i>
+        <span>Plantillas</span>
+      </button>
+    </div>
+
+    <!-- Body -->
+    <div class="modal-body">
+      <!-- Messages -->
+      <div class="error-message" *ngIf="errorMessage">
+        <i class="material-icons">error</i>
+        <span>{{ errorMessage }}</span>
+      </div>
+
+      <div class="success-message" *ngIf="successMessage">
+        <i class="material-icons">check_circle</i>
+        <span>{{ successMessage }}</span>
+      </div>
+
+      <!-- Quick Tab -->
+      <div *ngIf="activeTab === 'quick'" class="quick-form">
+        <!-- Type selector -->
+        <div class="type-selector">
+          <button
+            class="type-btn expense"
+            [class.active]="quickForm.type === 'expense'"
+            (click)="onQuickTypeChange('expense')"
+          >
+            <i class="material-icons">remove_circle</i>
+            <span>Gasto</span>
+          </button>
+          <button
+            class="type-btn income"
+            [class.active]="quickForm.type === 'income'"
+            (click)="onQuickTypeChange('income')"
+          >
+            <i class="material-icons">add_circle</i>
+            <span>Ingreso</span>
+          </button>
+        </div>
+
+        <!-- Amount -->
+        <div class="form-group amount-group">
+          <label for="amount">Monto</label>
+          <div class="amount-input-wrapper">
+            <span class="currency-symbol">$</span>
+            <input
+              id="amount"
+              type="number"
+              [(ngModel)]="quickForm.amount"
+              placeholder="0.00"
+              step="0.01"
+              min="0"
+              inputmode="decimal"
+              class="form-control amount-input"
+            />
+          </div>
+        </div>
+
+        <!-- Currency and Category row -->
+        <div class="form-row">
+          <div class="form-group">
+            <label for="currency">Moneda</label>
+            <select id="currency" [ngModel]="quickForm.currency" (ngModelChange)="onQuickCurrencyChange($event)" class="form-control">
+              <option value="ARS">ARS (Pesos)</option>
+              <option value="USD">USD (Dólares)</option>
+              <option value="EUR">EUR (Euros)</option>
+              <option value="CRYPTO">CRYPTO</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="quickCategory">Categoría</label>
+            <select id="quickCategory" [(ngModel)]="quickForm.category_id" class="form-control">
+              <option [ngValue]="null">Sin categoría</option>
+              <option *ngFor="let cat of getFilteredCategories(quickForm.type)" [ngValue]="cat.id">
+                {{ cat.name }}
+              </option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Wallet -->
+        <div class="form-group" *ngIf="getFilteredWallets(quickForm.currency).length > 0">
+          <label for="quickWallet">Billetera</label>
+          <select id="quickWallet" [(ngModel)]="quickForm.wallet_id" class="form-control">
+            <option [ngValue]="null">Sin billetera</option>
+            <option *ngFor="let wallet of getFilteredWallets(quickForm.currency)" [ngValue]="wallet.id">
+              {{ wallet.name }} ({{ wallet.provider }})
+            </option>
+          </select>
+        </div>
+
+        <!-- Submit -->
+        <button
+          class="btn btn-primary submit-btn"
+          [class.expense]="quickForm.type === 'expense'"
+          [class.income]="quickForm.type === 'income'"
+          [disabled]="isLoading || !quickForm.amount || quickForm.amount <= 0"
+          (click)="submitQuickTransaction()"
+        >
+          <i class="material-icons" *ngIf="isLoading">hourglass_empty</i>
+          <i class="material-icons" *ngIf="!isLoading">{{ quickForm.type === 'expense' ? 'remove_circle' : 'add_circle' }}</i>
+          <span>Registrar {{ quickForm.type === 'expense' ? 'Gasto' : 'Ingreso' }}</span>
+        </button>
+      </div>
+
+      <!-- Templates Tab -->
+      <div *ngIf="activeTab === 'templates'" class="templates-section">
+        <!-- Loading -->
+        <div *ngIf="templatesLoading" class="templates-loading">
+          <div class="spinner"></div>
+          <span>Cargando plantillas...</span>
+        </div>
+
+        <!-- Templates list -->
+        <div *ngIf="!templatesLoading && !showNewTemplateForm" class="templates-list">
+          <div
+            *ngFor="let template of templates"
+            class="template-item"
+            [class.expense]="template.type === 'expense'"
+            [class.income]="template.type === 'income'"
+            (click)="executeTemplate(template)"
+          >
+            <div class="template-info">
+              <div class="template-name">{{ template.name }}</div>
+              <div class="template-meta">
+                <span class="template-type">{{ template.type === 'expense' ? 'Gasto' : 'Ingreso' }}</span>
+                <span class="template-category" *ngIf="template.category_name">{{ template.category_name }}</span>
+                <span class="template-wallet" *ngIf="template.wallet_name">{{ template.wallet_name }}</span>
+                <span class="template-uses" *ngIf="template.use_count">Usado {{ template.use_count }}x</span>
+              </div>
+            </div>
+            <div class="template-amount">
+              {{ formatCurrency(template.amount, template.currency) }}
+            </div>
+            <div class="template-actions">
+              <button class="action-btn edit" (click)="editTemplate(template); $event.stopPropagation()" title="Editar">
+                <i class="material-icons">edit</i>
+              </button>
+              <button class="action-btn delete" (click)="deleteTemplate(template, $event)" title="Eliminar">
+                <i class="material-icons">delete</i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Empty state -->
+          <div *ngIf="templates.length === 0" class="empty-templates">
+            <i class="material-icons">bookmarks</i>
+            <p>No tienes plantillas guardadas</p>
+            <span>Crea una para registrar transacciones frecuentes con un solo clic</span>
+          </div>
+
+          <!-- Add template button -->
+          <button class="btn btn-add-template" (click)="toggleNewTemplateForm()">
+            <i class="material-icons">add</i>
+            <span>Nueva plantilla</span>
+          </button>
+        </div>
+
+        <!-- New/Edit template form -->
+        <div *ngIf="showNewTemplateForm" class="template-form">
+          <h3>{{ editingTemplate ? 'Editar Plantilla' : 'Nueva Plantilla' }}</h3>
+
+          <div class="form-group">
+            <label for="templateName">Nombre *</label>
+            <input
+              id="templateName"
+              type="text"
+              [(ngModel)]="newTemplate.name"
+              placeholder="Ej: Padel, Almuerzo, Netflix..."
+              class="form-control"
+            />
+          </div>
+
+          <div class="type-selector small">
+            <button
+              class="type-btn expense"
+              [class.active]="newTemplate.type === 'expense'"
+              (click)="onTemplateTypeChange('expense')"
+            >
+              <i class="material-icons">remove_circle</i>
+              <span>Gasto</span>
+            </button>
+            <button
+              class="type-btn income"
+              [class.active]="newTemplate.type === 'income'"
+              (click)="onTemplateTypeChange('income')"
+            >
+              <i class="material-icons">add_circle</i>
+              <span>Ingreso</span>
+            </button>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="templateAmount">Monto *</label>
+              <input
+                id="templateAmount"
+                type="number"
+                [(ngModel)]="newTemplate.amount"
+                placeholder="0.00"
+                step="0.01"
+                min="0"
+                inputmode="decimal"
+                class="form-control"
+              />
+            </div>
+            <div class="form-group">
+              <label for="templateCurrency">Moneda</label>
+              <select id="templateCurrency" [ngModel]="newTemplate.currency" (ngModelChange)="onTemplateCurrencyChange($event)" class="form-control">
+                <option value="ARS">ARS</option>
+                <option value="USD">USD</option>
+                <option value="EUR">EUR</option>
+                <option value="CRYPTO">CRYPTO</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Category and Wallet row -->
+          <div class="form-row">
+            <div class="form-group">
+              <label for="templateCategory">Categoría</label>
+              <select id="templateCategory" [(ngModel)]="newTemplate.category_id" class="form-control">
+                <option [ngValue]="null">Sin categoría</option>
+                <option *ngFor="let cat of getFilteredCategories(newTemplate.type || 'expense')" [ngValue]="cat.id">
+                  {{ cat.name }}
+                </option>
+              </select>
+            </div>
+            <div class="form-group" *ngIf="getFilteredWallets(newTemplate.currency || 'ARS').length > 0">
+              <label for="templateWallet">Billetera</label>
+              <select id="templateWallet" [(ngModel)]="newTemplate.wallet_id" class="form-control">
+                <option [ngValue]="null">Sin billetera</option>
+                <option *ngFor="let wallet of getFilteredWallets(newTemplate.currency || 'ARS')" [ngValue]="wallet.id">
+                  {{ wallet.name }}
+                </option>
+              </select>
+            </div>
+          </div>
+
+          <div class="template-form-actions">
+            <button class="btn btn-cancel" (click)="cancelTemplateForm()">
+              Cancelar
+            </button>
+            <button
+              class="btn btn-primary"
+              [disabled]="isLoading || !newTemplate.name || !newTemplate.amount"
+              (click)="saveTemplate()"
+            >
+              <i class="material-icons" *ngIf="isLoading">hourglass_empty</i>
+              <span>{{ editingTemplate ? 'Guardar' : 'Crear' }}</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
