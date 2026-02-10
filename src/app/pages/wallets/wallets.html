@@ -220,6 +220,10 @@
             <span class="material-icons">edit</span>
             Editar
           </button>
+          <button class="btn-icon" (click)="openReconcileModal(wallet); $event.stopPropagation()" title="Conciliar saldo">
+            <span class="material-icons">compare_arrows</span>
+            Conciliar
+          </button>
           <button class="btn-icon delete" (click)="deleteConfirmId = wallet.id || null; $event.stopPropagation()" title="Eliminar">
             <span class="material-icons">delete</span>
             Eliminar
@@ -264,6 +268,100 @@
         <span class="material-icons">add</span>
         Crear primera billetera
       </button>
+    </div>
+  </div>
+
+  <!-- Reconciliation Modal -->
+  <div class="modal-overlay" *ngIf="reconcileVisible" (click)="closeReconcileModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <div class="modal-title">
+          <span class="material-icons">account_balance_wallet</span>
+          <div>
+            <h2>Conciliar saldo</h2>
+            <p>{{ reconcileWallet?.name }} · {{ reconcileWallet?.currency }}</p>
+          </div>
+        </div>
+        <button class="btn-close" (click)="closeReconcileModal()">
+          <span class="material-icons">close</span>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <p class="modal-info">
+          No modificamos tu historial. Crearemos un ajuste automático para que el saldo contable iguale el saldo real.
+        </p>
+
+        <div class="reconcile-grid">
+          <div class="reconcile-item">
+            <span class="reconcile-label">Saldo contable actual</span>
+            <span class="reconcile-value">
+              {{ formatCurrency(reconcileCurrentBalance, reconcileWallet?.currency || 'ARS') }}
+            </span>
+          </div>
+
+          <div class="reconcile-item">
+            <label class="reconcile-label" for="realBalance">Saldo real</label>
+            <input
+              id="realBalance"
+              type="number"
+              class="form-input"
+              [(ngModel)]="reconcileRealBalance"
+              (ngModelChange)="onReconcileRealBalanceChange($event)"
+              name="realBalance"
+              step="0.01"
+              placeholder="0.00"
+            />
+          </div>
+
+          <div class="reconcile-item diff" [class.positive]="reconcileDifference > 0" [class.negative]="reconcileDifference < 0">
+            <span class="reconcile-label">Diferencia</span>
+            <span class="reconcile-value">
+              {{ formatCurrency(reconcileDifference, reconcileWallet?.currency || 'ARS') }}
+            </span>
+            <span class="reconcile-hint" *ngIf="reconcileDifference > 0">Se creará un ingreso de ajuste</span>
+            <span class="reconcile-hint" *ngIf="reconcileDifference < 0">Se creará un gasto de ajuste</span>
+            <span class="reconcile-hint" *ngIf="isZeroDifference">No se requiere ajuste</span>
+          </div>
+        </div>
+
+        <div class="reconcile-preview">
+          <div class="preview-title">
+            <span class="material-icons">receipt_long</span>
+            <span>Movimiento de ajuste</span>
+          </div>
+          <div class="preview-row">
+            <span>Tipo</span>
+            <strong>{{ reconcileType === 'income' ? 'Ingreso' : 'Gasto' }}</strong>
+          </div>
+          <div class="preview-row">
+            <span>Categoría</span>
+            <strong>Ajustes</strong>
+          </div>
+          <div class="preview-row">
+            <span>Origen</span>
+            <strong>Conciliación de billetera</strong>
+          </div>
+          <div class="preview-row">
+            <span>Monto</span>
+            <strong>{{ formatCurrency(Math.abs(reconcileDifference), reconcileWallet?.currency || 'ARS') }}</strong>
+          </div>
+          <div class="preview-row">
+            <span>Fecha</span>
+            <strong>Hoy</strong>
+          </div>
+        </div>
+
+        <div class="error-message" *ngIf="reconcileError">{{ reconcileError }}</div>
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn-secondary" (click)="closeReconcileModal()">Cancelar</button>
+        <button class="btn-primary" [disabled]="!reconcileCanConfirm" (click)="confirmReconciliation()">
+          <span *ngIf="!reconcileLoading">Crear ajuste</span>
+          <span *ngIf="reconcileLoading" class="spinner-small"></span>
+        </button>
+      </div>
     </div>
   </div>
 </div>

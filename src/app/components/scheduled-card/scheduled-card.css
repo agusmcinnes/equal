@@ -99,6 +99,10 @@
   background: rgba(239, 68, 68, 0.3);
 }
 
+.status-badge.finalized {
+  background: rgba(107, 114, 128, 0.4);
+}
+
 .card-body {
   padding: 16px;
   display: flex;
@@ -173,6 +177,58 @@
   padding: 12px 0;
   border-top: 1px solid #f0f0f0;
   border-bottom: 1px solid #f0f0f0;
+}
+
+.progress-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.progress-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+  gap: 12px;
+}
+
+.progress-label {
+  color: #6b7280;
+  font-weight: 500;
+  flex: 0 0 auto;
+}
+
+.progress-value {
+  color: #111827;
+  font-weight: 600;
+  text-align: right;
+  flex: 1;
+  word-break: break-word;
+}
+
+.progress-value.real {
+  color: #16a34a;
+}
+
+.progress-value.projected {
+  color: #2563eb;
+}
+
+.progress-bar {
+  height: 6px;
+  background: #e5e7eb;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #22c55e 0%, #16a34a 100%);
+  border-radius: 999px;
+  transition: width 0.3s ease;
 }
 
 .info-row {

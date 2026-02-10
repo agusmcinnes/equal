@@ -35,6 +35,9 @@ export interface ScheduledTransactionWithDetails extends ScheduledTransaction {
   category_type?: string;
   wallet_name?: string;
   wallet_provider?: string;
+  accrued_real?: number;
+  executed_count?: number;
+  executed_last_date?: string | null;
 }
 
 // Filters for scheduled transactions

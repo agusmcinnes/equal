@@ -40,6 +40,7 @@ export class MobileNav implements OnInit, OnDestroy {
     { icon: 'schedule', label: 'Operaciones Futuras', route: '/scheduled' },
     { icon: 'flag', label: 'Objetivos', route: '/goals' },
     { icon: 'attach_money', label: 'Dólar', route: '/dollar' },
+    { icon: 'savings', label: 'Plazo fijo', route: '/plazo-fijo' },
   ];
 
   constructor(

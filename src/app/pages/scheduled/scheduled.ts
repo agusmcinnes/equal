@@ -74,9 +74,26 @@ export class ScheduledComponent implements OnInit, OnDestroy {
         .toPromise() || [];
 
       // Load scheduled transactions
-      this.allScheduledTransactions = await this.scheduledTransactionsService.getUserScheduledTransactions()
+      const rawTransactions = await this.scheduledTransactionsService.getUserScheduledTransactions()
         .pipe(take(1))
         .toPromise() || [];
+
+      const grouped = this.groupScheduledTransactions(rawTransactions);
+      this.allScheduledTransactions = grouped.items;
+
+      const executedSummary = await this.scheduledTransactionsService.getExecutedSummaryByRecurringIds(grouped.allIds);
+
+      this.allScheduledTransactions = this.allScheduledTransactions.map(transaction => {
+        const groupIds = transaction.id ? grouped.groupIdsByDisplayId.get(transaction.id) || [] : [];
+        const groupSummary = this.mergeExecutionSummaries(groupIds, executedSummary);
+
+        return {
+          ...transaction,
+          accrued_real: groupSummary.total,
+          executed_count: groupSummary.count,
+          executed_last_date: groupSummary.lastDate
+        };
+      });
 
       this.filterTransactions();
     } catch (error) {
@@ -117,6 +134,97 @@ export class ScheduledComponent implements OnInit, OnDestroy {
   private filterTransactions(): void {
     this.incomeTransactions = this.allScheduledTransactions.filter(t => t.type === 'income');
     this.expenseTransactions = this.allScheduledTransactions.filter(t => t.type === 'expense');
+  }
+
+  private groupScheduledTransactions(transactions: ScheduledTransactionWithDetails[]): {
+    items: ScheduledTransactionWithDetails[];
+    groupIdsByDisplayId: Map<string, string[]>;
+    allIds: string[];
+  } {
+    const groups = new Map<string, ScheduledTransactionWithDetails[]>();
+
+    transactions.forEach(transaction => {
+      const key = this.getScheduledSignature(transaction);
+      if (!groups.has(key)) {
+        groups.set(key, []);
+      }
+      groups.get(key)!.push(transaction);
+    });
+
+    const items: ScheduledTransactionWithDetails[] = [];
+    const groupIdsByDisplayId = new Map<string, string[]>();
+    const allIds: string[] = [];
+
+    groups.forEach(group => {
+      const sorted = [...group].sort((a, b) => this.getDeduplicationScore(b) - this.getDeduplicationScore(a));
+      const display = sorted[0];
+      const ids = group.map(t => t.id).filter((id): id is string => !!id);
+      allIds.push(...ids);
+
+      if (display?.id) {
+        groupIdsByDisplayId.set(display.id, ids);
+        items.push(display);
+      }
+    });
+
+    return { items, groupIdsByDisplayId, allIds };
+  }
+
+  private mergeExecutionSummaries(
+    groupIds: string[],
+    summary: Record<string, { count: number; total: number; lastDate?: string }>
+  ): { count: number; total: number; lastDate: string | null } {
+    return groupIds.reduce(
+      (acc, id) => {
+        const data = summary[id];
+        if (!data) return acc;
+
+        acc.count += data.count || 0;
+        acc.total += data.total || 0;
+
+        if (data.lastDate && (!acc.lastDate || data.lastDate > acc.lastDate)) {
+          acc.lastDate = data.lastDate;
+        }
+
+        return acc;
+      },
+      { count: 0, total: 0, lastDate: null as string | null }
+    );
+  }
+
+  private getScheduledSignature(transaction: ScheduledTransactionWithDetails): string {
+    const description = (transaction.description || '').trim().toLowerCase();
+    const start = this.normalizeDateForSignature(transaction.start_date);
+    const end = this.normalizeDateForSignature(transaction.end_date);
+
+    return [
+      transaction.type,
+      transaction.amount,
+      transaction.currency,
+      transaction.category_id || '',
+      transaction.wallet_id || '',
+      transaction.frequency,
+      start,
+      end,
+      description
+    ].join('|');
+  }
+
+  private normalizeDateForSignature(dateValue?: string | null): string {
+    if (!dateValue) return '';
+
+    const date = new Date(dateValue);
+    if (Number.isNaN(date.getTime())) return '';
+
+    return date.toISOString().split('T')[0];
+  }
+
+  private getDeduplicationScore(transaction: ScheduledTransactionWithDetails): number {
+    const updatedAt = transaction.updated_at ? new Date(transaction.updated_at).getTime() : 0;
+    const nextExecution = transaction.next_execution_date ? new Date(transaction.next_execution_date).getTime() : 0;
+    const createdAt = transaction.created_at ? new Date(transaction.created_at).getTime() : 0;
+
+    return Math.max(updatedAt, nextExecution, createdAt);
   }
 
   openCreateModal(type: 'income' | 'expense'): void {
@@ -242,6 +350,59 @@ export class ScheduledComponent implements OnInit, OnDestroy {
 
   getExpenseTotalMonthly(): number {
     return this.expenseTransactions.reduce((sum, t) => sum + t.amount, 0);
+  }
+
+  private getProjectionSummary(transactions: ScheduledTransactionWithDetails[]): { total: number; hasOpenEnded: boolean } {
+    let total = 0;
+    let hasOpenEnded = false;
+
+    transactions.forEach(transaction => {
+      const projected = this.scheduledTransactionsService.getProjectedAmount(transaction);
+      if (projected === null) {
+        hasOpenEnded = true;
+      } else {
+        total += projected;
+      }
+    });
+
+    return { total, hasOpenEnded };
+  }
+
+  private formatAmount(amount: number): string {
+    return amount.toLocaleString('es-AR', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    });
+  }
+
+  private getAccruedRealAmount(transaction: ScheduledTransactionWithDetails): number {
+    if (typeof transaction.accrued_real === 'number') {
+      return transaction.accrued_real;
+    }
+
+    return this.scheduledTransactionsService.getAccruedAmount(transaction);
+  }
+
+  getIncomeAccruedTotal(): number {
+    return this.incomeTransactions.reduce((sum, t) => sum + this.getAccruedRealAmount(t), 0);
+  }
+
+  getExpenseAccruedTotal(): number {
+    return this.expenseTransactions.reduce((sum, t) => sum + this.getAccruedRealAmount(t), 0);
+  }
+
+  getIncomeProjectionLabel(): string {
+    const summary = this.getProjectionSummary(this.incomeTransactions);
+    if (summary.total === 0 && summary.hasOpenEnded) return 'Sin fin';
+    if (summary.hasOpenEnded) return `${this.formatAmount(summary.total)} ARS+`;
+    return `${this.formatAmount(summary.total)} ARS`;
+  }
+
+  getExpenseProjectionLabel(): string {
+    const summary = this.getProjectionSummary(this.expenseTransactions);
+    if (summary.total === 0 && summary.hasOpenEnded) return 'Sin fin';
+    if (summary.hasOpenEnded) return `${this.formatAmount(summary.total)} ARS+`;
+    return `${this.formatAmount(summary.total)} ARS`;
   }
 
   getActiveIncomeCount(): number {

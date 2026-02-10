@@ -286,6 +286,54 @@ export class ScheduledTransactionsService {
   }
 
   /**
+   * Obtiene resumen real de ejecuciones desde el histórico (transactions)
+   */
+  async getExecutedSummaryByRecurringIds(
+    recurringIds: string[]
+  ): Promise<Record<string, { count: number; total: number; lastDate?: string }>> {
+    const user = this.authService.currentUserValue;
+    if (!user || recurringIds.length === 0) {
+      return {};
+    }
+
+    try {
+      const nowIso = new Date().toISOString();
+      const { data, error } = await this.supabase
+        .from('transactions')
+        .select('recurring_id, amount, date')
+        .eq('user_id', user.id)
+        .eq('is_recurring', true)
+        .in('recurring_id', recurringIds)
+        .lte('date', nowIso);
+
+      if (error) throw error;
+
+      const summary: Record<string, { count: number; total: number; lastDate?: string }> = {};
+
+      (data || []).forEach((row: any) => {
+        const recurringId = row.recurring_id as string | null;
+        if (!recurringId) return;
+
+        if (!summary[recurringId]) {
+          summary[recurringId] = { count: 0, total: 0, lastDate: row.date };
+        }
+
+        summary[recurringId].count += 1;
+        summary[recurringId].total += Number(row.amount) || 0;
+
+        if (row.date && (!summary[recurringId].lastDate || row.date > summary[recurringId].lastDate!)) {
+          summary[recurringId].lastDate = row.date;
+        }
+      });
+
+      return summary;
+    } catch (error) {
+      console.error('Error loading recurring execution summary:', error);
+      return {};
+    }
+  }
+
+  /**
    * Calcula la próxima fecha de ejecución basada en frecuencia
    */
   calculateNextExecutionDate(currentDate: Date, frequency: string): Date {
@@ -334,5 +382,156 @@ export class ScheduledTransactionsService {
       'yearly': 'Anualmente'
     };
     return labels[frequency] || frequency;
+  }
+
+  /**
+   * Calcula ocurrencias entre dos fechas según frecuencia
+   */
+  getOccurrencesBetween(startDate: Date, endDate: Date, frequency: string): number {
+    if (endDate < startDate) return 0;
+
+    const dayBasedFrequencies: { [key: string]: number } = {
+      'daily': 1,
+      'weekly': 7,
+      'bi-weekly': 14
+    };
+
+    if (dayBasedFrequencies[frequency]) {
+      const intervalDays = dayBasedFrequencies[frequency];
+      const diffTime = endDate.getTime() - startDate.getTime();
+      const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+      return Math.floor(diffDays / intervalDays) + 1;
+    }
+
+    const monthBasedFrequencies: { [key: string]: number } = {
+      'monthly': 1,
+      'quarterly': 3,
+      'bi-annual': 6,
+      'yearly': 12
+    };
+
+    const intervalMonths = monthBasedFrequencies[frequency] || 1;
+    return this.getMonthOccurrences(startDate, endDate, intervalMonths);
+  }
+
+  /**
+   * Ocurrencias mensuales inclusivas según intervalo
+   */
+  private getMonthOccurrences(startDate: Date, endDate: Date, intervalMonths: number): number {
+    if (endDate < startDate) return 0;
+
+    let monthsDiff = (endDate.getFullYear() - startDate.getFullYear()) * 12;
+    monthsDiff += endDate.getMonth() - startDate.getMonth();
+
+    if (endDate.getDate() < startDate.getDate()) {
+      monthsDiff -= 1;
+    }
+
+    if (monthsDiff < 0) return 0;
+    return Math.floor(monthsDiff / intervalMonths) + 1;
+  }
+
+  /**
+   * Meses completos transcurridos entre dos fechas
+   */
+  private getFullMonthsBetween(startDate: Date, endDate: Date): number {
+    if (endDate < startDate) return 0;
+
+    let monthsDiff = (endDate.getFullYear() - startDate.getFullYear()) * 12;
+    monthsDiff += endDate.getMonth() - startDate.getMonth();
+
+    if (endDate.getDate() < startDate.getDate()) {
+      monthsDiff -= 1;
+    }
+
+    return Math.max(0, monthsDiff);
+  }
+
+  /**
+   * Ocurrencias ejecutadas hasta la fecha
+   */
+  getElapsedOccurrences(transaction: ScheduledTransaction): number {
+    const start = new Date(transaction.start_date);
+    const effectiveEnd = this.getAccrualEndDate(transaction);
+
+    if (effectiveEnd < start) return 0;
+    return this.getOccurrencesBetween(start, effectiveEnd, transaction.frequency);
+  }
+
+  /**
+   * Ocurrencias totales según fecha de fin (si existe)
+   */
+  getTotalOccurrences(transaction: ScheduledTransaction): number | null {
+    if (!transaction.end_date) return null;
+
+    const start = new Date(transaction.start_date);
+    const end = new Date(transaction.end_date);
+    if (end < start) return 0;
+    return this.getOccurrencesBetween(start, end, transaction.frequency);
+  }
+
+  /**
+   * Monto acumulado hasta la fecha
+   */
+  getAccruedAmount(transaction: ScheduledTransaction): number {
+    return this.getElapsedOccurrences(transaction) * transaction.amount;
+  }
+
+  /**
+   * Monto proyectado total (si tiene fin)
+   */
+  getProjectedAmount(transaction: ScheduledTransaction): number | null {
+    const totalOccurrences = this.getTotalOccurrences(transaction);
+    if (totalOccurrences === null) return null;
+    return totalOccurrences * transaction.amount;
+  }
+
+  /**
+   * Meses transcurridos desde el inicio
+   */
+  getElapsedMonths(transaction: ScheduledTransaction): number {
+    const start = new Date(transaction.start_date);
+    const effectiveEnd = this.getAccrualEndDate(transaction);
+
+    if (effectiveEnd < start) return 0;
+
+    if (transaction.end_date) {
+      const end = new Date(transaction.end_date);
+      const total = this.getTotalMonths(transaction) || 0;
+      if (effectiveEnd >= end) return total;
+    }
+
+    return this.getFullMonthsBetween(start, effectiveEnd);
+  }
+
+  /**
+   * Meses totales del plan (si tiene fin)
+   */
+  getTotalMonths(transaction: ScheduledTransaction): number | null {
+    if (!transaction.end_date) return null;
+
+    const start = new Date(transaction.start_date);
+    const end = new Date(transaction.end_date);
+    if (end < start) return 0;
+
+    return this.getFullMonthsBetween(start, end) + 1;
+  }
+
+  /**
+   * Fecha límite para acumulado real (solo ejecuciones ocurridas)
+   */
+  private getAccrualEndDate(transaction: ScheduledTransaction): Date {
+    const now = new Date();
+    const endLimit = transaction.end_date ? new Date(transaction.end_date) : now;
+    let effectiveEnd = endLimit < now ? endLimit : now;
+
+    if (transaction.last_execution_date) {
+      const lastExecution = new Date(transaction.last_execution_date);
+      if (lastExecution < effectiveEnd) {
+        effectiveEnd = lastExecution;
+      }
+    }
+
+    return effectiveEnd;
   }
 }

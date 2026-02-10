@@ -65,7 +65,7 @@ export class CurrencyExchangeService {
 
   /**
    * Execute a currency exchange
-   * Creates two linked transactions (expense + income) and the exchange record
+   * Creates two linked transactions (exchange) and the exchange record
    */
   async executeExchange(data: ExchangeFormData): Promise<{ success: boolean; error?: string; exchange?: CurrencyExchange }> {
     const user_id = this.userId();
@@ -82,50 +82,57 @@ export class CurrencyExchangeService {
       );
 
       const now = new Date().toISOString();
+      const formattedAmount = Number(data.amount).toLocaleString('es-AR', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      });
+      const formattedRate = Number(data.exchange_rate).toLocaleString('es-AR', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      });
+      const description = data.operation_type === 'buy_usd'
+        ? `Cambio ARS → USD · ${formattedAmount} USD · Tasa ${formattedRate}`
+        : `Cambio USD → ARS · ${formattedAmount} USD · Tasa ${formattedRate}`;
 
-      // Create the expense transaction (money leaving source wallet)
-      const expenseTransaction: Transaction = {
+      // Create the exchange transaction (money leaving source wallet)
+      const sourceExchangeTransaction: Transaction = {
         user_id,
         date: now,
-        description: data.operation_type === 'buy_usd'
-          ? `Compra USD - ${data.amount} USD @ ${data.exchange_rate}`
-          : `Venta USD - ${data.amount} USD @ ${data.exchange_rate}`,
-        amount: preview.source_amount,
+        description,
+        amount: -preview.source_amount,
         currency: preview.source_currency,
         wallet_id: data.source_wallet_id,
-        type: 'expense',
+        type: 'exchange',
         is_recurring: false
       };
 
-      const expenseResult = await this.transactionsService.create(expenseTransaction);
-      if (expenseResult.error || !expenseResult.data || expenseResult.data.length === 0) {
+      const sourceResult = await this.transactionsService.create(sourceExchangeTransaction);
+      if (sourceResult.error || !sourceResult.data || sourceResult.data.length === 0) {
         return { success: false, error: 'Error al crear transacción de salida' };
       }
 
-      const sourceTransactionId = expenseResult.data[0].id;
+      const sourceTransactionId = sourceResult.data[0].id;
 
-      // Create the income transaction (money entering destination wallet)
-      const incomeTransaction: Transaction = {
+      // Create the exchange transaction (money entering destination wallet)
+      const destinationExchangeTransaction: Transaction = {
         user_id,
         date: now,
-        description: data.operation_type === 'buy_usd'
-          ? `Compra USD - ${data.amount} USD @ ${data.exchange_rate}`
-          : `Venta USD - ${data.amount} USD @ ${data.exchange_rate}`,
+        description,
         amount: preview.destination_amount,
         currency: preview.destination_currency,
         wallet_id: data.destination_wallet_id,
-        type: 'income',
+        type: 'exchange',
         is_recurring: false
       };
 
-      const incomeResult = await this.transactionsService.create(incomeTransaction);
-      if (incomeResult.error || !incomeResult.data || incomeResult.data.length === 0) {
-        // Rollback: delete the expense transaction
+      const destinationResult = await this.transactionsService.create(destinationExchangeTransaction);
+      if (destinationResult.error || !destinationResult.data || destinationResult.data.length === 0) {
+        // Rollback: delete the source transaction
         await this.transactionsService.delete(sourceTransactionId!);
         return { success: false, error: 'Error al crear transacción de entrada' };
       }
 
-      const destinationTransactionId = incomeResult.data[0].id;
+      const destinationTransactionId = destinationResult.data[0].id;
 
       // Create the currency exchange record
       const exchangeRecord: CurrencyExchange = {

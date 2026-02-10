@@ -13,8 +13,20 @@ SELECT
     w.balance as initial_balance,
     w.created_at,
     w.updated_at,
-    COALESCE(SUM(CASE WHEN t.type = 'income' THEN t.amount ELSE -t.amount END), 0) as transaction_total,
-    w.balance + COALESCE(SUM(CASE WHEN t.type = 'income' THEN t.amount ELSE -t.amount END), 0) as current_balance,
+        COALESCE(SUM(
+            CASE
+                WHEN t.type = 'income' THEN t.amount
+                WHEN t.type = 'expense' THEN -t.amount
+                ELSE t.amount
+            END
+        ), 0) as transaction_total,
+        w.balance + COALESCE(SUM(
+            CASE
+                WHEN t.type = 'income' THEN t.amount
+                WHEN t.type = 'expense' THEN -t.amount
+                ELSE t.amount
+            END
+        ), 0) as current_balance,
     COUNT(t.id) as transaction_count
 FROM wallets w
 LEFT JOIN transactions t ON w.id = t.wallet_id AND w.currency = t.currency

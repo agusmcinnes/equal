@@ -320,6 +320,7 @@
             class="transaction-card"
             [class.income]="tx.type === 'income'"
             [class.expense]="tx.type === 'expense'"
+            [class.exchange]="tx.type === 'exchange'"
           >
             <div class="tx-type-indicator"></div>
             <div class="tx-content">
@@ -334,7 +335,20 @@
                   ></app-category-badge>
                 </div>
                 <div class="tx-info">
-                  <p class="tx-description">{{ tx.description || tx.category_name || 'Sin categoría' }}</p>
+                  <p class="tx-description tx-exchange" *ngIf="tx.type === 'exchange'; else dashboardRegularDesc">
+                    <span class="tx-exchange-badge">
+                      <span class="material-icons">currency_exchange</span>
+                    </span>
+                    <span class="tx-exchange-text">
+                      <span class="tx-exchange-title">{{ getExchangeDisplay(tx).title }}</span>
+                      <span class="tx-exchange-detail">{{ getExchangeDisplay(tx).detail }}</span>
+                    </span>
+                  </p>
+                  <ng-template #dashboardRegularDesc>
+                    <p class="tx-description">
+                      {{ tx.description || tx.category_name || 'Sin categoría' }}
+                    </p>
+                  </ng-template>
                   <div class="tx-meta">
                     <span class="tx-date">{{ formatDate(tx.date) }}</span>
                     <span class="tx-separator">•</span>
@@ -343,8 +357,12 @@
                 </div>
               </div>
               <div class="tx-amount-wrapper">
-                <p class="tx-amount" [class.positive]="tx.type === 'income'">
-                  {{ tx.type === 'income' ? '+' : '-' }}${{ tx.amount | number: '1.2-2' }}
+                <p
+                  class="tx-amount"
+                  [class.positive]="tx.type === 'income'"
+                  [class.exchange]="tx.type === 'exchange'"
+                >
+                  {{ tx.type === 'income' ? '+' : tx.type === 'expense' ? '-' : '' }}${{ tx.amount | number: '1.2-2' }}
                 </p>
               </div>
             </div>

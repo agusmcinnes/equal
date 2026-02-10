@@ -1,0 +1,111 @@
+<div class="fixed-term-page">
+  <div class="page-header">
+    <div class="header-content">
+      <h1>Simulador de Plazo Fijo</h1>
+      <p class="header-subtitle">Calculá los intereses estimados según monto, plazo y tasa</p>
+    </div>
+  </div>
+
+  <div class="grid">
+    <div class="card form-card">
+      <div class="card-header">
+        <h2>Datos de la simulación</h2>
+        <button class="btn-ghost" type="button" (click)="reset()">
+          <span class="material-icons">refresh</span>
+          Reiniciar
+        </button>
+      </div>
+
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="amount">Monto a invertir</label>
+          <input
+            id="amount"
+            type="number"
+            class="form-input"
+            [(ngModel)]="amount"
+            name="amount"
+            placeholder="Ej: 150000"
+            min="0"
+            step="1000"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="term">Plazo</label>
+          <div class="inline">
+            <input
+              id="term"
+              type="number"
+              class="form-input"
+              [(ngModel)]="term"
+              name="term"
+              placeholder="Ej: 30"
+              min="1"
+              step="1"
+            />
+            <select
+              class="form-select"
+              [(ngModel)]="termUnit"
+              name="termUnit"
+            >
+              <option value="days">Días</option>
+              <option value="months">Meses</option>
+            </select>
+          </div>
+          <p class="helper">Equivalente: {{ termInDays }} días</p>
+        </div>
+
+        <div class="form-group">
+          <label for="annualRate">Tasa anual (%)</label>
+          <input
+            id="annualRate"
+            type="number"
+            class="form-input"
+            [(ngModel)]="annualRate"
+            name="annualRate"
+            placeholder="Ej: 75"
+            min="0"
+            step="0.01"
+          />
+        </div>
+      </div>
+    </div>
+
+    <div class="card result-card">
+      <div class="card-header">
+        <h2>Proyección</h2>
+      </div>
+
+      <div *ngIf="isValid; else emptyState" class="results">
+        <div class="result-item">
+          <span class="label">Interés estimado</span>
+          <span class="value">{{ projectedInterest | number:'1.2-2' }}</span>
+        </div>
+        <div class="result-item">
+          <span class="label">Total al vencimiento</span>
+          <span class="value total">{{ projectedTotal | number:'1.2-2' }}</span>
+        </div>
+        <div class="result-item">
+          <span class="label">Tasa efectiva del período</span>
+          <span class="value">{{ effectiveRate | number:'1.2-2' }}%</span>
+        </div>
+      </div>
+
+      <ng-template #emptyState>
+        <div class="empty-state">
+          <span class="material-icons">savings</span>
+          <p>Completá los datos para ver la proyección.</p>
+        </div>
+      </ng-template>
+    </div>
+  </div>
+
+  <div class="note">
+    <span class="material-icons">info</span>
+    <p>
+      Esta simulación usa interés simple y considera 30 días por mes.
+      Los resultados son estimativos.
+    </p>
+  </div>
+</div>

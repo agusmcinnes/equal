@@ -555,6 +555,38 @@ export class Dashboard implements OnInit, OnDestroy {
     });
   }
 
+  getExchangeDisplay(tx: TransactionWithDetails): { title: string; detail: string } {
+    const description = (tx.description || '').trim();
+    const match = description.match(
+      /Cambio\s+([A-Z]{3})\s+→\s+([A-Z]{3})\s+·\s+([\d.,]+)\s+([A-Z]{3})\s+·\s+Tasa\s+([\d.,]+)/i
+    );
+
+    if (match) {
+      const fromCurrency = match[1].toUpperCase();
+      const toCurrency = match[2].toUpperCase();
+      const amount = match[3];
+      const amountCurrency = match[4].toUpperCase();
+      const rate = match[5];
+
+      let title = `Cambio ${fromCurrency} → ${toCurrency}`;
+      if (fromCurrency === 'ARS' && toCurrency === 'USD') {
+        title = 'Compra USD';
+      } else if (fromCurrency === 'USD' && toCurrency === 'ARS') {
+        title = 'Venta USD';
+      }
+
+      return {
+        title,
+        detail: `${amount} ${amountCurrency} @ ${rate}`
+      };
+    }
+
+    return {
+      title: 'Cambio',
+      detail: description || 'Sin descripción'
+    };
+  }
+
   navigateTo(route: string): void {
     this.router.navigate([`/${route}`]);
   }

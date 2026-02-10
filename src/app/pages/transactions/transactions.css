@@ -659,6 +659,10 @@
   background: #ef4444;
 }
 
+.transaction-card .tx-left.exchange::before {
+  background: #6366f1;
+}
+
 .tx-center {
   flex: 1;
   min-width: 0;
@@ -672,6 +676,65 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.tx-description.tx-exchange {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  white-space: normal;
+  overflow: visible;
+  text-overflow: unset;
+}
+
+.tx-exchange-badge {
+  width: 30px;
+  height: 30px;
+  border-radius: 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.18), rgba(99, 102, 241, 0.35));
+  color: #4f46e5;
+  box-shadow: 0 6px 12px rgba(79, 70, 229, 0.15);
+  flex-shrink: 0;
+}
+
+.tx-exchange-badge .material-icons {
+  font-size: 16px;
+}
+
+.tx-exchange-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.tx-exchange-title {
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1.2;
+}
+
+.tx-exchange-detail {
+  font-weight: 500;
+  color: var(--text-secondary);
+  font-size: 13px;
+  line-height: 1.2;
+}
+
+.tx-type-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 6px;
+  color: #6366f1;
+  vertical-align: middle;
+}
+
+.tx-type-icon .material-icons {
+  font-size: 16px;
 }
 
 .tx-metadata {
@@ -710,6 +773,10 @@
 
 .tx-amount.expense {
   color: #ef4444;
+}
+
+.tx-amount.exchange {
+  color: #6366f1;
 }
 
 .tx-actions {

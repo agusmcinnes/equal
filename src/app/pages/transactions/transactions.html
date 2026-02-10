@@ -213,7 +213,12 @@
         <h3 class="group-label">{{ group.label }}</h3>
 
         <div class="transaction-card" *ngFor="let tx of group.transactions">
-          <div class="tx-left" [class.income]="tx.type === 'income'" [class.expense]="tx.type === 'expense'">
+          <div
+            class="tx-left"
+            [class.income]="tx.type === 'income'"
+            [class.expense]="tx.type === 'expense'"
+            [class.exchange]="tx.type === 'exchange'"
+          >
             <app-category-badge
               [name]="tx.category_name || 'Sin categoría'"
               [icon]="tx.category_icon || 'category'"
@@ -223,9 +228,20 @@
           </div>
 
           <div class="tx-center">
-            <div class="tx-description">
-              {{ tx.description || 'Sin descripción' }}
+            <div class="tx-description tx-exchange" *ngIf="tx.type === 'exchange'; else regularDescription">
+              <span class="tx-exchange-badge">
+                <span class="material-icons">currency_exchange</span>
+              </span>
+              <div class="tx-exchange-text">
+                <span class="tx-exchange-title">{{ getExchangeDisplay(tx).title }}</span>
+                <span class="tx-exchange-detail">{{ getExchangeDisplay(tx).detail }}</span>
+              </div>
             </div>
+            <ng-template #regularDescription>
+              <div class="tx-description">
+                {{ tx.description || 'Sin descripción' }}
+              </div>
+            </ng-template>
             <div class="tx-metadata">
               <span class="tx-date">
                 <span class="material-icons">schedule</span>
@@ -243,8 +259,13 @@
           </div>
 
           <div class="tx-right">
-            <div class="tx-amount" [class.income]="tx.type === 'income'" [class.expense]="tx.type === 'expense'">
-              {{ tx.type === 'income' ? '+' : '-' }}{{ formatCurrency(tx.amount, tx.currency) }}
+            <div
+              class="tx-amount"
+              [class.income]="tx.type === 'income'"
+              [class.expense]="tx.type === 'expense'"
+              [class.exchange]="tx.type === 'exchange'"
+            >
+              {{ tx.type === 'income' ? '+' : tx.type === 'expense' ? '-' : '' }}{{ formatCurrency(tx.amount, tx.currency) }}
             </div>
             <div class="tx-actions">
               <button class="btn-icon" (click)="showForm(tx)" title="Editar">

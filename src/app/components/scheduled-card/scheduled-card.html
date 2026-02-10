@@ -14,8 +14,8 @@
           <p class="transaction-description">{{ transaction.description }}</p>
         </div>
       </div>
-      <div class="status-badge" [class.active]="transaction.is_active" [class.inactive]="!transaction.is_active">
-        {{ transaction.is_active ? 'Activo' : 'Inactivo' }}
+      <div class="status-badge" [ngClass]="getStatusClass()">
+        {{ getStatusLabel() }}
       </div>
     </div>
   </div>
@@ -30,7 +30,7 @@
         </span>
         <div class="amount-details">
           <span class="amount-value">{{ transaction.amount | number: '1.2-2' }} {{ transaction.currency }}</span>
-          <span class="amount-type">{{ transaction.type === 'income' ? 'Ingreso' : 'Gasto' }}</span>
+          <span class="amount-type">{{ transaction.type === 'income' ? 'Ingreso' : 'Gasto' }} · por ejecución</span>
         </div>
       </div>
     </div>
@@ -45,6 +45,10 @@
         <span class="info-label">Próxima ejecución:</span>
         <span class="info-value">{{ formatDate(transaction.next_execution_date) }}</span>
       </div>
+      <div class="info-row" *ngIf="getLastExecutionDate()">
+        <span class="info-label">Última ejecución:</span>
+        <span class="info-value">{{ formatDate(getLastExecutionDate()!) }}</span>
+      </div>
       <div class="info-row" *ngIf="transaction.wallet_name">
         <span class="info-label">Billetera:</span>
         <span class="info-value">{{ transaction.wallet_name }}</span>
@@ -55,15 +59,44 @@
       </div>
     </div>
 
+    <!-- Progress info -->
+    <div class="progress-section">
+      <div class="progress-row">
+        <span class="progress-label">Acumulado real:</span>
+        <span class="progress-value real">{{ getAccruedAmount() | number: '1.2-2' }} {{ transaction.currency }}</span>
+      </div>
+      <div class="progress-row">
+        <span class="progress-label">Proyección (estimada):</span>
+        <ng-container *ngIf="getProjectedAmount() !== null; else noEndDate">
+          <span class="progress-value projected">{{ getProjectedAmount() | number: '1.2-2' }} {{ transaction.currency }}</span>
+        </ng-container>
+        <ng-template #noEndDate>
+          <span class="progress-value projected">Sin fin</span>
+        </ng-template>
+      </div>
+      <div class="progress-row">
+        <span class="progress-label">Períodos transcurridos:</span>
+        <ng-container *ngIf="getTotalPeriods() !== null; else onlyElapsed">
+          <span class="progress-value">{{ getElapsedPeriods() }} / {{ getTotalPeriods() }}</span>
+        </ng-container>
+        <ng-template #onlyElapsed>
+          <span class="progress-value">{{ getElapsedPeriods() }}</span>
+        </ng-template>
+      </div>
+      <div class="progress-bar" *ngIf="getProjectedAmount() !== null">
+        <div class="progress-fill" [style.width.%]="getAccruedPercent()"></div>
+      </div>
+    </div>
+
     <!-- Days until execution -->
-    <div class="days-until" *ngIf="daysUntilExecution() >= 0">
+    <div class="days-until" *ngIf="daysUntilExecution() >= 0 && !isExpired()">
       <span class="days-count">{{ daysUntilExecution() }} día(s)</span>
     </div>
 
     <!-- Status message -->
     <div class="status-message" *ngIf="isExpired()">
       <i class="material-icons">warning</i>
-      Esta transacción ha vencido
+      Esta operación ha finalizado
     </div>
   </div>
 
