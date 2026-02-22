@@ -11,7 +11,7 @@ export interface Transaction {
   currency?: string;
   crypto_type?: string | null;
   wallet_id?: string | null;
-  type: 'income' | 'expense';
+  type: 'income' | 'expense' | 'exchange';
   is_recurring?: boolean;
   recurring_id?: string | null;
   goal_id?: string | null; // Link to goal if this transaction is from a goal movement
@@ -31,7 +31,7 @@ export interface TransactionWithDetails extends Transaction {
 
 // Transaction filters interface
 export interface TransactionFilters {
-  type?: 'income' | 'expense' | 'all';
+  type?: 'income' | 'expense' | 'exchange' | 'all';
   category_ids?: string[];
   wallet_ids?: string[];
   currency?: string;

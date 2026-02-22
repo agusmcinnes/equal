@@ -8,6 +8,7 @@ import { Goals } from './pages/goals/goals';
 import { Wallets } from './pages/wallets/wallets';
 import { ScheduledComponent } from './pages/scheduled/scheduled';
 import { DollarComponent } from './pages/dollar/dollar';
+import { FixedTermComponent } from './pages/fixed-term/fixed-term';
 import { MainLayout } from './layouts/main-layout/main-layout';
 import { authGuard } from './guards/auth.guard';
 
@@ -61,6 +62,10 @@ export const routes: Routes = [
       {
         path: 'dollar',
         component: DollarComponent
+      },
+      {
+        path: 'plazo-fijo',
+        component: FixedTermComponent
       }
     ]
   },

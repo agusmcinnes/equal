@@ -103,4 +103,40 @@ export class CategoriesService {
 
     return { data, error };
   }
+
+  /**
+   * Gets or creates the user's "Ajustes" category by type (income/expense)
+   * This ensures reconciliation adjustments are properly categorized
+   */
+  async getOrCreateAdjustmentCategory(type: 'income' | 'expense'): Promise<{ data: Category | null; error: any }> {
+    const user_id = this.userId();
+    if (!user_id) return { data: null, error: 'not_authenticated' };
+
+    const { data: existing, error: searchError } = await this.supabase
+      .from('categories')
+      .select('*')
+      .eq('user_id', user_id)
+      .eq('name', 'Ajustes')
+      .eq('type', type)
+      .maybeSingle();
+
+    if (searchError) return { data: null, error: searchError };
+    if (existing) return { data: existing as Category, error: null };
+
+    const newCategory: Category = {
+      user_id: user_id,
+      name: 'Ajustes',
+      type,
+      color: '#6b7280',
+      icon: 'tune'
+    };
+
+    const { data, error } = await this.supabase
+      .from('categories')
+      .insert([newCategory])
+      .select()
+      .single();
+
+    return { data: (data as Category) || null, error };
+  }
 }

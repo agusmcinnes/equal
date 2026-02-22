@@ -49,9 +49,23 @@ export class ScheduledCardComponent {
     });
   }
 
+  getLastExecutionDate(): string | null {
+    return this.transaction.executed_last_date || this.transaction.last_execution_date || null;
+  }
+
   isExpired(): boolean {
     if (!this.transaction.end_date) return false;
     return new Date(this.transaction.end_date) < new Date();
+  }
+
+  getStatusLabel(): string {
+    if (this.isExpired()) return 'Finalizada';
+    return this.transaction.is_active ? 'Activa' : 'Pausada';
+  }
+
+  getStatusClass(): string {
+    if (this.isExpired()) return 'finalized';
+    return this.transaction.is_active ? 'active' : 'inactive';
   }
 
   daysUntilExecution(): number {
@@ -60,5 +74,33 @@ export class ScheduledCardComponent {
     const diffTime = next.getTime() - now.getTime();
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     return diffDays;
+  }
+
+  getAccruedAmount(): number {
+    if (typeof this.transaction.accrued_real === 'number') {
+      return this.transaction.accrued_real;
+    }
+    return this.scheduledTransactionsService.getAccruedAmount(this.transaction);
+  }
+
+  getProjectedAmount(): number | null {
+    return this.scheduledTransactionsService.getProjectedAmount(this.transaction);
+  }
+
+  getElapsedPeriods(): number {
+    if (typeof this.transaction.executed_count === 'number') {
+      return this.transaction.executed_count;
+    }
+    return this.scheduledTransactionsService.getElapsedOccurrences(this.transaction);
+  }
+
+  getTotalPeriods(): number | null {
+    return this.scheduledTransactionsService.getTotalOccurrences(this.transaction);
+  }
+
+  getAccruedPercent(): number {
+    const projected = this.getProjectedAmount();
+    if (!projected || projected <= 0) return 0;
+    return Math.min(100, (this.getAccruedAmount() / projected) * 100);
   }
 }

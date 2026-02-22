@@ -213,7 +213,12 @@
         <h3 class="group-label">{{ group.label }}</h3>
 
         <div class="transaction-card" *ngFor="let tx of group.transactions">
-          <div class="tx-left" [class.income]="tx.type === 'income'" [class.expense]="tx.type === 'expense'">
+          <div
+            class="tx-left"
+            [class.income]="tx.type === 'income'"
+            [class.expense]="tx.type === 'expense'"
+            [class.exchange]="tx.type === 'exchange'"
+          >
             <app-category-badge
               [name]="tx.category_name || 'Sin categoría'"
               [icon]="tx.category_icon || 'category'"
@@ -223,9 +228,20 @@
           </div>
 
           <div class="tx-center">
-            <div class="tx-description">
-              {{ tx.description || 'Sin descripción' }}
+            <div class="tx-description tx-exchange" *ngIf="tx.type === 'exchange'; else regularDescription">
+              <span class="tx-exchange-badge">
+                <span class="material-icons">currency_exchange</span>
+              </span>
+              <div class="tx-exchange-text">
+                <span class="tx-exchange-title">{{ getExchangeDisplay(tx).title }}</span>
+                <span class="tx-exchange-detail">{{ getExchangeDisplay(tx).detail }}</span>
+              </div>
             </div>
+            <ng-template #regularDescription>
+              <div class="tx-description">
+                {{ tx.description || 'Sin descripción' }}
+              </div>
+            </ng-template>
             <div class="tx-metadata">
               <span class="tx-date">
                 <span class="material-icons">schedule</span>
@@ -243,14 +259,19 @@
           </div>
 
           <div class="tx-right">
-            <div class="tx-amount" [class.income]="tx.type === 'income'" [class.expense]="tx.type === 'expense'">
-              {{ tx.type === 'income' ? '+' : '-' }}{{ formatCurrency(tx.amount, tx.currency) }}
+            <div
+              class="tx-amount"
+              [class.income]="tx.type === 'income'"
+              [class.expense]="tx.type === 'expense'"
+              [class.exchange]="tx.type === 'exchange'"
+            >
+              {{ tx.type === 'income' ? '+' : tx.type === 'expense' ? '-' : '' }}{{ formatCurrency(tx.amount, tx.currency) }}
             </div>
             <div class="tx-actions">
               <button class="btn-icon" (click)="showForm(tx)" title="Editar">
                 <span class="material-icons">edit</span>
               </button>
-              <button class="btn-icon btn-danger" (click)="remove(tx.id)" title="Eliminar">
+              <button class="btn-icon btn-danger" (click)="openDeleteModal(tx)" title="Eliminar">
                 <span class="material-icons">delete</span>
               </button>
             </div>
@@ -402,6 +423,40 @@
           </button>
         </div>
       </form>
+    </div>
+  </div>
+
+  <!-- Delete Transaction Modal -->
+  <div class="modal-overlay" *ngIf="deleteModalVisible" (click)="closeDeleteModal()">
+    <div class="modal-content delete-modal" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <div class="modal-title-row">
+          <span class="material-icons" style="color: #dc2626;">delete</span>
+          <h2>Eliminar transacción</h2>
+        </div>
+        <button class="btn-close" (click)="closeDeleteModal()">
+          <span class="material-icons">close</span>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <p class="delete-warning">
+          ¿Está seguro de que desea eliminar esta transacción?
+        </p>
+        <p class="delete-tx-name">{{ deleteModalTxDescription }}</p>
+        <p class="delete-hint">Esta acción no se puede deshacer.</p>
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn-secondary" (click)="closeDeleteModal()" [disabled]="deleteModalLoading">Cancelar</button>
+        <button class="btn-delete" (click)="confirmDeleteTransaction()" [disabled]="deleteModalLoading">
+          <span *ngIf="!deleteModalLoading">
+            <span class="material-icons">delete</span>
+            Eliminar
+          </span>
+          <span *ngIf="deleteModalLoading" class="spinner-small"></span>
+        </button>
+      </div>
     </div>
   </div>
 </div>

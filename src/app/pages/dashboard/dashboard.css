@@ -947,6 +947,10 @@
   background: #ef4444;
 }
 
+.transaction-card.exchange .tx-type-indicator {
+  background: #6366f1;
+}
+
 /* Main content wrapper - use CSS Grid for consistent columns */
 .tx-content {
   display: grid;
@@ -978,6 +982,65 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.tx-description.tx-exchange {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  white-space: normal;
+  overflow: visible;
+  text-overflow: unset;
+}
+
+.tx-exchange-badge {
+  width: 26px;
+  height: 26px;
+  border-radius: 9px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.18), rgba(99, 102, 241, 0.35));
+  color: #4f46e5;
+  box-shadow: 0 6px 12px rgba(79, 70, 229, 0.15);
+  flex-shrink: 0;
+}
+
+.tx-exchange-badge .material-icons {
+  font-size: 14px;
+}
+
+.tx-exchange-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.tx-exchange-title {
+  font-weight: 600;
+  color: var(--color-dark);
+  line-height: 1.2;
+}
+
+.tx-exchange-detail {
+  font-weight: 500;
+  color: #6b7280;
+  font-size: 12px;
+  line-height: 1.2;
+}
+
+.tx-type-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 6px;
+  color: #6366f1;
+  vertical-align: middle;
+}
+
+.tx-type-icon .material-icons {
+  font-size: 14px;
 }
 
 .tx-meta {
@@ -1023,6 +1086,10 @@
 
 .tx-amount.positive {
   color: #10b981;
+}
+
+.tx-amount.exchange {
+  color: #6366f1;
 }
 
 /* ===== QUICK ACTIONS CARD ===== */

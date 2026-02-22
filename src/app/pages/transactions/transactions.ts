@@ -76,13 +76,20 @@ export class Transactions implements OnInit, OnDestroy {
   formVisible = false;
   editing: Transaction | null = null;
   filterCurrency: 'all' | 'ARS' | 'USD' | 'EUR' | 'CRYPTO' = 'all';
-  filterType: 'all' | 'income' | 'expense' = 'all';
+  filterType: 'all' | 'income' | 'expense' | 'exchange' = 'all';
+
+  // Delete modal state
+  deleteModalVisible = false;
+  deleteModalTxId: string | null = null;
+  deleteModalTxDescription = '';
+  deleteModalLoading = false;
 
   // Select options
   typeOptions: SelectOption[] = [
     { value: 'all', label: 'Todos', icon: 'list' },
     { value: 'income', label: 'Ingresos', icon: 'trending_up' },
-    { value: 'expense', label: 'Gastos', icon: 'trending_down' }
+    { value: 'expense', label: 'Gastos', icon: 'trending_down' },
+    { value: 'exchange', label: 'Cambios', icon: 'swap_horiz' }
   ];
 
   currencyOptions: SelectOption[] = [
@@ -259,7 +266,7 @@ export class Transactions implements OnInit, OnDestroy {
     this.applyFilters();
   }
 
-  changeTypeFilter(type: 'all' | 'income' | 'expense'): void {
+  changeTypeFilter(type: 'all' | 'income' | 'expense' | 'exchange'): void {
     this.filterType = type;
     this.currentPage = 1;
     this.applyFilters();
@@ -424,19 +431,70 @@ export class Transactions implements OnInit, OnDestroy {
     }
   }
 
-  async remove(id?: string): Promise<void> {
-    if (!id || !confirm('¿Estás seguro de eliminar esta transacción?')) return;
+  openDeleteModal(tx: TransactionWithDetails): void {
+    this.deleteModalTxId = tx.id || null;
+    this.deleteModalTxDescription = tx.description || 'Sin descripción';
+    this.deleteModalLoading = false;
+    this.deleteModalVisible = true;
+  }
 
+  closeDeleteModal(): void {
+    if (this.deleteModalLoading) return;
+    this.deleteModalVisible = false;
+    this.deleteModalTxId = null;
+    this.deleteModalTxDescription = '';
+  }
+
+  async confirmDeleteTransaction(): Promise<void> {
+    if (!this.deleteModalTxId) return;
+
+    this.deleteModalLoading = true;
     try {
-      await this.txService.delete(id);
+      await this.txService.delete(this.deleteModalTxId);
+      this.deleteModalLoading = false;
+      this.closeDeleteModal();
       await this.loadData();
     } catch (error) {
       console.error('Error deleting transaction:', error);
+      this.deleteModalLoading = false;
+      this.closeDeleteModal();
     }
   }
 
   formatCurrency(amount: number, currency: string = 'ARS'): string {
     return this.statsService.formatCurrency(amount, currency);
+  }
+
+  getExchangeDisplay(tx: TransactionWithDetails): { title: string; detail: string } {
+    const description = (tx.description || '').trim();
+    const match = description.match(
+      /Cambio\s+([A-Z]{3})\s+→\s+([A-Z]{3})\s+·\s+([\d.,]+)\s+([A-Z]{3})\s+·\s+Tasa\s+([\d.,]+)/i
+    );
+
+    if (match) {
+      const fromCurrency = match[1].toUpperCase();
+      const toCurrency = match[2].toUpperCase();
+      const amount = match[3];
+      const amountCurrency = match[4].toUpperCase();
+      const rate = match[5];
+
+      let title = `Cambio ${fromCurrency} → ${toCurrency}`;
+      if (fromCurrency === 'ARS' && toCurrency === 'USD') {
+        title = 'Compra USD';
+      } else if (fromCurrency === 'USD' && toCurrency === 'ARS') {
+        title = 'Venta USD';
+      }
+
+      return {
+        title,
+        detail: `${amount} ${amountCurrency} @ ${rate}`
+      };
+    }
+
+    return {
+      title: 'Cambio',
+      detail: description || 'Sin descripción'
+    };
   }
 
   private getEmptyModel(): Transaction {

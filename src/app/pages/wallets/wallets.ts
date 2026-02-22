@@ -5,6 +5,7 @@ import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { WalletsService } from '../../services/wallets.service';
 import { TransactionsService } from '../../services/transactions.service';
+import { CategoriesService } from '../../services/categories.service';
 import { Wallet, WalletWithBalance } from '../../models/wallet.model';
 import { Transaction } from '../../models/transaction.model';
 import { EmptyStateComponent } from '../../components/empty-state/empty-state';
@@ -19,6 +20,12 @@ interface WalletForm {
 interface ProviderOption {
   name: string;
   icon: string;
+}
+
+interface OrphanedBalance {
+  currency: string;
+  balance: number;
+  count: number;
 }
 
 @Component({
@@ -41,6 +48,22 @@ export class Wallets implements OnInit, OnDestroy {
   editing: Wallet | null = null;
   filterCurrency: 'all' | 'ARS' | 'USD' | 'EUR' | 'CRYPTO' = 'all';
   deleteConfirmId: string | null = null;
+  orphanedBalances: OrphanedBalance[] = [];
+
+  // Delete modal state
+  deleteModalVisible = false;
+  deleteModalWalletId: string | null = null;
+  deleteModalWalletName = '';
+  deleteModalTxCount = 0;
+  deleteModalLoading = false;
+
+  // Reconciliation modal state
+  reconcileVisible = false;
+  reconcileWallet: WalletWithBalance | null = null;
+  reconcileRealBalance: number | null = null;
+  reconcileLoading = false;
+  reconcileError = '';
+  private readonly reconcileTolerance = 0.005;
 
   // Form model
   model: WalletForm = this.getEmptyWalletModel();
@@ -67,7 +90,8 @@ export class Wallets implements OnInit, OnDestroy {
 
   constructor(
     private walletsService: WalletsService,
-    private transactionsService: TransactionsService
+    private transactionsService: TransactionsService,
+    private categoriesService: CategoriesService
   ) {}
 
   ngOnInit(): void {
@@ -84,14 +108,16 @@ export class Wallets implements OnInit, OnDestroy {
     this.walletsService.listWithBalance()
       .pipe(takeUntil(this.destroy$))
       .subscribe({
-        next: (data) => {
+        next: async (data) => {
           this.wallets = data;
           this.applyFilter();
+          this.orphanedBalances = await this.transactionsService.getOrphanedTransactionBalances();
           this.loading = false;
         },
         error: (error) => {
           console.error('Error loading wallets:', error);
           this.wallets = [];
+          this.orphanedBalances = [];
           this.loading = false;
         }
       });
@@ -204,26 +230,54 @@ export class Wallets implements OnInit, OnDestroy {
     }
   }
 
-  deleteWallet(id: string): void {
-    if (!confirm('¿Está seguro de que desea eliminar esta billetera? Esta acción no se puede deshacer.')) return;
+  async openDeleteModal(wallet: WalletWithBalance): Promise<void> {
+    this.deleteModalWalletId = wallet.id || null;
+    this.deleteModalWalletName = wallet.name;
+    this.deleteModalTxCount = await this.transactionsService.countByWalletId(wallet.id!);
+    this.deleteModalLoading = false;
+    this.deleteModalVisible = true;
+  }
 
-    this.loading = true;
+  closeDeleteModal(): void {
+    if (this.deleteModalLoading) return;
+    this.deleteModalVisible = false;
+    this.deleteModalWalletId = null;
+    this.deleteModalWalletName = '';
+    this.deleteModalTxCount = 0;
+  }
+
+  async confirmDeleteWallet(): Promise<void> {
+    if (!this.deleteModalWalletId) return;
+
+    this.deleteModalLoading = true;
+    const id = this.deleteModalWalletId;
+
+    // Delete associated transactions first
+    if (this.deleteModalTxCount > 0) {
+      const { error: txError } = await this.transactionsService.deleteByWalletId(id);
+      if (txError) {
+        console.error('Error deleting wallet transactions:', txError);
+        this.deleteModalLoading = false;
+        return;
+      }
+    }
+
+    // Then delete the wallet
     this.walletsService.delete(id)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (success) => {
+          this.deleteModalLoading = false;
+          this.closeDeleteModal();
           if (success) {
-            this.deleteConfirmId = null;
             this.loadWallets();
-          } else {
-            alert('Error al eliminar la billetera');
-            this.loading = false;
           }
         },
         error: (error) => {
           console.error('Error deleting wallet:', error);
-          alert('Error al eliminar la billetera');
-          this.loading = false;
+          this.deleteModalLoading = false;
+          this.closeDeleteModal();
+          this.loadWallets();
         }
       });
   }
@@ -247,20 +301,153 @@ export class Wallets implements OnInit, OnDestroy {
   }
 
   getTotalBalance(): { [key: string]: number } {
-    return {
-      ARS: this.wallets
-        .filter(w => w.currency === 'ARS')
-        .reduce((sum, w) => sum + (w.current_balance || 0), 0),
-      USD: this.wallets
-        .filter(w => w.currency === 'USD')
-        .reduce((sum, w) => sum + (w.current_balance || 0), 0),
-      EUR: this.wallets
-        .filter(w => w.currency === 'EUR')
-        .reduce((sum, w) => sum + (w.current_balance || 0), 0),
-      CRYPTO: this.wallets
-        .filter(w => w.currency === 'CRYPTO')
-        .reduce((sum, w) => sum + (w.current_balance || 0), 0)
-    };
+    const result: { [key: string]: number } = {};
+    const currencies = ['ARS', 'USD', 'EUR', 'CRYPTO'];
+
+    currencies.forEach(curr => {
+      const walletTotal = this.wallets
+        .filter(w => w.currency === curr)
+        .reduce((sum, w) => sum + (w.current_balance || 0), 0);
+      const orphanedTotal = this.getOrphanedBalanceByCurrency(curr);
+      result[curr] = walletTotal + orphanedTotal;
+    });
+
+    return result;
+  }
+
+  getFilteredOrphanedBalances(): OrphanedBalance[] {
+    if (this.filterCurrency === 'all') {
+      return this.orphanedBalances;
+    }
+    return this.orphanedBalances.filter(ob => ob.currency === this.filterCurrency);
+  }
+
+  hasOrphanedTransactions(): boolean {
+    return this.getFilteredOrphanedBalances().length > 0;
+  }
+
+  getOrphanedBalanceByCurrency(currency: string): number {
+    const found = this.orphanedBalances.find(ob => ob.currency === currency);
+    return found ? found.balance : 0;
+  }
+
+  openReconcileModal(wallet: WalletWithBalance): void {
+    this.reconcileWallet = wallet;
+    this.reconcileRealBalance = wallet.current_balance ?? 0;
+    this.reconcileError = '';
+    this.reconcileVisible = true;
+  }
+
+  closeReconcileModal(): void {
+    if (this.reconcileLoading) return;
+    this.reconcileVisible = false;
+    this.reconcileWallet = null;
+    this.reconcileRealBalance = null;
+    this.reconcileError = '';
+  }
+
+  get reconcileCurrentBalance(): number {
+    return this.roundAmount(this.reconcileWallet?.current_balance ?? 0);
+  }
+
+  get reconcileDifference(): number {
+    const real = this.normalizeAmount(this.reconcileRealBalance);
+    if (real === null) return 0;
+    return this.roundAmount(real - this.reconcileCurrentBalance);
+  }
+
+  get reconcileType(): 'income' | 'expense' {
+    return this.reconcileDifference >= 0 ? 'income' : 'expense';
+  }
+
+  get reconcileCanConfirm(): boolean {
+    return !!this.reconcileWallet && this.normalizeAmount(this.reconcileRealBalance) !== null && !this.isZeroDifference && !this.reconcileLoading;
+  }
+
+  get isZeroDifference(): boolean {
+    return Math.abs(this.reconcileDifference) < this.reconcileTolerance;
+  }
+
+  get Math() {
+    return Math;
+  }
+
+  onReconcileRealBalanceChange(value: any): void {
+    const parsed = value === '' || value === null || value === undefined ? null : Number(value);
+    this.reconcileRealBalance = Number.isFinite(parsed as number) ? (parsed as number) : null;
+    this.reconcileError = '';
+  }
+
+  private normalizeAmount(value: number | null | undefined): number | null {
+    if (value === null || value === undefined) return null;
+    const num = Number(value);
+    if (!Number.isFinite(num)) return null;
+    return this.roundAmount(num);
+  }
+
+  private roundAmount(value: number): number {
+    return Math.round((value + Number.EPSILON) * 100) / 100;
+  }
+
+  async confirmReconciliation(): Promise<void> {
+    if (!this.reconcileWallet) return;
+    const real = this.normalizeAmount(this.reconcileRealBalance);
+    if (real === null) {
+      this.reconcileError = 'Ingrese el saldo real para conciliar.';
+      return;
+    }
+
+    const diff = this.reconcileDifference;
+    if (this.isZeroDifference) {
+      this.reconcileError = 'No hay diferencia para conciliar.';
+      return;
+    }
+
+    this.reconcileLoading = true;
+    this.reconcileError = '';
+
+    try {
+      const type: 'income' | 'expense' = diff > 0 ? 'income' : 'expense';
+      const amount = this.roundAmount(Math.abs(diff));
+      if (amount <= 0) {
+        this.reconcileError = 'El ajuste debe ser mayor a 0.';
+        this.reconcileLoading = false;
+        return;
+      }
+
+      const { data: category, error: categoryError } = await this.categoriesService.getOrCreateAdjustmentCategory(type);
+      if (categoryError || !category?.id) {
+        this.reconcileError = 'No se pudo obtener la categoría de ajustes.';
+        this.reconcileLoading = false;
+        return;
+      }
+
+      const tx: Transaction = {
+        date: new Date().toISOString(),
+        description: 'Conciliación de billetera',
+        category_id: category.id,
+        amount,
+        currency: this.reconcileWallet.currency || 'ARS',
+        wallet_id: this.reconcileWallet.id || null,
+        type,
+        is_recurring: false
+      };
+
+      const { error } = await this.transactionsService.create(tx);
+      if (error) {
+        this.reconcileError = 'Error al crear el ajuste de conciliación.';
+        this.reconcileLoading = false;
+        return;
+      }
+
+      this.reconcileLoading = false;
+      this.closeReconcileModal();
+      this.loadWallets();
+    } catch (err) {
+      console.error('Error reconciling wallet:', err);
+      this.reconcileError = 'Error inesperado al conciliar.';
+      this.reconcileLoading = false;
+    }
   }
 
   private async createInitialTransaction(wallet: Wallet, amount: number): Promise<void> {

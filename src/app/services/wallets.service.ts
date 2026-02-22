@@ -233,8 +233,8 @@ export class WalletsService {
     }
 
     const defaultWallets = [
-      { user_id, name: 'Efectivo', provider: 'Cash', currency: 'ARS', balance: 0 },
-      { user_id, name: 'Mercado Pago', provider: 'Mercado Pago', currency: 'ARS', balance: 0 }
+      { user_id, name: 'Efectivo ARS', provider: 'Cash', currency: 'ARS', balance: 0 },
+      { user_id, name: 'Efectivo USD', provider: 'Cash', currency: 'USD', balance: 0 }
     ];
 
     return from(

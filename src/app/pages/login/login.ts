@@ -3,6 +3,7 @@ import { Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../services/auth.service';
+import { WalletsService } from '../../services/wallets.service';
 
 @Component({
   selector: 'app-login',
@@ -19,6 +20,7 @@ export class Login {
 
   constructor(
     private authService: AuthService,
+    private walletsService: WalletsService,
     private router: Router
   ) {}
 
@@ -38,6 +40,12 @@ export class Login {
     if (error) {
       this.errorMessage = 'Email o contraseña incorrectos';
     } else {
+      // Initialize default wallets for new users
+      this.walletsService.list().subscribe(wallets => {
+        if (wallets.length === 0) {
+          this.walletsService.initializeDefaultWallets().subscribe();
+        }
+      });
       this.router.navigate(['/dashboard']);
     }
   }

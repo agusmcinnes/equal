@@ -8,7 +8,7 @@ CREATE TABLE IF NOT EXISTS public.categories (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
   name text NOT NULL,
-  type text NOT NULL CHECK (type IN ('income','expense')),
+  type text NOT NULL CHECK (type IN ('income','expense','exchange')),
   color varchar(32),
   icon varchar(128),
   created_at timestamptz DEFAULT now(),

@@ -15,6 +15,7 @@ SELECT
     MIN(amount) as min_amount,
     MAX(amount) as max_amount
 FROM transactions
+WHERE type IN ('income', 'expense')
 GROUP BY user_id, DATE_TRUNC('month', date), type, currency;
 
 COMMENT ON VIEW transaction_monthly_summary IS 'Monthly aggregated transaction statistics by user, type, and currency';
@@ -35,6 +36,7 @@ SELECT
     AVG(t.amount) as avg_amount
 FROM transactions t
 LEFT JOIN categories c ON t.category_id = c.id
+WHERE t.type IN ('income', 'expense')
 GROUP BY t.user_id, t.category_id, c.name, c.type, c.color, c.icon, t.type, t.currency;
 
 COMMENT ON VIEW transaction_category_summary IS 'Transaction statistics grouped by category';
@@ -50,6 +52,7 @@ SELECT
     SUM(amount) as total_amount
 FROM transactions
 WHERE date >= CURRENT_DATE - INTERVAL '90 days'
+    AND type IN ('income', 'expense')
 GROUP BY user_id, DATE(date), type, currency;
 
 COMMENT ON VIEW transaction_daily_summary IS 'Daily transaction summary for the last 90 days';
@@ -63,8 +66,20 @@ SELECT
     w.provider,
     w.currency,
     w.balance as initial_balance,
-    COALESCE(SUM(CASE WHEN t.type = 'income' THEN t.amount ELSE -t.amount END), 0) as transaction_total,
-    w.balance + COALESCE(SUM(CASE WHEN t.type = 'income' THEN t.amount ELSE -t.amount END), 0) as current_balance,
+        COALESCE(SUM(
+            CASE
+                WHEN t.type = 'income' THEN t.amount
+                WHEN t.type = 'expense' THEN -t.amount
+                ELSE t.amount
+            END
+        ), 0) as transaction_total,
+        w.balance + COALESCE(SUM(
+            CASE
+                WHEN t.type = 'income' THEN t.amount
+                WHEN t.type = 'expense' THEN -t.amount
+                ELSE t.amount
+            END
+        ), 0) as current_balance,
     COUNT(t.id) as transaction_count
 FROM wallets w
 LEFT JOIN transactions t ON w.id = t.wallet_id AND w.currency = t.currency
@@ -84,6 +99,7 @@ SELECT
     COUNT(CASE WHEN type = 'income' THEN 1 END) as income_count,
     COUNT(CASE WHEN type = 'expense' THEN 1 END) as expense_count
 FROM transactions
+WHERE type IN ('income', 'expense')
 GROUP BY user_id, currency;
 
 COMMENT ON VIEW user_financial_summary IS 'Overall financial summary by user and currency';

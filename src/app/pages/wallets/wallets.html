@@ -14,7 +14,7 @@
   </div>
 
   <!-- Summary Cards -->
-  <div class="summary-section" *ngIf="wallets.length > 0 && !formVisible">
+  <div class="summary-section" *ngIf="(wallets.length > 0 || orphanedBalances.length > 0) && !formVisible">
     <div class="summary-card" *ngFor="let curr of currencies">
       <div class="summary-icon" [style.backgroundColor]="curr.color + '20'">
         <span class="material-icons" [style.color]="curr.color">account_balance_wallet</span>
@@ -178,7 +178,7 @@
     </div>
 
     <!-- Wallets Grid -->
-    <div *ngIf="!formVisible && filteredWallets.length > 0" class="wallets-grid">
+    <div *ngIf="!formVisible && (filteredWallets.length > 0 || hasOrphanedTransactions())" class="wallets-grid">
       <div *ngFor="let wallet of filteredWallets" class="wallet-card">
         <div class="card-header">
           <div class="wallet-icon" [style.backgroundColor]="getCurrencyInfo(wallet.currency!).color + '20'">
@@ -220,23 +220,48 @@
             <span class="material-icons">edit</span>
             Editar
           </button>
-          <button class="btn-icon delete" (click)="deleteConfirmId = wallet.id || null; $event.stopPropagation()" title="Eliminar">
+          <button class="btn-icon" (click)="openReconcileModal(wallet); $event.stopPropagation()" title="Conciliar saldo">
+            <span class="material-icons">compare_arrows</span>
+            Conciliar
+          </button>
+          <button class="btn-icon delete" (click)="openDeleteModal(wallet); $event.stopPropagation()" title="Eliminar">
             <span class="material-icons">delete</span>
             Eliminar
           </button>
         </div>
+      </div>
 
-        <!-- Delete Confirmation -->
-        <div *ngIf="deleteConfirmId === wallet.id" class="delete-confirmation" (click)="$event.stopPropagation()">
-          <p>¿Eliminar esta billetera?</p>
-          <div class="confirm-actions">
-            <button class="btn-danger" (click)="deleteWallet(wallet.id!)">
-              <span class="material-icons">delete</span>
-              Eliminar
-            </button>
-            <button class="btn-secondary" (click)="deleteConfirmId = null">
-              Cancelar
-            </button>
+      <!-- "Sin billetera" cards for orphaned transactions -->
+      <div *ngFor="let orphaned of getFilteredOrphanedBalances()" class="wallet-card orphaned-card">
+        <div class="card-header">
+          <div class="wallet-icon orphaned-icon">
+            <span class="material-icons" style="color: #9ca3af;">
+              credit_card_off
+            </span>
+          </div>
+          <div class="wallet-info">
+            <h3>Sin billetera</h3>
+            <p class="wallet-provider">Transacciones sin asignar</p>
+          </div>
+          <div class="wallet-currency">
+            <span class="currency-badge" [style.backgroundColor]="getCurrencyInfo(orphaned.currency).color" style="opacity: 0.6;">
+              {{ orphaned.currency }}
+            </span>
+          </div>
+        </div>
+
+        <div class="card-body">
+          <div class="balance-section">
+            <div class="balance-item">
+              <span class="balance-label">Balance</span>
+              <span class="balance-value current" [class.negative-balance]="orphaned.balance < 0">
+                {{ formatCurrency(orphaned.balance, orphaned.currency) }}
+              </span>
+            </div>
+          </div>
+          <div class="transaction-info">
+            <span class="material-icons">receipt_long</span>
+            <span>{{ orphaned.count }} transacción{{ orphaned.count !== 1 ? 'es' : '' }}</span>
           </div>
         </div>
       </div>
@@ -264,6 +289,139 @@
         <span class="material-icons">add</span>
         Crear primera billetera
       </button>
+    </div>
+  </div>
+
+  <!-- Delete Wallet Modal -->
+  <div class="modal-overlay" *ngIf="deleteModalVisible" (click)="closeDeleteModal()">
+    <div class="modal-content delete-modal" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <div class="modal-title">
+          <span class="material-icons" style="color: #dc2626;">delete</span>
+          <div>
+            <h2>Eliminar billetera</h2>
+            <p>{{ deleteModalWalletName }}</p>
+          </div>
+        </div>
+        <button class="btn-close" (click)="closeDeleteModal()">
+          <span class="material-icons">close</span>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <p class="modal-info delete-warning">
+          ¿Está seguro de que desea eliminar esta billetera? Esta acción no se puede deshacer.
+        </p>
+        <div class="delete-detail" *ngIf="deleteModalTxCount > 0">
+          <span class="material-icons">warning</span>
+          <span>Se eliminarán también <strong>{{ deleteModalTxCount }} transacción{{ deleteModalTxCount !== 1 ? 'es' : '' }}</strong> asociada{{ deleteModalTxCount !== 1 ? 's' : '' }}.</span>
+        </div>
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn-secondary" (click)="closeDeleteModal()" [disabled]="deleteModalLoading">Cancelar</button>
+        <button class="btn-danger" (click)="confirmDeleteWallet()" [disabled]="deleteModalLoading">
+          <span *ngIf="!deleteModalLoading">
+            <span class="material-icons">delete</span>
+            Eliminar
+          </span>
+          <span *ngIf="deleteModalLoading" class="spinner-small"></span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Reconciliation Modal -->
+  <div class="modal-overlay" *ngIf="reconcileVisible" (click)="closeReconcileModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <div class="modal-title">
+          <span class="material-icons">account_balance_wallet</span>
+          <div>
+            <h2>Conciliar saldo</h2>
+            <p>{{ reconcileWallet?.name }} · {{ reconcileWallet?.currency }}</p>
+          </div>
+        </div>
+        <button class="btn-close" (click)="closeReconcileModal()">
+          <span class="material-icons">close</span>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <p class="modal-info">
+          No modificamos tu historial. Crearemos un ajuste automático para que el saldo contable iguale el saldo real.
+        </p>
+
+        <div class="reconcile-grid">
+          <div class="reconcile-item">
+            <span class="reconcile-label">Saldo contable actual</span>
+            <span class="reconcile-value">
+              {{ formatCurrency(reconcileCurrentBalance, reconcileWallet?.currency || 'ARS') }}
+            </span>
+          </div>
+
+          <div class="reconcile-item">
+            <label class="reconcile-label" for="realBalance">Saldo real</label>
+            <input
+              id="realBalance"
+              type="number"
+              class="form-input"
+              [(ngModel)]="reconcileRealBalance"
+              (ngModelChange)="onReconcileRealBalanceChange($event)"
+              name="realBalance"
+              step="0.01"
+              placeholder="0.00"
+            />
+          </div>
+
+          <div class="reconcile-item diff" [class.positive]="reconcileDifference > 0" [class.negative]="reconcileDifference < 0">
+            <span class="reconcile-label">Diferencia</span>
+            <span class="reconcile-value">
+              {{ formatCurrency(reconcileDifference, reconcileWallet?.currency || 'ARS') }}
+            </span>
+            <span class="reconcile-hint" *ngIf="reconcileDifference > 0">Se creará un ingreso de ajuste</span>
+            <span class="reconcile-hint" *ngIf="reconcileDifference < 0">Se creará un gasto de ajuste</span>
+            <span class="reconcile-hint" *ngIf="isZeroDifference">No se requiere ajuste</span>
+          </div>
+        </div>
+
+        <div class="reconcile-preview">
+          <div class="preview-title">
+            <span class="material-icons">receipt_long</span>
+            <span>Movimiento de ajuste</span>
+          </div>
+          <div class="preview-row">
+            <span>Tipo</span>
+            <strong>{{ reconcileType === 'income' ? 'Ingreso' : 'Gasto' }}</strong>
+          </div>
+          <div class="preview-row">
+            <span>Categoría</span>
+            <strong>Ajustes</strong>
+          </div>
+          <div class="preview-row">
+            <span>Origen</span>
+            <strong>Conciliación de billetera</strong>
+          </div>
+          <div class="preview-row">
+            <span>Monto</span>
+            <strong>{{ formatCurrency(Math.abs(reconcileDifference), reconcileWallet?.currency || 'ARS') }}</strong>
+          </div>
+          <div class="preview-row">
+            <span>Fecha</span>
+            <strong>Hoy</strong>
+          </div>
+        </div>
+
+        <div class="error-message" *ngIf="reconcileError">{{ reconcileError }}</div>
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn-secondary" (click)="closeReconcileModal()">Cancelar</button>
+        <button class="btn-primary" [disabled]="!reconcileCanConfirm" (click)="confirmReconciliation()">
+          <span *ngIf="!reconcileLoading">Crear ajuste</span>
+          <span *ngIf="reconcileLoading" class="spinner-small"></span>
+        </button>
+      </div>
     </div>
   </div>
 </div>

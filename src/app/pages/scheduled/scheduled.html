@@ -37,8 +37,12 @@
 
       <div class="section-stats">
         <div class="stat-item">
-          <span class="stat-label">Total programado:</span>
-          <span class="stat-value income">{{ getIncomeTotalMonthly() | number: '1.2-2' }} ARS</span>
+          <span class="stat-label">Acumulado:</span>
+          <span class="stat-value income">{{ getIncomeAccruedTotal() | number: '1.2-2' }} ARS</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">Proyección total:</span>
+          <span class="stat-value income">{{ getIncomeProjectionLabel() }}</span>
         </div>
       </div>
 
@@ -81,8 +85,12 @@
 
       <div class="section-stats">
         <div class="stat-item">
-          <span class="stat-label">Total programado:</span>
-          <span class="stat-value expense">{{ getExpenseTotalMonthly() | number: '1.2-2' }} ARS</span>
+          <span class="stat-label">Acumulado:</span>
+          <span class="stat-value expense">{{ getExpenseAccruedTotal() | number: '1.2-2' }} ARS</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">Proyección total:</span>
+          <span class="stat-value expense">{{ getExpenseProjectionLabel() }}</span>
         </div>
       </div>
 

@@ -29,6 +29,7 @@ export class MobileNav implements OnInit, OnDestroy {
   navItems: NavItem[] = [
     { icon: 'dashboard', label: 'Inicio', route: '/dashboard' },
     { icon: 'account_balance_wallet', label: 'Transacciones', route: '/transactions' },
+    { icon: 'wallet', label: 'Billeteras', route: '/wallets' },
     { icon: 'flag', label: 'Objetivos', route: '/goals' },
   ];
 
@@ -36,10 +37,12 @@ export class MobileNav implements OnInit, OnDestroy {
   allMenuItems: NavItem[] = [
     { icon: 'dashboard', label: 'Dashboard', route: '/dashboard' },
     { icon: 'account_balance_wallet', label: 'Transacciones', route: '/transactions' },
+    { icon: 'wallet', label: 'Billeteras', route: '/wallets' },
     { icon: 'category', label: 'Categorías', route: '/categories' },
     { icon: 'schedule', label: 'Operaciones Futuras', route: '/scheduled' },
     { icon: 'flag', label: 'Objetivos', route: '/goals' },
     { icon: 'attach_money', label: 'Dólar', route: '/dollar' },
+    { icon: 'savings', label: 'Plazo fijo', route: '/plazo-fijo' },
   ];
 
   constructor(
