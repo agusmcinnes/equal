@@ -78,6 +78,12 @@ export class Transactions implements OnInit, OnDestroy {
   filterCurrency: 'all' | 'ARS' | 'USD' | 'EUR' | 'CRYPTO' = 'all';
   filterType: 'all' | 'income' | 'expense' | 'exchange' = 'all';
 
+  // Delete modal state
+  deleteModalVisible = false;
+  deleteModalTxId: string | null = null;
+  deleteModalTxDescription = '';
+  deleteModalLoading = false;
+
   // Select options
   typeOptions: SelectOption[] = [
     { value: 'all', label: 'Todos', icon: 'list' },
@@ -425,14 +431,33 @@ export class Transactions implements OnInit, OnDestroy {
     }
   }
 
-  async remove(id?: string): Promise<void> {
-    if (!id || !confirm('¿Estás seguro de eliminar esta transacción?')) return;
+  openDeleteModal(tx: TransactionWithDetails): void {
+    this.deleteModalTxId = tx.id || null;
+    this.deleteModalTxDescription = tx.description || 'Sin descripción';
+    this.deleteModalLoading = false;
+    this.deleteModalVisible = true;
+  }
 
+  closeDeleteModal(): void {
+    if (this.deleteModalLoading) return;
+    this.deleteModalVisible = false;
+    this.deleteModalTxId = null;
+    this.deleteModalTxDescription = '';
+  }
+
+  async confirmDeleteTransaction(): Promise<void> {
+    if (!this.deleteModalTxId) return;
+
+    this.deleteModalLoading = true;
     try {
-      await this.txService.delete(id);
+      await this.txService.delete(this.deleteModalTxId);
+      this.deleteModalLoading = false;
+      this.closeDeleteModal();
       await this.loadData();
     } catch (error) {
       console.error('Error deleting transaction:', error);
+      this.deleteModalLoading = false;
+      this.closeDeleteModal();
     }
   }
 

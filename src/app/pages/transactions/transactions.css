@@ -982,6 +982,84 @@
   color: var(--color-dark);
 }
 
+/* ===== DELETE MODAL ===== */
+.delete-modal {
+  max-width: 440px;
+}
+
+.modal-title-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.modal-title-row h2 {
+  font-size: 20px;
+}
+
+.modal-body {
+  padding: 20px 24px;
+}
+
+.modal-actions {
+  padding: 16px 24px 20px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  border-top: 1px solid var(--border);
+}
+
+.delete-warning {
+  color: var(--text-primary);
+  font-size: 15px;
+  margin: 0 0 8px 0;
+}
+
+.delete-tx-name {
+  font-weight: 600;
+  color: var(--color-dark);
+  font-size: 15px;
+  margin: 0 0 12px 0;
+  padding: 10px 14px;
+  background: var(--bg-secondary);
+  border-radius: 8px;
+}
+
+.delete-hint {
+  color: var(--text-secondary);
+  font-size: 13px;
+  margin: 0;
+}
+
+.btn-delete {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px 20px;
+  background: #dc2626;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.btn-delete:hover {
+  background: #b91c1c;
+}
+
+.btn-delete:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn-delete .material-icons {
+  font-size: 18px;
+}
+
 /* ===== TRANSACTION FORM ===== */
 .transaction-form {
   padding: 24px;

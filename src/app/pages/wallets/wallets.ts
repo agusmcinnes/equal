@@ -22,6 +22,12 @@ interface ProviderOption {
   icon: string;
 }
 
+interface OrphanedBalance {
+  currency: string;
+  balance: number;
+  count: number;
+}
+
 @Component({
   selector: 'app-wallets',
   standalone: true,
@@ -42,6 +48,14 @@ export class Wallets implements OnInit, OnDestroy {
   editing: Wallet | null = null;
   filterCurrency: 'all' | 'ARS' | 'USD' | 'EUR' | 'CRYPTO' = 'all';
   deleteConfirmId: string | null = null;
+  orphanedBalances: OrphanedBalance[] = [];
+
+  // Delete modal state
+  deleteModalVisible = false;
+  deleteModalWalletId: string | null = null;
+  deleteModalWalletName = '';
+  deleteModalTxCount = 0;
+  deleteModalLoading = false;
 
   // Reconciliation modal state
   reconcileVisible = false;
@@ -94,14 +108,16 @@ export class Wallets implements OnInit, OnDestroy {
     this.walletsService.listWithBalance()
       .pipe(takeUntil(this.destroy$))
       .subscribe({
-        next: (data) => {
+        next: async (data) => {
           this.wallets = data;
           this.applyFilter();
+          this.orphanedBalances = await this.transactionsService.getOrphanedTransactionBalances();
           this.loading = false;
         },
         error: (error) => {
           console.error('Error loading wallets:', error);
           this.wallets = [];
+          this.orphanedBalances = [];
           this.loading = false;
         }
       });
@@ -214,26 +230,54 @@ export class Wallets implements OnInit, OnDestroy {
     }
   }
 
-  deleteWallet(id: string): void {
-    if (!confirm('¿Está seguro de que desea eliminar esta billetera? Esta acción no se puede deshacer.')) return;
+  async openDeleteModal(wallet: WalletWithBalance): Promise<void> {
+    this.deleteModalWalletId = wallet.id || null;
+    this.deleteModalWalletName = wallet.name;
+    this.deleteModalTxCount = await this.transactionsService.countByWalletId(wallet.id!);
+    this.deleteModalLoading = false;
+    this.deleteModalVisible = true;
+  }
 
-    this.loading = true;
+  closeDeleteModal(): void {
+    if (this.deleteModalLoading) return;
+    this.deleteModalVisible = false;
+    this.deleteModalWalletId = null;
+    this.deleteModalWalletName = '';
+    this.deleteModalTxCount = 0;
+  }
+
+  async confirmDeleteWallet(): Promise<void> {
+    if (!this.deleteModalWalletId) return;
+
+    this.deleteModalLoading = true;
+    const id = this.deleteModalWalletId;
+
+    // Delete associated transactions first
+    if (this.deleteModalTxCount > 0) {
+      const { error: txError } = await this.transactionsService.deleteByWalletId(id);
+      if (txError) {
+        console.error('Error deleting wallet transactions:', txError);
+        this.deleteModalLoading = false;
+        return;
+      }
+    }
+
+    // Then delete the wallet
     this.walletsService.delete(id)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (success) => {
+          this.deleteModalLoading = false;
+          this.closeDeleteModal();
           if (success) {
-            this.deleteConfirmId = null;
             this.loadWallets();
-          } else {
-            alert('Error al eliminar la billetera');
-            this.loading = false;
           }
         },
         error: (error) => {
           console.error('Error deleting wallet:', error);
-          alert('Error al eliminar la billetera');
-          this.loading = false;
+          this.deleteModalLoading = false;
+          this.closeDeleteModal();
+          this.loadWallets();
         }
       });
   }
@@ -257,20 +301,34 @@ export class Wallets implements OnInit, OnDestroy {
   }
 
   getTotalBalance(): { [key: string]: number } {
-    return {
-      ARS: this.wallets
-        .filter(w => w.currency === 'ARS')
-        .reduce((sum, w) => sum + (w.current_balance || 0), 0),
-      USD: this.wallets
-        .filter(w => w.currency === 'USD')
-        .reduce((sum, w) => sum + (w.current_balance || 0), 0),
-      EUR: this.wallets
-        .filter(w => w.currency === 'EUR')
-        .reduce((sum, w) => sum + (w.current_balance || 0), 0),
-      CRYPTO: this.wallets
-        .filter(w => w.currency === 'CRYPTO')
-        .reduce((sum, w) => sum + (w.current_balance || 0), 0)
-    };
+    const result: { [key: string]: number } = {};
+    const currencies = ['ARS', 'USD', 'EUR', 'CRYPTO'];
+
+    currencies.forEach(curr => {
+      const walletTotal = this.wallets
+        .filter(w => w.currency === curr)
+        .reduce((sum, w) => sum + (w.current_balance || 0), 0);
+      const orphanedTotal = this.getOrphanedBalanceByCurrency(curr);
+      result[curr] = walletTotal + orphanedTotal;
+    });
+
+    return result;
+  }
+
+  getFilteredOrphanedBalances(): OrphanedBalance[] {
+    if (this.filterCurrency === 'all') {
+      return this.orphanedBalances;
+    }
+    return this.orphanedBalances.filter(ob => ob.currency === this.filterCurrency);
+  }
+
+  hasOrphanedTransactions(): boolean {
+    return this.getFilteredOrphanedBalances().length > 0;
+  }
+
+  getOrphanedBalanceByCurrency(currency: string): number {
+    const found = this.orphanedBalances.find(ob => ob.currency === currency);
+    return found ? found.balance : 0;
   }
 
   openReconcileModal(wallet: WalletWithBalance): void {

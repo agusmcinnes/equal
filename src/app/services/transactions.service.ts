@@ -152,6 +152,87 @@ export class TransactionsService {
   }
 
   /**
+   * Delete all transactions for a specific wallet
+   */
+  async deleteByWalletId(walletId: string): Promise<{ count: number; error: any }> {
+    const user_id = this.userId();
+    if (!user_id) return { count: -1, error: 'not_authenticated' };
+
+    const { data, error } = await this.supabase.client
+      .from('transactions')
+      .delete()
+      .eq('wallet_id', walletId)
+      .eq('user_id', user_id)
+      .select();
+
+    return {
+      count: error ? -1 : (data?.length || 0),
+      error
+    };
+  }
+
+  /**
+   * Count transactions for a given wallet
+   */
+  async countByWalletId(walletId: string): Promise<number> {
+    const user_id = this.userId();
+    if (!user_id) return 0;
+
+    const { count, error } = await this.supabase.client
+      .from('transactions')
+      .select('*', { count: 'exact', head: true })
+      .eq('wallet_id', walletId)
+      .eq('user_id', user_id);
+
+    if (error) {
+      console.error('Error counting transactions:', error);
+      return 0;
+    }
+    return count || 0;
+  }
+
+  /**
+   * Get balance of transactions with no wallet, grouped by currency
+   */
+  async getOrphanedTransactionBalances(): Promise<{ currency: string; balance: number; count: number }[]> {
+    const user_id = this.userId();
+    if (!user_id) return [];
+
+    const { data, error } = await this.supabase.client
+      .from('transactions')
+      .select('amount, currency, type')
+      .eq('user_id', user_id)
+      .is('wallet_id', null);
+
+    if (error || !data) {
+      console.error('Error fetching orphaned transactions:', error);
+      return [];
+    }
+
+    const currencyMap = new Map<string, { income: number; expenses: number; count: number }>();
+
+    data.forEach((tx: any) => {
+      const curr = tx.currency || 'ARS';
+      if (!currencyMap.has(curr)) {
+        currencyMap.set(curr, { income: 0, expenses: 0, count: 0 });
+      }
+      const entry = currencyMap.get(curr)!;
+      if (tx.type === 'income') {
+        entry.income += Number(tx.amount);
+      } else {
+        entry.expenses += Number(tx.amount);
+      }
+      entry.count += 1;
+    });
+
+    return Array.from(currencyMap.entries()).map(([currency, data]) => ({
+      currency,
+      balance: data.income - data.expenses,
+      count: data.count
+    }));
+  }
+
+  /**
    * Get transaction statistics
    */
   getStatistics(filters?: TransactionFilters): Observable<TransactionStatistics[]> {
